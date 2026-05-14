@@ -1,0 +1,9 @@
+{"error":"TypeError: fetch failed","level":"error","message":"findUserByEmail error","service":"medai-pro","timestamp":"2026-05-13T12:40:38.846Z"}
+{"error":"TypeError: fetch failed","level":"error","message":"findUserByEmail error","service":"medai-pro","timestamp":"2026-05-13T12:40:56.648Z"}
+{"error":"TypeError: fetch failed","level":"error","message":"findUserByEmail error","service":"medai-pro","timestamp":"2026-05-13T12:41:28.892Z"}
+{"error":"TypeError: fetch failed","level":"error","message":"findUserByEmail error","service":"medai-pro","timestamp":"2026-05-13T12:44:17.251Z"}
+{"error":"TypeError: fetch failed","level":"error","message":"findUserByEmail error","service":"medai-pro","timestamp":"2026-05-13T13:08:34.922Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"Erro de autenticação com o provider de IA.","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-13T13:11:13.655Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"Erro de autenticação com o provider de IA.","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-13T13:36:52.025Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":350,"error":"404 {\"type\":\"error\",\"error\":{\"type\":\"not_found_error\",\"message\":\"model: claude-sonnet-4-20250514\"},\"request_id\":\"req_011CazfahyRYJ4jnH18a8uHx\"}","level":"error","message":"AI Gateway error","service":"medai-pro","timestamp":"2026-05-13T13:42:55.841Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"Erro ao processar com IA. Tente novamente.","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-13T13:42:56.001Z"}
