@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedAI Pro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── TOKENS ── */
+:root {
+  --bg:     #07090F;
+  --sf:     #0C1018;
+  --sf2:    #111827;
+  --sf3:    #192032;
+  --sf4:    #1E2840;
+
+  --blu:    #3B7FFF;
+  --blu-h:  #2D70EF;
+  --blu-l:  #6FA3FF;
+  --blu-d:  rgba(59,127,255,0.08);
+  --blu-b:  rgba(59,127,255,0.18);
+
+  --gld:    #C9A84C;
+  --gld-d:  rgba(201,168,76,0.10);
+  --gld-b:  rgba(201,168,76,0.20);
+
+  --t1: #F0F4FF;
+  --t2: #8A9BBE;
+  --t3: #4A5A7A;
+  --t4: #242F45;
+
+  --bd:  rgba(255,255,255,0.055);
+  --bd2: rgba(255,255,255,0.095);
+  --bda: rgba(59,127,255,0.22);
+
+  --ok:   #22C55E;
+  --err:  #EF4444;
+  --wrn:  #F59E0B;
+  --ok-d: rgba(34,197,94,0.09);
+
+  --font: 'Inter', system-ui, -apple-system, sans-serif;
+  --r:  10px; --rs: 7px; --rl: 16px; --rx: 22px;
+  --sh:  0 4px 20px rgba(0,0,0,0.4);
+  --shl: 0 20px 60px rgba(0,0,0,0.6);
+  --sbw: 220px;
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; background:var(--bg); color:var(--t1); font-family:var(--font); font-size:14px; line-height:1.5; overflow:hidden; -webkit-font-smoothing:antialiased; }
+::-webkit-scrollbar { width:3px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--sf4); border-radius:3px; }
+button,input,select,textarea { font-family:inherit; }
+
+/* ── SCREENS ── */
+.screen { display:none; height:100vh; width:100vw; overflow:hidden; }
+.screen.active { display:flex; }
+
+/* ══════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════ */
+#ls {
+  align-items:center; justify-content:center; position:relative;
+  overflow-y:auto; overflow-x:hidden; padding:32px 16px;
+  background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(59,127,255,0.14) 0%, transparent 58%),
+              radial-gradient(ellipse 50% 40% at 88% 92%, rgba(201,168,76,0.06) 0%, transparent 50%),
+              var(--bg);
+}
+.l-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size:28px 28px;
+  mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, black, transparent);
+}
+.l-vp  { position:relative; z-index:2; width:100%; max-width:400px; overflow:hidden; }
+.l-sl  { display:flex; width:200%; transition:transform .44s cubic-bezier(.4,0,.2,1); }
+.l-sl.s2 { transform:translateX(-50%); }
+.l-step {
+  width:50%; flex-shrink:0; padding:38px 34px;
+  background:var(--sf); border:1px solid var(--bd2); border-radius:var(--rx);
+  box-shadow:var(--shl); box-sizing:border-box;
+}
+/* Login: wordmark */
+.l-mark { display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+.l-icon { width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--blu),var(--blu-l)); display:flex; align-items:center; justify-content:center; font-size:17px; box-shadow:0 6px 18px rgba(59,127,255,0.4); }
+.l-wm   { font-size:17px; font-weight:700; letter-spacing:-.03em; color:var(--t1); }
+.l-wm span { color:var(--blu-l); }
+.l-title  { font-size:22px; font-weight:700; letter-spacing:-.03em; margin-bottom:5px; }
+.l-sub    { color:var(--t2); font-size:13px; margin-bottom:24px; line-height:1.55; }
+/* Steps */
+.l-steps { display:flex; align-items:center; gap:6px; margin-bottom:20px; }
+.l-dot { width:6px; height:6px; border-radius:50%; background:var(--sf4); transition:all .3s; }
+.l-dot.on { background:var(--blu); }
+.l-dot.dn { background:var(--ok); width:16px; border-radius:3px; }
+.l-slbl { font-size:10px; color:var(--t3); font-weight:500; margin-left:5px; }
+/* Fields */
+.lf { margin-bottom:12px; }
+.lf label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--t3); margin-bottom:6px; }
+.lf input { width:100%; padding:11px 14px; background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); color:var(--t1); font-size:14px; outline:none; transition:border-color .2s,box-shadow .2s; }
+.lf input:focus { border-color:var(--blu); box-shadow:0 0 0 3px var(--blu-d); }
+.lf input::placeholder { color:var(--t3); }
+.l-code { width:100%; padding:14px 18px; background:var(--sf2); border:1.5px solid var(--bda); border-radius:var(--rs); color:var(--t1); font-size:18px; font-family:'Courier New',monospace; font-weight:700; letter-spacing:.15em; text-align:center; text-transform:uppercase; outline:none; transition:border-color .2s,box-shadow .2s; }
+.l-code:focus { border-color:var(--blu); box-shadow:0 0 0 3px var(--blu-d); }
+.l-code::placeholder { font-size:12px; letter-spacing:.04em; font-weight:400; font-family:var(--font); color:var(--t3); }
+.l-econf { display:flex; align-items:center; gap:9px; padding:9px 12px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.16); border-radius:var(--rs); margin-bottom:16px; }
+.l-econf-lbl { font-size:10px; color:var(--ok); text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:1px; }
+.l-econf-val { font-size:12px; color:var(--t2); }
+.l-btn { width:100%; padding:12px; margin-top:13px; background:var(--blu); border:none; border-radius:var(--rs); color:#fff; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; transition:background .2s,transform .1s; box-shadow:0 4px 14px rgba(59,127,255,0.4); }
+.l-btn:hover { background:var(--blu-h); } .l-btn:active { transform:scale(.98); } .l-btn:disabled { opacity:.45; cursor:not-allowed; }
+.l-ghost { width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid var(--bd); border-radius:var(--rs); color:var(--t3); font-size:13px; cursor:pointer; transition:all .2s; }
+.l-ghost:hover { color:var(--t2); border-color:var(--bd2); }
+.l-badge { display:flex; align-items:center; gap:7px; margin-top:16px; padding:9px 12px; background:var(--gld-d); border:1px solid var(--gld-b); border-radius:var(--rs); font-size:11px; color:var(--gld); }
+.l-err { font-size:12px; color:var(--err); margin-top:8px; text-align:center; min-height:16px; }
+.l-err.shk { animation:shk .35s ease; }
+@keyframes shk { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+/* ══════════════════════════════════════════════
+   APP
+══════════════════════════════════════════════ */
+#as { flex-direction:row; }
+
+/* ── SIDEBAR — minimal ── */
+.sb { width:var(--sbw); min-width:var(--sbw); height:100vh; background:var(--sf); border-right:1px solid var(--bd); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0; }
+.sb-logo { padding:16px; border-bottom:1px solid var(--bd); flex-shrink:0; display:flex; align-items:center; gap:10px; }
+.sb-icon { width:30px; height:30px; border-radius:9px; background:linear-gradient(135deg,var(--blu),var(--blu-l)); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.sb-wm { font-size:14px; font-weight:700; letter-spacing:-.03em; }
+.sb-wm span { color:var(--blu-l); }
+.sb-nav { flex:1; padding:8px; overflow-y:auto; }
+.ni { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:var(--rs); color:var(--t2); font-size:13px; font-weight:500; cursor:pointer; transition:all .12s; border:1px solid transparent; margin-bottom:1px; user-select:none; }
+.ni:hover { background:var(--sf2); color:var(--t1); }
+.ni.active { background:var(--blu-d); color:var(--blu-l); border-color:var(--bda); }
+.ni-ic { font-size:14px; flex-shrink:0; width:16px; text-align:center; opacity:.75; }
+.ni-lbl { flex:1; }
+.ni-new { font-size:10px; font-weight:700; padding:1px 6px; border-radius:20px; background:rgba(34,197,94,0.12); color:var(--ok); border:1px solid rgba(34,197,94,0.2); }
+/* Usage pill */
+.sb-use { margin:4px 8px 6px; padding:9px 12px; background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); }
+.su-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.su-lbl { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); }
+.su-pct { font-size:10px; font-weight:700; }
+.u-trk { height:3px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; }
+.u-fil { height:100%; border-radius:3px; transition:width .6s cubic-bezier(.4,0,.2,1); background:var(--ok); }
+.u-fil.m { background:var(--wrn); } .u-fil.h { background:var(--err); }
+.su-sub { font-size:10px; color:var(--t3); margin-top:4px; }
+/* User */
+.sb-foot { padding:10px; border-top:1px solid var(--bd); flex-shrink:0; }
+.u-card { display:flex; align-items:center; gap:9px; padding:8px 10px; background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); cursor:pointer; transition:border-color .15s; }
+.u-card:hover { border-color:var(--bd2); }
+.u-av { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--blu),var(--gld)); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex-shrink:0; }
+.u-nm { font-size:12px; font-weight:600; color:var(--t1); }
+.u-rl { font-size:10px; color:var(--t3); }
+
+/* ── MAIN ── */
+.main { flex:1; display:flex; flex-direction:column; height:100vh; overflow:hidden; min-width:0; }
+
+/* ── TOPBAR — ultra-minimal ── */
+.topbar { height:48px; padding:0 22px; border-bottom:1px solid var(--bd); background:var(--sf); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:12px; }
+.tb-l { display:flex; align-items:center; gap:8px; min-width:0; }
+.tb-t { font-size:13px; font-weight:600; color:var(--t1); white-space:nowrap; }
+.tb-sep { color:var(--t4); font-size:12px; }
+.tb-s { font-size:12px; color:var(--t3); }
+.tb-r { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.tb-live { display:flex; align-items:center; gap:5px; font-size:11px; font-weight:500; color:var(--ok); }
+.tb-dot { width:5px; height:5px; border-radius:50%; background:var(--ok); animation:pls 2.5s infinite; }
+@keyframes pls { 0%,100%{opacity:1} 50%{opacity:.3} }
+.btn-sm { padding:5px 12px; border-radius:var(--rs); font-size:12px; font-weight:500; background:transparent; border:1px solid var(--bd); color:var(--t3); cursor:pointer; transition:all .15s; }
+.btn-sm:hover { color:var(--t1); border-color:var(--bd2); background:var(--sf2); }
+
+/* ── PAGES ── */
+.page { display:none; flex:1; overflow-y:auto; }
+.page.active { display:block; }
+
+/* ══════════════════════════════════════════════
+   HOME — AI-First conversacional
+══════════════════════════════════════════════ */
+.home { display:flex; flex-direction:column; height:100%; min-height:0; }
+
+/* Header da home — saudação + status */
+.home-header { padding:28px 32px 0; flex-shrink:0; }
+.home-gr { font-size:22px; font-weight:700; letter-spacing:-.03em; margin-bottom:4px; }
+.home-sub { font-size:13px; color:var(--t2); }
+
+/* Brain — sugestão contextual */
+.brain { margin:20px 32px 0; padding:16px 20px; background:var(--sf); border:1px solid var(--bd); border-radius:var(--r); display:flex; align-items:flex-start; gap:12px; }
+.brain-ic { font-size:16px; margin-top:1px; flex-shrink:0; }
+.brain-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--blu-l); margin-bottom:4px; display:flex; align-items:center; gap:5px; }
+.brain-lbl::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--blu); display:inline-block; animation:pls 2s infinite; }
+.brain-txt { font-size:13px; color:var(--t2); line-height:1.55; }
+
+/* CAMPO UNIVERSAL — o coração da nova UX */
+.uni-wrap { padding:24px 32px 0; flex-shrink:0; }
+.uni-box {
+  position:relative; background:var(--sf); border:1px solid var(--bd2);
+  border-radius:var(--rl); padding:18px 20px 14px;
+  transition:border-color .2s, box-shadow .2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.uni-box:focus-within { border-color:var(--blu); box-shadow:0 0 0 3px var(--blu-d), 0 4px 20px rgba(0,0,0,0.35); }
+.uni-label { font-size:11px; font-weight:600; color:var(--blu-l); letter-spacing:.05em; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.uni-label::before { content:'✦'; font-size:10px; }
+.uni-ta { width:100%; background:transparent; border:none; outline:none; color:var(--t1); font-size:15px; font-family:var(--font); resize:none; min-height:48px; max-height:160px; line-height:1.6; }
+.uni-ta::placeholder { color:var(--t3); }
+.uni-footer { display:flex; align-items:center; justify-content:space-between; margin-top:12px; padding-top:10px; border-top:1px solid var(--bd); }
+.uni-hints { display:flex; gap:6px; flex-wrap:wrap; flex:1; min-width:0; }
+.uni-clear { display:none; align-items:center; gap:5px; padding:5px 11px; border-radius:var(--rs); font-size:11px; font-weight:600; background:transparent; border:1px solid var(--bd); color:var(--t3); cursor:pointer; transition:all .15s; white-space:nowrap; flex-shrink:0; margin-right:6px; font-family:var(--font); }
+.uni-clear:hover { color:var(--err); border-color:rgba(239,68,68,0.35); background:rgba(239,68,68,0.06); }
+.uni-clear.visible { display:flex; }
+.uni-hint { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:500; background:var(--sf2); border:1px solid var(--bd); color:var(--t3); cursor:pointer; transition:all .15s; white-space:nowrap; }
+.uni-hint:hover { background:var(--blu-d); color:var(--blu-l); border-color:var(--bda); }
+.uni-send { width:38px; height:38px; flex-shrink:0; background:var(--blu); border:none; border-radius:var(--rs); color:#fff; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s, transform .1s; box-shadow:0 4px 12px rgba(59,127,255,0.4); }
+.uni-send:hover { background:var(--blu-h); } .uni-send:active { transform:scale(.93); } .uni-send:disabled { opacity:.3; cursor:not-allowed; }
+
+/* CONVERSATION — histórico de interações */
+.conv-wrap { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 32px 0; display: flex; flex-direction: column; gap: 20px; order: 1; }
+.conv-wrap:empty::after { content: ''; }
+
+/* New state for active chat */
+.home.chat-active { justify-content: space-between; }
+.home.chat-active .home-header,
+.home.chat-active .brain {
+  display: none;
+}
+.home.chat-active .uni-wrap {
+  order: 2;
+  padding: 16px 32px 32px;
+  background: var(--bg);
+  border-top: 1px solid var(--bd2);
+  margin-top: auto;
+}
+.home.chat-active .conv-wrap {
+  order: 1;
+}
+
+/* Mensagem do usuário */
+.msg-u { align-self:flex-end; max-width:72%; }
+.msg-u .bub { background:var(--blu); color:#fff; padding:11px 15px; border-radius:var(--r); border-bottom-right-radius:3px; font-size:14px; line-height:1.65; }
+.msg-t { font-size:10px; color:var(--t3); margin-top:3px; padding:0 3px; }
+.msg-u .msg-t { text-align:right; }
+
+/* Resposta da IA */
+.msg-ai { align-self:flex-start; max-width:100%; width:100%; }
+.ai-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.ai-avatar { width:26px; height:26px; border-radius:8px; background:linear-gradient(135deg,var(--blu),var(--blu-l)); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+.ai-name { font-size:12px; font-weight:600; color:var(--blu-l); }
+.ai-time { font-size:10px; color:var(--t3); margin-left:4px; }
+.ai-body { background:var(--sf); border:1px solid var(--bd); border-radius:var(--r); padding:16px 18px; font-size:13px; line-height:1.7; color:var(--t1); }
+.ai-img { max-width:100%; border-radius:var(--r); border:1px solid var(--bd); margin-top:10px; display:block; }
+.ai-prompt { font-size:11px; color:var(--t3); font-style:italic; background:var(--sf2); padding:6px 11px; border-radius:var(--rs); border-left:2px solid var(--blu); margin-top:7px; }
+
+/* Loader */
+.ldots { display:flex; align-items:center; gap:4px; }
+.ld { width:6px; height:6px; border-radius:50%; background:var(--t3); animation:lda 1.4s infinite ease-in-out; }
+.ld:nth-child(2){animation-delay:.2s} .ld:nth-child(3){animation-delay:.4s}
+@keyframes lda { 0%,80%,100%{transform:scale(.6);opacity:.3} 40%{transform:scale(1);opacity:1} }
+
+/* Erro */
+.emsg { display:flex; align-items:flex-start; gap:8px; padding:11px 14px; border-radius:var(--r); background:rgba(239,68,68,0.07); border:1px solid rgba(239,68,68,0.18); color:var(--err); font-size:13px; line-height:1.5; }
+.emsg.w { background:rgba(245,158,11,0.07); border-color:rgba(245,158,11,0.2); color:var(--wrn); }
+.e-t { font-weight:700; margin-bottom:2px; } .e-d { font-size:12px; opacity:.8; }
+
+/* ══════════════════════════════════════════════
+   CAMPAIGN DOCUMENT (embedded in conversation)
+══════════════════════════════════════════════ */
+.camp-doc { background:var(--sf); border:1px solid var(--bd2); border-radius:var(--rl); overflow:hidden; box-shadow:var(--sh); width:100%; }
+.camp-hdr { padding:18px 22px; border-bottom:1px solid var(--bd); background:linear-gradient(135deg,var(--sf2) 0%,var(--sf3) 100%); }
+.camp-ey { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; color:var(--blu-l); margin-bottom:5px; display:flex; align-items:center; gap:5px; }
+.camp-ey::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--blu); display:inline-block; }
+.camp-nm { font-size:18px; font-weight:800; letter-spacing:-.03em; color:var(--t1); margin-bottom:4px; }
+.camp-sl { font-size:13px; color:var(--t2); font-style:italic; }
+.camp-meta { display:flex; gap:7px; margin-top:10px; flex-wrap:wrap; }
+.c-chip { font-size:10px; font-weight:600; padding:2px 9px; border-radius:20px; }
+.c-chip.b { background:var(--blu-d); color:var(--blu-l); border:1px solid var(--bda); }
+.c-chip.g { background:var(--gld-d); color:var(--gld); border:1px solid var(--gld-b); }
+.c-chip.k { background:var(--ok-d); color:var(--ok); border:1px solid rgba(34,197,94,0.18); }
+/* tabs */
+.camp-tabs { display:flex; overflow-x:auto; border-bottom:1px solid var(--bd); background:var(--sf); }
+.c-tab { padding:9px 15px; font-size:12px; font-weight:600; color:var(--t3); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; user-select:none; }
+.c-tab:hover { color:var(--t2); } .c-tab.on { color:var(--blu-l); border-bottom-color:var(--blu); }
+.camp-panels { }
+.c-panel { display:none; padding:18px 22px; }
+.c-panel.on { display:block; }
+.cs { margin-bottom:18px; }
+.cs:last-child { margin-bottom:0; }
+.cs-t { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--t3); margin-bottom:9px; display:flex; align-items:center; gap:7px; }
+.cs-t::before { content:''; flex:1; height:1px; background:var(--bd); }
+.cp-blk { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:13px 15px; font-size:13px; color:var(--t1); line-height:1.7; white-space:pre-wrap; word-break:break-word; position:relative; }
+.cp-lbl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); margin-bottom:7px; }
+.cp-btn { position:absolute; top:10px; right:10px; padding:3px 9px; font-size:10px; font-weight:600; border-radius:var(--rs); background:var(--sf3); border:1px solid var(--bd); color:var(--t3); cursor:pointer; transition:all .15s; font-family:var(--font); }
+.cp-btn:hover { color:var(--t1); } .cp-btn.dn { color:var(--ok); border-color:rgba(34,197,94,0.3); }
+.strat-g { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.strat-i { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:11px 13px; }
+.strat-l { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); margin-bottom:4px; }
+.strat-v { font-size:12px; color:var(--t1); line-height:1.5; }
+.posts-g { display:flex; flex-direction:column; gap:9px; }
+.post-c { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:13px 15px; }
+.post-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+.post-n { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--blu-l); }
+.post-tp { font-size:10px; padding:2px 8px; border-radius:20px; background:var(--blu-d); color:var(--blu-l); border:1px solid var(--bda); font-weight:600; }
+.post-ti { font-size:13px; font-weight:700; color:var(--t1); margin-bottom:4px; }
+.post-b { font-size:12px; color:var(--t2); line-height:1.6; }
+.stor-g { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
+.stor-c { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:11px 13px; }
+.stor-n { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--gld); margin-bottom:4px; }
+.stor-tp { font-size:10px; padding:2px 7px; border-radius:20px; background:var(--gld-d); color:var(--gld); border:1px solid var(--gld-b); font-weight:600; margin-bottom:7px; display:inline-block; }
+.stor-b { font-size:12px; color:var(--t2); line-height:1.55; }
+.wa-blk { background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.16); border-radius:var(--rs); padding:13px 15px; font-size:13px; color:var(--t1); line-height:1.7; white-space:pre-wrap; position:relative; }
+.htags { display:flex; flex-wrap:wrap; gap:5px; }
+.htag { font-size:11px; padding:3px 8px; border-radius:20px; background:var(--sf3); border:1px solid var(--bd); color:var(--t2); cursor:pointer; transition:all .12s; }
+.htag:hover { background:var(--blu-d); color:var(--blu-l); border-color:var(--bda); }
+.cal-g { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.cal-i { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:10px 13px; display:flex; align-items:flex-start; gap:9px; }
+.cal-d { font-size:11px; font-weight:800; color:var(--blu-l); min-width:46px; padding-top:1px; }
+.cal-t { font-size:12px; font-weight:600; color:var(--t1); margin-bottom:2px; }
+.cal-s { font-size:11px; color:var(--t3); }
+.vis-g { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.vis-i { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:11px 13px; }
+.vis-l { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); margin-bottom:4px; }
+.vis-v { font-size:12px; color:var(--t1); line-height:1.5; }
+.img-prompts { display:flex; flex-direction:column; gap:9px; }
+.img-p { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:12px 14px; }
+.img-pl { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); margin-bottom:6px; }
+.img-pt { font-size:12px; color:var(--t2); line-height:1.6; margin-bottom:8px; }
+.img-pb { display:flex; gap:7px; }
+.ver-g { display:flex; flex-direction:column; gap:9px; }
+.ver-c { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:13px 15px; }
+.ver-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+.ver-tp { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; }
+.ver-tp.em { background:rgba(239,68,68,0.10); color:#F87171; border:1px solid rgba(239,68,68,0.2); }
+.ver-tp.pr { background:var(--blu-d); color:var(--blu-l); border:1px solid var(--bda); }
+.ver-tp.in { background:var(--gld-d); color:var(--gld); border:1px solid var(--gld-b); }
+.ver-tp.hu { background:var(--ok-d); color:var(--ok); border:1px solid rgba(34,197,94,0.2); }
+.ver-b { font-size:12px; color:var(--t2); line-height:1.65; }
+.met-g { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.met-c { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); padding:12px 13px; text-align:center; }
+.met-i { font-size:20px; margin-bottom:4px; }
+.met-t { font-size:12px; font-weight:700; color:var(--t1); margin-bottom:2px; }
+.met-s { font-size:11px; color:var(--t3); line-height:1.45; }
+.camp-foot { padding:11px 22px; border-top:1px solid var(--bd); background:var(--sf2); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:7px; }
+.camp-fn { font-size:11px; color:var(--t3); }
+.camp-fb { display:flex; gap:6px; }
+.cfb { padding:6px 14px; border-radius:var(--rs); font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all .15s; border:1px solid var(--bd2); background:transparent; color:var(--t2); }
+.cfb:hover { color:var(--t1); background:var(--sf3); }
+.cfb.p { background:var(--blu); color:#fff; border-color:var(--blu); box-shadow:0 4px 12px rgba(59,127,255,0.3); }
+.cfb.p:hover { background:var(--blu-h); }
+
+/* ══════════════════════════════════════════════
+   CONFIG PAGE
+══════════════════════════════════════════════ */
+.cfg { padding:28px 32px; max-width:680px; }
+.cfg-h { margin-bottom:24px; }
+.cfg-h h2 { font-size:18px; font-weight:700; letter-spacing:-.03em; margin-bottom:4px; }
+.cfg-h p { font-size:13px; color:var(--t2); }
+.cfg-s { margin-bottom:24px; }
+.cfg-s-t { font-size:13px; font-weight:700; color:var(--t1); margin-bottom:2px; }
+.cfg-s-s { font-size:12px; color:var(--t3); margin-bottom:13px; }
+.cfg-g { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.cf label { display:block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--t3); margin-bottom:6px; }
+.cf input,.cf select,.cf textarea { width:100%; padding:10px 13px; background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); color:var(--t1); font-size:13px; outline:none; transition:border-color .2s,box-shadow .2s; resize:vertical; }
+.cf select { appearance:none; cursor:pointer; }
+.cf input:focus,.cf select:focus,.cf textarea:focus { border-color:var(--blu); box-shadow:0 0 0 3px var(--blu-d); }
+.cf input::placeholder,.cf textarea::placeholder { color:var(--t3); }
+.cf.full { grid-column:1/-1; }
+.cfg-clrs { display:flex; align-items:center; gap:12px; padding:12px 14px; background:var(--sf2); border:1px solid var(--bd); border-radius:var(--rs); margin-bottom:11px; }
+.cfg-sv { padding:10px 20px; background:var(--blu); border:none; border-radius:var(--rs); color:#fff; font-size:13px; font-weight:600; cursor:pointer; transition:background .2s; box-shadow:0 4px 12px rgba(59,127,255,0.3); }
+.cfg-sv:hover { background:var(--blu-h); }
+.cfg-ok { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ok); margin-left:11px; opacity:0; transition:opacity .3s; }
+.cfg-ok.show { opacity:1; }
+
+/* ══════════════════════════════════════════════
+   HISTORY PAGE
+══════════════════════════════════════════════ */
+.hist { padding:28px 32px; }
+.hist h2 { font-size:18px; font-weight:700; letter-spacing:-.03em; margin-bottom:4px; }
+.hist p { font-size:13px; color:var(--t2); margin-bottom:20px; }
+.h-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.h-tbl th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:.06em; font-weight:600; color:var(--t3); padding:0 14px 9px; border-bottom:1px solid var(--bd); }
+.h-tbl td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.03); color:var(--t2); vertical-align:middle; }
+.h-tbl tr:last-child td { border-bottom:none; }
+.h-tbl tr:hover td { background:rgba(255,255,255,0.02); }
+.h-pill { padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; background:var(--sf3); color:var(--t2); border:1px solid var(--bd); }
+.h-ok  { color:var(--ok); font-size:10px; font-weight:600; }
+.h-err { color:var(--err); font-size:10px; font-weight:600; }
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+.mover { position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:100; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(6px); }
+.mover.open { display:flex; }
+.modal { background:var(--sf); border:1px solid var(--bd2); border-radius:var(--rx); padding:26px; width:100%; max-width:480px; max-height:88vh; overflow-y:auto; box-shadow:var(--shl); position:relative; }
+.m-cls { position:absolute; top:12px; right:12px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--t3); border-radius:var(--rs); border:1px solid var(--bd); background:var(--sf2); font-size:12px; }
+.m-cls:hover { color:var(--t1); }
+.m-tit { font-size:16px; font-weight:700; margin-bottom:4px; }
+.m-sub { font-size:13px; color:var(--t2); margin-bottom:16px; }
+.m-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px; }
+.m-mi { background:var(--sf2); border:1px solid var(--bd); border-radius:var(--r); padding:12px 13px; }
+.m-ml { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--t3); font-weight:600; margin-bottom:6px; }
+.m-mv { font-size:18px; font-weight:700; color:var(--t1); }
+.m-ms { font-size:10px; color:var(--t3); margin-top:3px; }
+.m-pb { background:rgba(255,255,255,0.06); border-radius:3px; height:5px; overflow:hidden; margin:5px 0 3px; }
+.m-pf { height:100%; border-radius:3px; transition:width .5s; }
+.m-note { font-size:11px; color:var(--t3); line-height:1.65; padding:10px 12px; background:var(--sf3); border-radius:var(--rs); margin-top:13px; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:900px) { .strat-g,.cal-g,.vis-g,.cfg-g { grid-template-columns:1fr; } .stor-g { grid-template-columns:1fr 1fr; } .met-g { grid-template-columns:1fr; } .home-header,.uni-wrap,.conv-wrap,.cfg,.hist { padding-left:20px; padding-right:20px; } }
+@media(max-width:700px) { :root{--sbw:0px} .sb{display:none} .home-header,.uni-wrap,.conv-wrap { padding-left:14px; padding-right:14px; } .cfg,.hist { padding:16px; } .stor-g { grid-template-columns:1fr; } }
+@media(max-width:420px) { .l-step{padding:26px 18px} .l-title{font-size:19px} .l-slbl{display:none} .met-g{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="ls">
+  <div class="l-grid"></div>
+  <div class="l-vp">
+    <div class="l-sl" id="lslider">
+      <!-- Step 1 -->
+      <div class="l-step">
+        <div class="l-mark"><div class="l-icon">🏥</div><div class="l-wm">Med<span>AI</span> Pro</div></div>
+        <div class="l-title">Bem-vindo de volta</div>
+        <div class="l-sub">Plataforma de inteligência operacional para clínicas médicas.</div>
+        <div class="l-steps"><div class="l-dot on"></div><div class="l-dot"></div><span class="l-slbl">Etapa 1 de 2</span></div>
+        <div class="lf"><label>E-mail</label><input type="email" id="in-em" placeholder="seu@clinica.com.br" autocomplete="email"></div>
+        <div class="lf"><label>Senha</label><input type="password" id="in-pw" placeholder="••••••••" autocomplete="current-password"></div>
+        <button class="l-btn" id="b1" onclick="doS1()"><span id="b1t">Continuar</span><span id="b1a">→</span></button>
+        <div class="l-err" id="e1"></div>
+        <div class="l-badge">🔒 Acesso restrito · Clínica Dr. Grégori Bertagnolli</div>
+      </div>
+      <!-- Step 2 -->
+      <div class="l-step">
+        <div class="l-mark"><div class="l-icon" style="background:linear-gradient(135deg,#22C55E,#16A34A)">🔐</div><div class="l-wm">Med<span>AI</span> Pro</div></div>
+        <div class="l-title">Verificação</div>
+        <div class="l-sub">Digite o código de acesso exclusivo da sua conta.</div>
+        <div class="l-steps"><div class="l-dot dn"></div><div class="l-dot on"></div><span class="l-slbl">Etapa 2 de 2</span></div>
+        <div class="l-econf"><span style="color:var(--ok);font-size:15px">✓</span><div><div class="l-econf-lbl">Conta identificada</div><div class="l-econf-val" id="emask">—</div></div></div>
+        <div class="lf" style="margin-bottom:7px"><label>Código de acesso</label><input class="l-code" type="text" id="in-cod" placeholder="XXXX-0000" autocomplete="off" maxlength="20" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doS2()"></div>
+        <p style="font-size:11px;color:var(--t3);margin-bottom:4px">Fornecido pela equipe MedAI Pro no cadastro.</p>
+        <button class="l-btn" id="b2" onclick="doS2()"><span id="b2t">Entrar na plataforma</span></button>
+        <button class="l-ghost" onclick="backS1()">← Voltar</button>
+        <div class="l-err" id="e2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="as">
+  <!-- SIDEBAR — minimal -->
+  <aside class="sb">
+    <div class="sb-logo"><div class="sb-icon">🏥</div><div class="sb-wm">Med<span>AI</span> Pro</div></div>
+    <nav class="sb-nav">
+      <div class="ni active" id="nav-home" onclick="goHome(this)">
+        <span class="ni-ic">✦</span><span class="ni-lbl">MedAI Intelligence</span>
+      </div>
+      <div class="ni" onclick="goPage('hist',this)">
+        <span class="ni-ic">🕐</span><span class="ni-lbl">Histórico</span>
+      </div>
+      <div class="ni" onclick="goPage('cfg',this)">
+        <span class="ni-ic">⚙</span><span class="ni-lbl">Configurações</span>
+      </div>
+      <div class="ni" onclick="openUM()">
+        <span class="ni-ic">📊</span><span class="ni-lbl">Uso e Licença</span>
+      </div>
+    </nav>
+    <div class="sb-use">
+      <div class="su-row"><span class="su-lbl">Uso mensal</span><span class="su-pct" id="sbpct" style="color:var(--ok)">0%</span></div>
+      <div class="u-trk"><div class="u-fil" id="sbfil" style="width:0%"></div></div>
+      <div class="su-sub" id="sbsub">0 / 500</div>
+    </div>
+    <div class="sb-foot">
+      <div class="u-card" onclick="goPage('cfg',null)">
+        <div class="u-av" id="sbav">GB</div>
+        <div><div class="u-nm" id="sbnm">—</div><div class="u-rl" id="sbrl">—</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-l">
+        <span class="tb-t" id="tbt">MedAI Intelligence</span>
+        <span class="tb-sep">/</span>
+        <span class="tb-s" id="tbs">Assistente operacional da clínica</span>
+      </div>
+      <div class="tb-r">
+        <div class="tb-live"><div class="tb-dot"></div>Online</div>
+        <button class="btn-sm" onclick="openUM()">Uso</button>
+        <button class="btn-sm" onclick="doLogout()">Sair</button>
+      </div>
+    </div>
+
+    <!-- HOME — conversacional -->
+    <div class="page active" id="pg-home">
+      <div class="home">
+        <div class="home-header">
+          <div class="home-gr" id="hgr">Bom dia 👋</div>
+          <div class="home-sub" id="hsub">O que deseja fazer hoje?</div>
+        </div>
+        <div class="brain" id="brain-card">
+          <div class="brain-ic">🧠</div>
+          <div>
+            <div class="brain-lbl">Sugestão de hoje</div>
+            <div class="brain-txt" id="brain-txt">—</div>
+          </div>
+        </div>
+        <div class="uni-wrap">
+          <div class="uni-box">
+            <div class="uni-label">MedAI Intelligence</div>
+            <textarea class="uni-ta" id="uni-ta" placeholder="Descreva o que deseja criar ou fazer para a clínica…" rows="2" onkeydown="onUniKey(event)" oninput="rszTa(this)"></textarea>
+            <div class="uni-footer">
+              <div class="uni-hints" id="uni-hints">
+                <span class="uni-hint" onclick="useHint(this)">Campanha de vacinação</span>
+                <span class="uni-hint" onclick="useHint(this)">Post para Instagram</span>
+                <span class="uni-hint" onclick="useHint(this)">Gerar imagem</span>
+                <span class="uni-hint" onclick="useHint(this)">Responder dúvidas</span>
+                <span class="uni-hint" onclick="useHint(this)">Conseguir mais pacientes</span>
+              </div>
+              <button class="uni-clear" id="clrbtn" onclick="clearConv()" title="Limpar conversa">✕ Limpar</button>
+              <button class="uni-send" id="unibtn" onclick="uniSend()" title="Enviar">➤</button>
+            </div>
+          </div>
+        </div>
+        <!-- Conversation history renders here -->
+        <div class="conv-wrap" id="conv"></div>
+        <div style="height:24px;flex-shrink:0"></div>
+      </div>
+    </div>
+
+    <!-- CONFIG -->
+    <div class="page" id="pg-cfg">
+      <div class="cfg">
+        <div class="cfg-h"><h2>Configurações da Clínica</h2><p>A IA usa essas informações automaticamente em todas as respostas.</p></div>
+        <div class="cfg-s">
+          <div class="cfg-s-t">🏥 Identidade</div><div class="cfg-s-s">Informações básicas da clínica.</div>
+          <div class="cfg-g">
+            <div class="cf"><label>Nome da Clínica</label><input type="text" id="c-nom" placeholder="Clínica Pediátrica Bertagnolli"></div>
+            <div class="cf"><label>Especialidade</label><select id="c-esp"><option value="">Selecione...</option><option>Pediatria</option><option>Clínica Geral</option><option>Ortopedia</option><option>Dermatologia</option><option>Cardiologia</option><option>Ginecologia</option><option>Neurologia</option><option>Psiquiatria</option><option>Outra</option></select></div>
+            <div class="cf"><label>Cidade / Região</label><input type="text" id="c-cid" placeholder="Porto Alegre, RS"></div>
+            <div class="cf"><label>Público-Alvo</label><input type="text" id="c-pub" placeholder="Pais com crianças 0–12 anos"></div>
+            <div class="cf full"><label>Serviços</label><textarea id="c-srv" rows="2" placeholder="Consultas, vacinação, puericultura…"></textarea></div>
+            <div class="cf full"><label>Diferenciais</label><textarea id="c-dif" rows="2" placeholder="Atendimento humanizado, ambiente acolhedor…"></textarea></div>
+          </div>
+        </div>
+        <div class="cfg-s">
+          <div class="cfg-s-t">🎨 Identidade Visual</div><div class="cfg-s-s">Usada para manter consistência visual em imagens e conteúdos.</div>
+          <div class="cfg-clrs">
+            <span style="font-size:11px;color:var(--t3)">Cor principal:</span>
+            <input type="color" id="c-c1" value="#3B7FFF" style="width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;padding:0;background:none">
+            <span style="font-size:11px;color:var(--t3);margin-left:10px">Secundária:</span>
+            <input type="color" id="c-c2" value="#C9A84C" style="width:28px;height:28px;border:none;border-radius:50%;cursor:pointer;padding:0;background:none">
+          </div>
+          <div class="cfg-g">
+            <div class="cf"><label>Tom de Comunicação</label><select id="c-tom"><option value="acolhedor e profissional">Acolhedor e profissional</option><option value="técnico e informativo">Técnico e informativo</option><option value="descontraído e próximo">Descontraído e próximo</option><option value="formal e clínico">Formal e clínico</option><option value="empático e cuidadoso">Empático e cuidadoso</option></select></div>
+            <div class="cf"><label>Estilo Visual</label><select id="c-est"><option value="moderno e clean">Moderno e clean</option><option value="colorido e vibrante">Colorido e vibrante</option><option value="minimalista">Minimalista</option><option value="infantil e divertido">Infantil e divertido</option><option value="sóbrio e confiável">Sóbrio e confiável</option></select></div>
+          </div>
+        </div>
+        <div class="cfg-s">
+          <div class="cfg-s-t">📱 Presença Digital</div><div class="cfg-s-s">Para personalizar o conteúdo de marketing.</div>
+          <div class="cfg-g">
+            <div class="cf"><label>Instagram</label><input type="text" id="c-ig" placeholder="@clinicabertagnolli"></div>
+            <div class="cf"><label>Contato / Site</label><input type="text" id="c-ct" placeholder="(51) 99999-0000"></div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center">
+          <button class="cfg-sv" onclick="saveConf()">Salvar configurações</button>
+          <span class="cfg-ok" id="csd">✓ Salvo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="pg-hist">
+      <div class="hist">
+        <h2>Histórico de uso</h2>
+        <p>Registro de todas as interações desta sessão.</p>
+        <div style="background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden">
+          <table class="h-tbl"><thead><tr><th>Horário</th><th>Tipo</th><th>Status</th></tr></thead><tbody id="htb"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--t3)">Nenhuma interação ainda.</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL USO -->
+<div class="mover" id="umod">
+  <div class="modal">
+    <div class="m-cls" onclick="closeUM()">✕</div>
+    <div class="m-tit">Uso da licença</div>
+    <div class="m-sub" id="mu-i">—</div>
+    <div class="m-row">
+      <div class="m-mi"><div class="m-ml">Mensagens</div><div class="m-mv" id="mu-m">0</div><div class="m-ms" id="mu-l">/ 500</div></div>
+      <div class="m-mi"><div class="m-ml">Plano</div><div class="m-mv" id="mu-p" style="font-size:16px">—</div><div class="m-ms">Ativo</div></div>
+      <div class="m-mi"><div class="m-ml">Status</div><div class="m-mv" style="font-size:13px;color:var(--ok);display:flex;align-items:center;gap:5px;margin-top:3px"><span style="width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block"></span>Online</div><div class="m-ms">Todos serviços</div></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:4px"><span>Limite mensal</span><span id="mu-pct" style="font-weight:700">0%</span></div>
+    <div class="m-pb"><div class="m-pf" id="mu-fil" style="width:0%;background:var(--ok)"></div></div>
+    <div class="m-note">🔒 Todas as interações são processadas com criptografia nos servidores MedAI Pro. Nenhuma chave de API é armazenada no navegador.</div>
+  </div>
+</div>
+
+<script>
+/* ── CONFIG ── */
+window.MEDAI_BACKEND_URL = 'http://localhost:3001';
+
+/* ══════════════════════════════════════════════════════
+   INTELLIGENCE ROUTER — interpreta intenção e roteia
+   para o agente interno correto, de forma invisível
+══════════════════════════════════════════════════════ */
+function classifyIntent(text) {
+  var t = text.toLowerCase();
+  // Campanha / marketing completo
+  if (/campanha|marketing|divulgar|promover|lançamento|awareness/.test(t)) return 'campaign';
+  // Instagram / redes sociais / conteúdo
+  if (/instagram|post|story|stories|feed|reels?|reel|legenda|hashtag|conteúdo para|social|engajamento/.test(t)) return 'social';
+  // Imagem / visual
+  if (/imagem|foto|gerar.*visual|visual.*gerar|ilustração|design|banner|pôster|criar.*foto|fotografia/.test(t)) return 'image';
+  // Dúvidas / atendimento / FAQ
+  if (/dúvida|pergunta|agendamento|convênio|horário|funciona|atende|contato|responder|paciente.*pergunta/.test(t)) return 'faq';
+  // Tudo que envolve paciente / crescimento = campanha
+  if (/paciente|crescimento|mais.*cliente|atrair|conseguir.*mais/.test(t)) return 'campaign';
+  // Orientação / saúde / pediatria
+  if (/saúde|pediatria|criança|bebê|vacina|febre|sintoma|doença|prevenção|orientação/.test(t)) return 'health';
+  // Default: campanha (o mais completo)
+  return 'campaign';
+}
+
+/* Roteia para o agente correto de forma transparente */
+async function routeAndExecute(text) {
+  var intent = classifyIntent(text);
+
+  if (intent === 'image') {
+    // Geração de imagem
+    await doImg(text);
+    return;
+  }
+
+  if (intent === 'campaign') {
+    // Campanha completa via Orchestrator
+    await doOrch(text);
+    return;
+  }
+
+  if (intent === 'social') {
+    // Conteúdo Instagram via agente social
+    HIST.push({ role:'user', content:text });
+    var r;
+    try { r = await MB.callAI(SESSION.clientId, 'instagram', HIST, AGENTS.instagram.sys()); }
+    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
+    HIST.push({ role:'assistant', content:r.reply });
+    addAIMsg(r.reply);
+    return;
+  }
+
+  if (intent === 'faq') {
+    // Dúvidas via agente de atendimento
+    HIST.push({ role:'user', content:text });
+    var r2;
+    try { r2 = await MB.callAI(SESSION.clientId, 'duvidas', HIST, AGENTS.duvidas.sys()); }
+    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
+    HIST.push({ role:'assistant', content:r2.reply });
+    addAIMsg(r2.reply);
+    return;
+  }
+
+  if (intent === 'health') {
+    // Orientação de saúde
+    HIST.push({ role:'user', content:text });
+    var r3;
+    try { r3 = await MB.callAI(SESSION.clientId, 'orientacao', HIST, AGENTS.orientacao.sys()); }
+    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
+    HIST.push({ role:'assistant', content:r3.reply });
+    addAIMsg(r3.reply);
+    return;
+  }
+}
+</script>
+<script>
+/* ══════════════════════════════════════════════════════
+   CORE INTELLIGENCE — AIO, CTX, buildDemoCampaign,
+   buildVIEDemo, MB, AGENTS, VS (extraídos do v3)
+══════════════════════════════════════════════════════ */
+</script>
+<script id="core-intelligence-placeholder">
+const AIO = {
+  buildCtx() {
+    const c = CTX, p = [];
+    if (c.nom) p.push('Clínica: '              + c.nom);
+    if (c.esp) p.push('Especialidade: '         + c.esp);
+    if (c.cid) p.push('Localização: '           + c.cid);
+    if (c.pub) p.push('Público-alvo: '          + c.pub);
+    if (c.srv) p.push('Serviços: '              + c.srv);
+    if (c.tom) p.push('Tom de comunicação: '    + c.tom);
+    if (c.est) p.push('Estilo visual da marca: '+ c.est);
+    if (c.dif) p.push('Diferenciais: '          + c.dif);
+    if (c.ig)  p.push('Instagram: '             + c.ig);
+    if (c.ct)  p.push('Contato: '               + c.ct);
+    if (c.c1 && c.c1 !== '#3B7FFF') p.push('Cor principal: ' + c.c1);
+    return p.length ? '\n\n[CONTEXTO DA CLÍNICA — use sempre]\n' + p.join('\n') : '';
+  },
+
+  enrich(sys) { return sys + this.buildCtx(); },
+
+  async campaign(topic, clientId) {
+    const nome = CTX.nom || SESSION?.clinica || 'a clínica';
+    const esp  = CTX.esp || 'médica';
+    const pub  = CTX.pub || 'pacientes e famílias';
+    const tom  = CTX.tom || 'acolhedor e profissional';
+    const est  = CTX.est || 'moderno e clean';
+    const extra = (CTX.dif ? ' Diferenciais: ' + CTX.dif + '.' : '')
+                + (CTX.ig  ? ' Instagram: '    + CTX.ig  + '.' : '')
+                + (CTX.ct  ? ' Contato: '      + CTX.ct  + '.' : '');
+
+    const seed   = Math.floor(Math.random() * 9000) + 1000;
+    const angulos = [
+      'EMOCIONAL: histórias reais, medo de perder, amor familiar como motor da ação',
+      'EDUCATIVO: dados, fatos científicos, mitos vs verdades, autoridade médica',
+      'PREVENTIVO: antecipação, checklist prático, empoderamento do paciente',
+      'AUTORIDADE: posicionamento da clínica, diferenciais, cases implícitos',
+      'SAZONAL: momento atual, tendência, por que agir agora'
+    ];
+    const angulo = angulos[seed % angulos.length];
+
+    const sysLines = [
+      'Você é uma equipe completa de marketing médico da MedAI Pro: estrategista, copywriter sênior, social media specialist e diretor criativo.',
+      this.buildCtx(),
+      '',
+      'MISSÃO: Campanha profissional completa sobre "' + topic + '" para ' + nome + ' (' + esp + ').',
+      'Público: ' + pub + '. Tom: ' + tom + '. Estilo: ' + est + '.' + extra,
+      '',
+      'ÂNGULO CRIATIVO (seed ' + seed + '): ' + angulo,
+      'Use este ângulo em todo o conteúdo. Gera variação mesmo no mesmo tema.',
+      '',
+      'REGRA: Responda APENAS com JSON válido. Sem texto antes ou depois.',
+      'Conteúdo real, específico para ' + nome + ' — sem placeholders ou exemplos genéricos.',
+      '',
+      'JSON esperado (português brasileiro):',
+      '{',
+      '  "nome": "Nome criativo da campanha",',
+      '  "slogan": "Slogan forte e memorável",',
+      '  "estrategia": {',
+      '    "objetivo": "Objetivo mensurável",',
+      '    "publicoAlvo": "Público detalhado",',
+      '    "abordagem": "Abordagem emocional e estratégica",',
+      '    "ctaPrincipal": "Call-to-action principal",',
+      '    "posicionamento": "Posicionamento da clínica"',
+      '  },',
+      '  "copyPrincipal": "Copy completo para post de lançamento. Mínimo 5 parágrafos reais com abertura forte, emoção, benefícios, prova social e CTA poderoso.",',
+      '  "posts": [',
+      '    {"num":1,"tipo":"Carrossel","titulo":"Título impactante","legenda":"Legenda completa 8+ linhas com emojis e CTA","slides":["Slide 1","Slide 2","Slide 3","Slide 4","Slide 5"]},',
+      '    {"num":2,"tipo":"Post educativo","titulo":"Título","legenda":"Legenda completa","slides":[]},',
+      '    {"num":3,"tipo":"Post autoridade","titulo":"Título","legenda":"Legenda completa","slides":[]}',
+      '  ],',
+      '  "stories": [',
+      '    {"num":1,"tipo":"Abertura","conteudo":"Texto do story 1"},',
+      '    {"num":2,"tipo":"Enquete","conteudo":"Texto com pergunta e 2 opções"},',
+      '    {"num":3,"tipo":"CTA","conteudo":"Story final com call-to-action"}',
+      '  ],',
+      '  "whatsapp": "Mensagem pessoal completa para base de pacientes. Mínimo 6 linhas.",',
+      '  "hashtags": ["25","hashtags","relevantes","sem","simbolo"],',
+      '  "calendario": [',
+      '    {"dia":"Dia 1","acao":"Post lançamento","horario":"18h","obs":"Prioridade máxima"},',
+      '    {"dia":"Dia 2","acao":"Stories","horario":"12h e 19h","obs":"Ampliar alcance"},',
+      '    {"dia":"Dia 3","acao":"WhatsApp","horario":"10h","obs":"Alta taxa abertura"},',
+      '    {"dia":"Dia 5","acao":"Post educativo","horario":"18h","obs":"Nutrir audiência"},',
+      '    {"dia":"Dia 8","acao":"Post autoridade","horario":"18h","obs":"Consolidar posição"},',
+      '    {"dia":"Dia 10","acao":"Reels/vídeo","horario":"20h","obs":"Alto alcance orgânico"}',
+      '  ],',
+      '  "briefingVisual": {',
+      '    "conceito": "Conceito visual",',
+      '    "composicao": "Como compor imagens",',
+      '    "estilo": "Estilo visual específico",',
+      '    "emocao": "Emoção a transmitir",',
+      '    "cores": "Paleta recomendada",',
+      '    "promptImagem": "Prompt detalhado em inglês para gerador de imagens"',
+      '  },',
+      '  "versoes": [',
+      '    {"tipo":"emocional","tag":"Emocional","copy":"Versão emocional real mínimo 4 linhas"},',
+      '    {"tipo":"profissional","tag":"Profissional","copy":"Versão técnica real mínimo 4 linhas"},',
+      '    {"tipo":"institucional","tag":"Institucional","copy":"Versão institucional real mínimo 4 linhas"},',
+      '    {"tipo":"humanizado","tag":"Humanizado","copy":"Versão conversacional real mínimo 4 linhas"}',
+      '  ],',
+      '  "metricas": [',
+      '    {"icone":"👁️","titulo":"Alcance esperado","desc":"Meta de impressões nas primeiras 72h"},',
+      '    {"icone":"💬","titulo":"Engajamento alvo","desc":"Taxa de saves e compartilhamentos esperada"},',
+      '    {"icone":"📅","titulo":"Conversões","desc":"Meta de agendamentos gerados"}',
+      '  ]',
+      '}'
+    ];
+    const sys = sysLines.join('\n');
+    return await MB.callAI(clientId, 'orchestrator', [{ role: 'user', content: 'Criar campanha sobre: ' + topic }], sys);
+  }
+};
+
+/* ══════════════════════════════════════════════════════
+   CONTEXTO PERSISTENTE
+══════════════════════════════════════════════════════ */
+const CTX = { nom:'', esp:'', cid:'', pub:'', srv:'', tom:'acolhedor e profissional', est:'moderno e clean', dif:'', ig:'', ct:'', c1:'#3B7FFF', c2:'#C9A84C' };
+function loadCtx() { try { const s = sessionStorage.getItem('mctx'); if (s) Object.assign(CTX, JSON.parse(s)); } catch(e) {} }
+function saveCtx() { try { sessionStorage.setItem('mctx', JSON.stringify(CTX)); } catch(e) {} }
+
+/* ══════════════════════════════════════════════════════
+   DEMO DINÂMICO DE CAMPANHA — varia por tema
+══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   INTELLIGENCE ENGINE — Motor de geração de campanhas
+   Produz campanhas profissionais completas contextualmente,
+   variando ângulo criativo, profundidade e abordagem
+   por tema e perfil de clínica.
+══════════════════════════════════════════════════════ */
+function buildDemoCampaign(topic) {
+  var nome   = CTX.nom || (SESSION && SESSION.clinica) || 'Clínica Pediátrica Bertagnolli';
+  var esp    = CTX.esp || 'Pediatria';
+  var pub    = CTX.pub || 'pais e famílias com crianças de 0 a 12 anos';
+  var cid    = CTX.cid || 'Porto Alegre, RS';
+  var tom    = CTX.tom || 'acolhedor e profissional';
+  var est    = CTX.est || 'moderno e clean';
+  var dif    = CTX.dif || 'atendimento humanizado, equipe especializada, ambiente acolhedor';
+  var ig     = CTX.ig  || '@clinicabertagnolli';
+  var ct     = CTX.ct  || '(51) 99999-0000';
+  var cor1   = CTX.c1  || '#3B7FFF';
+
+  // Hash do tema → variação criativa determinística
+  var h = topic.split('').reduce(function(a,c){ return a + c.charCodeAt(0); }, 0);
+  var t = topic.charAt(0).toUpperCase() + topic.slice(1);
+
+  // Banco de ângulos criativos
+  var angulos = [
+    { nome: 'Proteção Familiar',    emocao: 'amor e proteção',       gancho: 'Quem ama, previne. Quem previne, cuida antes de precisar.' },
+    { nome: 'Autoridade Científica',emocao: 'confiança e expertise', gancho: 'A ciência confirma. A experiência comprova. O cuidado faz a diferença.' },
+    { nome: 'Urgência Preventiva',  emocao: 'responsabilidade',      gancho: 'O melhor momento para agir é antes do problema aparecer.' },
+    { nome: 'Empoderamento',        emocao: 'autonomia e segurança', gancho: 'Informação é o melhor remédio que existe. E começa aqui.' },
+    { nome: 'Vínculo Comunitário',  emocao: 'pertencimento',         gancho: 'Juntos, cuidamos melhor. Essa campanha é para toda a nossa comunidade.' }
+  ];
+  var angulo = angulos[h % angulos.length];
+  var emjs   = ['💙','💚','🌟','❤️','✨'];
+  var em     = emjs[h % emjs.length];
+
+  // Dados temáticos contextuais
+  var topicSlug = topic.toLowerCase().replace(/\s+/g,'');
+  var nomeSlug  = nome.toLowerCase().replace(/\s+/g,'').slice(0,16);
+  var espSlug   = esp.toLowerCase().replace(/\s+/g,'');
+
+  return {
+    nome: angulo.nome + ': ' + t,
+    slogan: angulo.gancho,
+
+    estrategia: {
+      objetivo: 'Posicionar ' + nome + ' como autoridade em ' + esp + ' na região de ' + cid + ' através de conteúdo estratégico sobre "' + topic + '", gerando engajamento orgânico e conversões em agendamentos. Meta: +20% de novos pacientes no trimestre.',
+      publicoAlvo: pub + ' — moradores de ' + cid + ' e região, pacientes ativos da base e indicações. Perfil: buscam informação confiável, valorizam atendimento humanizado e decidem por indicação e autoridade percebida.',
+      abordagem: 'Comunicação com ângulo "' + angulo.nome + '" — explorar a emoção de ' + angulo.emocao + ' para conectar o tema ao cotidiano do público. Linguagem: ' + tom + '. Evitar linguagem excessivamente técnica; priorizar clareza, empatia e chamada para ação.',
+      ctaPrincipal: 'Agende sua consulta na ' + nome + ' pelo ' + ct + ' ou pelo link na bio do Instagram ' + ig + '. Primeiras 10 respostas desta campanha recebem orientação preventiva gratuita por WhatsApp.',
+      posicionamento: nome + ' como o parceiro estratégico de saúde das famílias de ' + cid + ': não apenas trata — previne, educa e acompanha. Diferencial: ' + dif + '.'
+    },
+
+    copyPrincipal: em + ' Você sabia que ' + topic + ' afeta diretamente a qualidade de vida de milhares de crianças e famílias na nossa região todos os anos?\n\nNa ' + nome + ', acompanhamos famílias de ' + cid + ' há anos e vemos de perto como uma informação certa — chegando no momento certo — pode mudar completamente o desfecho de uma situação.\n\nNão é exagero dizer: conhecimento salva vidas.\n\nPor isso lançamos esta campanha. Não para vender uma consulta. Mas porque acreditamos que o cuidado real começa com educação — e que a ' + nome + ' tem a responsabilidade de ser essa fonte de informação confiável para você.\n\n' + em + ' O que você vai aprender nesta campanha:\n\n✅ O que toda família precisa saber sobre ' + topic + ' — sem jargão médico, sem alarme desnecessário\n✅ Quais sinais merecem atenção imediata e quais podem ser observados com calma\n✅ O que fazer nas primeiras horas — o protocolo que todo pai e mãe deveria conhecer\n✅ Quando é hora de buscar atendimento especializado — e como agilizar esse processo\n✅ Como a prevenção inteligente pode evitar 70% dos problemas mais comuns\n\nNa ' + nome + ', nossa missão vai além da consulta. É estar presente na vida das famílias de ' + cid + ' com informação de qualidade, atendimento humano e a certeza de que, quando você precisar, estaremos aqui.\n\n👉 Salva esse post. Compartilha com quem você ama. E quando precisar — a gente está a uma mensagem de distância.\n\n📞 ' + ct + ' | ' + ig,
+
+    posts: [
+      {
+        num: 1,
+        tipo: 'Carrossel educativo (5 slides)',
+        titulo: topic + ': O guia definitivo para famílias de ' + cid,
+        legenda: em + ' Esse post pode salvar a saúde do seu filho.\n\nCriamos o guia mais completo sobre ' + topic + ' para as famílias de ' + cid + '.\n\nArraste até o final — o slide 5 tem a informação mais importante. 👉\n\n💡 Salva agora para ter sempre à mão. Sua família vai agradecer.\n\n📅 Quer orientação personalizada para o seu caso?\nAgende pelo link na bio — ' + ig + '\n\n' + [topicSlug, espSlug, 'saudeinfantil', 'pediatria', nomeSlug, 'familia', 'prevencao', 'saude', cid.split(',')[0].toLowerCase().replace(/\s+/g,'')].map(function(h){ return '#'+h; }).join(' '),
+        slides: [
+          '📌 SLIDE 1 — ' + topic.toUpperCase() + '\nO que toda família de ' + cid + ' precisa saber — guia completo da ' + nome,
+          '🔍 SLIDE 2 — O QUE É E POR QUE IMPORTA\n' + topic + ' é responsável por milhares de atendimentos pediátricos por ano. Entender o tema é o primeiro passo para proteger sua família.',
+          '⚠️ SLIDE 3 — SINAIS DE ATENÇÃO\nFique atento a: alterações no comportamento da criança, sintomas persistentes por mais de 48h, febre acima de 38,5°C, recusa de alimentos por mais de 24h.',
+          '✅ SLIDE 4 — O QUE FAZER\nPasso 1: Mantenha a calma e observe os sintomas. Passo 2: Registre horários e intensidade. Passo 3: Ligue para seu pediatra antes de medicar. Passo 4: Em caso de dúvida, procure atendimento.',
+          '💙 SLIDE 5 — ' + nome.toUpperCase() + ' ESTÁ AQUI\nSomos a referência em ' + esp + ' de ' + cid + '. ' + dif + '.\n📞 ' + ct + ' | ' + ig
+        ]
+      },
+      {
+        num: 2,
+        tipo: 'Post educativo — Mitos e Verdades',
+        titulo: '5 mitos sobre ' + topic + ' que todo pai/mãe acredita (e não deveria)',
+        legenda: '🚫 "Vi na internet que..." — e aí o problema começa.\n\nExistem muitas informações erradas circulando sobre ' + topic + '. E elas podem atrasar um tratamento, gerar pânico desnecessário ou fazer você tomar a decisão errada.\n\nVou desmistificar os 5 maiores equívocos que chegam toda semana no nosso consultório:\n\n❌ Mito 1: "Se não tem febre, não é grave" — FALSO. Vários quadros sérios de ' + topic + ' surgem sem febre nas primeiras horas.\n\n❌ Mito 2: "Pode esperar passar sozinho" — DEPENDE. Alguns casos se resolvem, outros evoluem rapidamente. Só um especialista pode avaliar.\n\n❌ Mito 3: "Antibiótico resolve tudo" — ERRADO. A maioria dos casos pediátricos não responde a antibiótico e o uso inadequado cria resistência.\n\n❌ Mito 4: "Se a criança está brincando, está bem" — NEM SEMPRE. Crianças são resilientes e escondem sintomas.\n\n❌ Mito 5: "Isso não acontece com a minha família" — QUALQUER família pode ser afetada. Prevenção é para todos.\n\n💡 Salva e compartilha com outros pais! A informação certa chega quando mais precisamos.\n\n📩 Dúvidas? Manda mensagem: ' + ig + '\n\n#' + topicSlug + ' #mitos #verdades #' + espSlug + ' #' + nomeSlug,
+        slides: []
+      },
+      {
+        num: 3,
+        tipo: 'Post de autoridade — Bastidores da clínica',
+        titulo: 'O que vemos no consultório todos os dias sobre ' + topic,
+        legenda: '🏥 Depois de anos atendendo famílias de ' + cid + ', posso compartilhar algo importante:\n\nA maioria dos casos graves de ' + topic + ' que chegam até nós poderiam ter sido evitados ou tratados mais cedo — se a família tivesse a informação certa no momento certo.\n\nIsso não é crítica. É uma realidade que nos motiva a fazer mais.\n\nNa ' + nome + ', não esperamos o problema aparecer para agir. Nossa abordagem é preventiva, educativa e humanizada — porque acreditamos que cuidar é um ato contínuo, não pontual.\n\n' + dif + '.\n\nSe você está em ' + cid + ' e quer uma equipe de ' + esp + ' que vai estar presente em cada etapa do desenvolvimento da sua família — venha conversar com a gente.\n\n📅 Agendamentos: ' + ct + '\n🔗 Link na bio: ' + ig + '\n\n#' + espSlug + ' #' + nomeSlug + ' #' + cid.split(',')[0].toLowerCase().replace(/\s+/g,'') + ' #pediatra #saude #familia',
+        slides: []
+      }
+    ],
+
+    stories: [
+      {
+        num: 1, tipo: 'Abertura de impacto',
+        conteudo: '🔴 ATENÇÃO, PAIS DE ' + cid.split(',')[0].toUpperCase() + '\n\n[Imagem de impacto: criança com expressão preocupada ou símbolo do tema]\n\n' + topic.toUpperCase() + ':\no que você não sabe pode estar colocando sua família em risco.\n\n👆 Deslize para ver o guia completo\n\n[Sticker: Slide para aprender →]'
+      },
+      {
+        num: 2, tipo: 'Enquete interativa',
+        conteudo: '🤔 Pergunta rápida:\n\nVocê já recebeu orientação médica especializada sobre ' + topic + '?\n\n✅ SIM — já me informei\n❌ NÃO — preciso saber mais\n\n[Enquete aqui]\n\nSeja qual for sua resposta — a gente tem conteúdo especial pra você! ' + em + '\n\n[Sticker: Responde a enquete!]'
+      },
+      {
+        num: 3, tipo: 'CTA direto',
+        conteudo: em + ' Sua família merece o melhor da ' + esp + ' em ' + cid + '.\n\n' + nome + ':\n✓ ' + dif.split(',')[0].trim() + '\n✓ Equipe especializada\n✓ Agendamento fácil\n\nAgende agora:\n📞 ' + ct + '\n\n👇 ARRASTE PARA FALAR CONOSCO\n\n[Link na bio: ' + ig + ']'
+      }
+    ],
+
+    whatsapp: 'Olá! ' + em + ' Tudo bem?\n\nAqui é da equipe da ' + nome + ', sua clínica de ' + esp + ' em ' + cid + '.\n\nEstamos com uma campanha especial sobre "' + topic + '" e queríamos compartilhar algumas informações importantes com você e sua família.\n\nSabia que esse é um tema que afeta muitas famílias da nossa região — e que com as informações certas é possível prevenir a maioria dos casos mais graves?\n\nPreparamos um guia completo com:\n📌 O que toda família precisa saber sobre ' + topic + '\n⚠️ Sinais de atenção que exigem avaliação imediata\n✅ O protocolo de primeiros cuidados\n💡 Dicas de prevenção que realmente funcionam\n\nQuer receber o guia completo no WhatsApp? É gratuito.\n\nE se tiver qualquer dúvida ou precisar agendar uma avaliação, estamos à disposição:\n📞 ' + ct + '\n📱 ' + ig + '\n\nCuide-se! ' + em + '\n\nEquipe ' + nome + '\n' + esp + ' | ' + cid,
+
+    hashtags: [topicSlug, topicSlug+'saude', espSlug, nomeSlug, 'saude', 'saudeinfantil', 'pediatria', 'familia', 'prevencao', 'saudavel', 'criancasaudavel', 'medicinapreventiva', 'pediatra', 'consultapediatrica', 'puericultura', 'maternidade', cid.split(',')[0].toLowerCase().replace(/\s+/g,''), 'saude2025', 'clinicapediatrica', 'amor', 'cuidado', 'infancia', 'desenvolvimento', 'criança', 'bebe'],
+
+    calendario: [
+      { dia: 'Dia 1 — Ter',  acao: 'Publicar carrossel de lançamento', horario: '18h30', obs: 'Terça às 18h30 — pico de engajamento para saúde infantil. Boost pago recomendado R$30–50.' },
+      { dia: 'Dia 2 — Qua',  acao: 'Stories interativos (3 slides + enquete)', horario: '12h e 20h', obs: 'Dois envios: almoço e pós-jantar. Responder todos os DMs em até 2h.' },
+      { dia: 'Dia 3 — Qui',  acao: 'WhatsApp broadcast para base de pacientes', horario: '10h', obs: 'Horário comercial — maior taxa de abertura. Segmentar por faixa etária dos filhos.' },
+      { dia: 'Dia 5 — Sáb',  acao: 'Post "Mitos e Verdades" (post educativo)', horario: '09h', obs: 'Sábado de manhã tem alto alcance para público parental. Incentivar compartilhamento.' },
+      { dia: 'Dia 8 — Ter',  acao: 'Post de autoridade (bastidores da clínica)', horario: '19h', obs: 'Consolidar posicionamento. Responder comentários ativamente nas primeiras 2h.' },
+      { dia: 'Dia 10 — Qui', acao: 'Reels/vídeo curto (30–60s) sobre o tema', horario: '20h', obs: 'Formato vídeo gera 3x mais alcance orgânico. Roteiro: problema → causa → solução → CTA.' },
+      { dia: 'Dia 12 — Sáb', acao: 'Story de encerramento + CTA para agendamento', horario: '10h', obs: 'Recap da campanha com urgência: "últimas vagas desta semana". Converter audiência acumulada.' }
+    ],
+
+    briefingVisual: {
+      conceito: 'Campanha "' + angulo.nome + '" — paleta dominante ' + cor1 + ' (cor da marca) com brancos e tons neutros quentes. Visual clean, profissional e humano. Evitar imagens de banco de dados genéricas. Priorizar fotos com crianças reais em contexto clínico acolhedor.',
+      composicao: 'Plano médio ou close-up de criança/família em ambiente da clínica. Luz natural difusa. Profissional de saúde presente como figura de apoio (não de autoridade fria). Fundo desfocado, sujeito nítido. Regra dos terços.',
+      estilo: est + ' — fotografia editorial com toque documental. Evitar cenografia artificial. Preferir momentos genuínos de cuidado e interação.',
+      emocao: angulo.emocao + ' — o espectador precisa sentir que a clínica entende o universo dele. Não vender consulta: transmitir parceria.',
+      cores: 'Primária: ' + cor1 + '. Secundária: branco e cinza claro. Acento: verde saúde (#22C55E) para elementos de destaque positivo. Evitar vermelho (associação a alarme).',
+      promptImagem: 'Professional medical photography ' + cid + ', caring pediatrician gently examining a happy young child, warm modern clinic, soft natural window light, bokeh background, genuine smile, shallow depth of field, editorial healthcare style, ' + est.toLowerCase() + ' aesthetic, brand color ' + cor1
+    },
+
+    versoes: [
+      {
+        tipo: 'emocional', tag: 'Emocional',
+        copy: 'Tem uma cena que a gente nunca esquece.\n\nÉ quando um pai ou mãe entra no consultório, olhos vermelhos, com a criança no colo, e diz: "Se eu tivesse sabido antes..."\n\nA gente ouve isso com frequência. E dói.\n\nNão porque não haja solução — na maioria das vezes há. Mas porque aquele sofrimento poderia ter sido evitado com uma informação simples, disponível, acessível.\n\nÉ por isso que a ' + nome + ' criou esta campanha sobre ' + topic + '.\n\nNão para assustar. Mas para armar você com o conhecimento que protege quem você mais ama.\n\nPorque nós acreditamos que toda família merece chegar ao consultório informada — não em pânico.\n\n' + em + ' Compartilha com quem você ama. Talvez essa informação chegue exatamente para quem mais precisa hoje.'
+      },
+      {
+        tipo: 'profissional', tag: 'Profissional',
+        copy: 'Dados epidemiológicos recentes indicam que ' + topic + ' é responsável por uma parcela significativa dos atendimentos pediátricos de urgência na região Sul do Brasil — e que até 65% desses casos poderiam ter sido manejados ambulatorialmente com orientação preventiva adequada.\n\nNa ' + nome + ', adotamos protocolo baseado nas diretrizes da Sociedade Brasileira de Pediatria, com foco em:\n\n• Diagnóstico precoce e triagem de risco\n• Orientação familiar estruturada\n• Acompanhamento longitudinal do desenvolvimento\n• Integração entre atenção primária e especializada\n\nSe você busca uma equipe de ' + esp + ' em ' + cid + ' comprometida com evidências científicas e atualização contínua, agende uma consulta.\n\nContato: ' + ct + ' | ' + ig
+      },
+      {
+        tipo: 'institucional', tag: 'Institucional',
+        copy: nome + ' tem orgulho de ser referência em ' + esp + ' para as famílias de ' + cid + ' e região.\n\nEsta campanha sobre ' + topic + ' reflete nosso compromisso com o que sempre acreditamos: que saúde de qualidade começa com informação acessível, atendimento humanizado e uma equipe que genuinamente se importa com cada família.\n\nNossos pilares:\n✦ Excelência clínica baseada em evidências\n✦ ' + dif.split(',').map(function(d){ return d.trim(); }).join('\n✦ ') + '\n\nJuntos, construímos uma comunidade mais saudável em ' + cid + '.\n\nPara agendamentos e informações: ' + ct
+      },
+      {
+        tipo: 'humanizado', tag: 'Humanizado',
+        copy: 'Olha, vou ser honesta com você.\n\nSei que você já tem uma lista enorme de coisas para se preocupar. Trabalho, casa, escola, alimentação, sono... criar filho em ' + cid + ' não é tarefa fácil.\n\nMas esse assunto — ' + topic + ' — é um que a gente não pode deixar passar.\n\nNão porque vai dar trabalho. Mas porque uma informação de 5 minutos pode te poupar horas de angústia depois.\n\nNa ' + nome + ', a gente fala a língua de pai e mãe. Sem termos complicados, sem julgamento, sem pressa.\n\nVem conversar. Pode ser pelo WhatsApp mesmo: ' + ct + '\n\nA gente está aqui. ' + em
+      }
+    ],
+
+    metricas: [
+      {
+        icone: '👁️',
+        titulo: 'Alcance & Impressões',
+        desc: 'Meta: 3.000–8.000 impressões orgânicas em 10 dias. Com impulsionamento de R$50, potencial de 15.000–25.000. Benchmark: clínicas de ' + esp + ' em ' + cid + ' com perfil similar alcançam ~4.200 impressões/campanha.'
+      },
+      {
+        icone: '💬',
+        titulo: 'Engajamento',
+        desc: 'Meta: taxa de engajamento de 8–14% (saves + compartilhamentos + comentários). Carrosséis educativos neste nicho geram em média 2,3x mais saves que posts simples. Stories com enquete: meta de 40%+ de participação.'
+      },
+      {
+        icone: '📅',
+        titulo: 'Conversões',
+        desc: 'Meta principal: 12–20 novos agendamentos ou contatos qualificados nos 10 dias de campanha. Custo de aquisição estimado: R$8–15 por lead com impulsionamento. ROI médio do setor: R$180–400 por paciente convertido.'
+      }
+    ]
+  };
+}
+
+/* ══════════════════════════════════════════════════════
+   VISUAL INTELLIGENCE ENGINE — Demo semântico local
+   Retorna JSON válido que buildSP pode parsear,
+   detectando estilo e conteúdo do pedido do usuário
+   sem precisar de chamada de API.
+══════════════════════════════════════════════════════ */
+function buildVIEDemo(userInput) {
+  var inp = (userInput || '').toLowerCase();
+
+  // Detecção de estilo — mapeamento PT→style key
+  var styleMap = [
+    { keys:['desenho animado','cartoon','animação','animado','divertido','pixar','disney'],     style:'cartoon' },
+    { keys:['anime','mangá','manga','japonês','ghibli','estilo anime'],                          style:'anime' },
+    { keys:['3d','render','tridimensional','cgi','three d'],                                     style:'3d' },
+    { keys:['pixel art','pixel','8-bit','16-bit','retro game','8bit','16bit'],                   style:'pixel_art' },
+    { keys:['aquarela','watercolor','pintura aquarela','aquarelado'],                            style:'watercolor' },
+    { keys:['pintura digital','digital painting','concept art','ilustração digital'],            style:'digital_painting' },
+    { keys:['cyberpunk','neon','futurista neon','blade runner','neonfuturista'],                  style:'cyberpunk' },
+    { keys:['minimalista','minimal','minimalismo','simples clean'],                              style:'minimalist' },
+    { keys:['futurista','futuro','sci-fi','ficção científica','futuristic'],                     style:'futurist' },
+    { keys:['vintage','retrô','retro','anos 50','anos 70','old school','nostálgico'],            style:'vintage' },
+    { keys:['foto realista','fotorrealista','realista','fotografia real','dslr'],                style:'realistic_photo' },
+    { keys:['documentário','fotojornalismo','candid','documental'],                             style:'documentary_photo' },
+    { keys:['produto','embalagem','frasco','fundo branco','fundo neutro','isolado'],             style:'product_photo' },
+    { keys:['pôster','poster','cartaz','campanha publicitária','banner','campanha visual'],       style:'poster' },
+    { keys:['infográfico','infografico','diagrama','ilustração educativa','educativo visual'],   style:'infographic' }
+  ];
+
+  var detectedStyle = 'neutral';
+  var userSpecifiedStyle = false;
+  for (var i = 0; i < styleMap.length; i++) {
+    for (var j = 0; j < styleMap[i].keys.length; j++) {
+      if (inp.indexOf(styleMap[i].keys[j]) !== -1) {
+        detectedStyle = styleMap[i].style;
+        userSpecifiedStyle = true;
+        break;
+      }
+    }
+    if (userSpecifiedStyle) break;
+  }
+
+  // Se não especificou estilo, inferir pelo conteúdo
+  if (!userSpecifiedStyle) {
+    if (/vacina|frasco|seringa|medicamento|cápsula|comprimido|embalagem/.test(inp)) detectedStyle = 'product_photo';
+    else if (/criança|paciente|médico|consulta|procedimento|exame|bebê/.test(inp)) detectedStyle = 'documentary_photo';
+    else if (/campanha|prevenção|conscientização|combate|alerta|dengue|gripe/.test(inp)) detectedStyle = 'poster';
+    else if (/diagrama|esquema|explicar|como funciona|processo|etapas/.test(inp)) detectedStyle = 'infographic';
+    else detectedStyle = 'neutral';
+  }
+
+  // Extração de sujeito — remove palavras de estilo para isolar o conteúdo
+  var subject = userInput
+    .replace(/em (estilo )?(cartoon|anime|3d|aquarela|pixel art|minimalista|vintage|cyberpunk|futurista|realista|pôster|infográfico|pintura digital)/gi, '')
+    .replace(/(desenho animado|foto realista|fotorrealista|pintura digital)/gi, '')
+    .replace(/\s+/g, ' ').trim()
+    .slice(0, 80);
+
+  // Content prompt — descreve o QUE mostrar em inglês
+  var contentMap = [
+    { test:/criança.*feliz|feliz.*criança/,    en:'A cheerful young child with big smile, playful expression, simple colorful background, arms raised in joy' },
+    { test:/criança.*vacina|vacina.*criança/,  en:'A small child sitting calmly while a kind pediatrician administers a vaccine injection in the upper arm, warm clinic atmosphere' },
+    { test:/vacina.*polio|poliomielite/,       en:'A glass medical vial labeled polio vaccine with clear printed text, next to a sterile syringe, on a clean white surface' },
+    { test:/vacina/,                           en:'A medical vaccine vial with printed label, sterile syringe beside it, clean medical surface' },
+    { test:/bebê|recém-nascido/,               en:'A newborn baby with soft skin, peaceful sleeping expression, wrapped in a soft white blanket' },
+    { test:/médico|pediatra|doutor/,           en:'A caring pediatrician in a white coat, warm smile, interacting with a young patient in a modern clean clinic' },
+    { test:/família|pais.*filho|filho.*pais/,  en:'A loving family with young children in a warm home setting, natural expressions of care and happiness' },
+    { test:/dengue|mosquito/,                  en:'Bold public health awareness composition, Aedes aegypti mosquito silhouette over standing water, prevention theme, strong visual impact' },
+    { test:/gripe|resfriado|febre/,            en:'A parent gently caring for a sick child at home, thermometer, warm blanket, soft comforting light' },
+    { test:/alimentação|nutrição|comida/,      en:'Colorful fresh healthy foods and vegetables arranged on a clean white surface, nutritional variety' },
+    { test:/exercício|esporte|atividade física/,en:'Active child playing outdoors in natural light, energetic healthy lifestyle' },
+    { test:/logo|marca|símbolo/,               en:'A modern medical clinic logo featuring stylized caduceus or heart symbol, centered, premium feel' },
+    { test:/clínica|consultório/,              en:'Modern pediatric clinic interior, clean white walls, welcoming reception area, warm lighting, professional aesthetic' }
+  ];
+
+  var contentPrompt = '';
+  for (var k = 0; k < contentMap.length; k++) {
+    if (contentMap[k].test.test(inp)) {
+      contentPrompt = contentMap[k].en;
+      break;
+    }
+  }
+
+  // Fallback: traduz descrição genérica
+  if (!contentPrompt) {
+    contentPrompt = 'Professional medical themed visual: ' + subject.slice(0, 60) + '. Clean composition, medical context, warm professional atmosphere';
+  }
+
+  return {
+    subject: subject.slice(0, 60) || userInput.slice(0, 60),
+    contentPrompt: contentPrompt,
+    style: detectedStyle,
+    userSpecifiedStyle: userSpecifiedStyle,
+    extraNegatives: ''
+  };
+}
+const MB = {
+  clients: {
+    'doutorgregory@clinica.com.br': {
+      clientId: 'clinica-gregori',
+      nome: 'Dr. Grégori Bertagnolli',
+      clinica: 'Clínica Pediátrica Bertagnolli',
+      role: 'Admin', initials: 'GB',
+      plan: 'Professional', monthlyLimit: 500,
+      agents: ['orientacao','instagram','duvidas','campanhas','imagens'],
+      password: 'MedAI@2025!', accessCode: 'BERG-7X4K', active: true
+    }
+  },
+  log: [],
+
+  async verifyCred(email, pw) {
+    await dl(600);
+    const c = this.clients[(email || '').toLowerCase().trim()];
+    if (!c)        throw { code:'NF', msg:'E-mail não encontrado.' };
+    if (!c.active) throw { code:'IN', msg:'Conta desativada. Contate o suporte.' };
+    if (pw !== c.password) throw { code:'WP', msg:'Senha incorreta. Tente novamente.' };
+    return { ek: (email || '').toLowerCase().trim() };
+  },
+
+  async verifyCode(ek, code) {
+    await dl(400);
+    const c = this.clients[ek];
+    if (!c || !c.active) throw { code:'EX', msg:'Sessão expirada. Faça login novamente.' };
+    const inp = (code || '').trim().toUpperCase();
+    const stored = (c.accessCode || '').trim().toUpperCase();
+    if (!inp)          throw { code:'EM', msg:'Digite o código de acesso.' };
+    if (inp !== stored) throw { code:'WC', msg:'Código inválido. Tente novamente.' };
+    return {
+      token: 'tok_' + c.clientId + '_' + Date.now(),
+      clientId: c.clientId, nome: c.nome, clinica: c.clinica,
+      role: c.role, initials: c.initials, plan: c.plan,
+      monthlyLimit: c.monthlyLimit, agents: c.agents
+    };
+  },
+
+  monthly(cid) {
+    var n = new Date();
+    return this.log.filter(function(r) {
+      var d = new Date(r.ts);
+      return r.cid === cid && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
+    });
+  },
+
+  logU(cid, aid, tok, status, ms) {
+    this.log.push({ id:'U'+Date.now(), cid:cid, aid:aid, tok:tok, status:status, ts:new Date().toISOString(), ms:ms });
+  },
+
+  async callAI(cid, aid, messages, sys) {
+    var t0 = Date.now();
+    if (!SESSION || SESSION.clientId !== cid) throw { code:'AU', msg:'Sessão expirada.' };
+    var mu = this.monthly(cid).filter(function(r){ return r.status !== 'limit_exceeded'; });
+    if (mu.length >= SESSION.monthlyLimit) {
+      this.logU(cid, aid, 0, 'limit_exceeded', 0);
+      throw { code:'LM', msg:'Limite de ' + SESSION.monthlyLimit + ' mensagens atingido.' };
+    }
+    /* ── ROTEAMENTO DE IA ──────────────────────────────────
+       Arquitetura correta para SaaS:
+         Frontend → MB.callAI → /api/ai/chat (backend)
+                                     ↓
+                              AI Orchestrator
+                                     ↓
+                          Provider (Anthropic/OpenAI/etc)
+
+       Em produção: configurar MEDAI_BACKEND_URL para o
+       servidor Node.js que mantém a chave segura.
+       Em desenvolvimento: usa Intelligence Engine local.
+    ────────────────────────────────────────────────────── */
+    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
+
+    if (!BACKEND_URL) {
+      await dl(1200 + Math.random() * 600);
+      this.logU(cid, aid, 200, 'success', Date.now() - t0);
+
+      // Orchestrator / Campanhas → Campaign Document
+      if (aid === 'orchestrator' || aid === 'campanhas') {
+        var userMsg = messages[messages.length - 1] && messages[messages.length - 1].content || 'campanha';
+        var cleanTopic = userMsg
+          .replace(/^criar campanha (profissional completa )?sobre:\s*/i, '')
+          .replace(/^campanha (sobre\s*)?:\s*/i,'')
+          .replace(/^quero (uma )?campanha (sobre|de|para)\s*/i,'')
+          .trim();
+        return { reply: JSON.stringify(buildDemoCampaign(cleanTopic)), demo: true };
+      }
+
+      // Imagens → Visual Intelligence Engine retorna JSON semântico
+      // para que buildSP possa parseá-lo e gerar o prompt de imagem corretamente
+      if (aid === 'imagens') {
+        var userInput = messages[messages.length - 1] && messages[messages.length - 1].content || '';
+        var vieResult = buildVIEDemo(userInput);
+        return { reply: JSON.stringify(vieResult), demo: true };
+      }
+
+      var nome   = CTX.nom  || (SESSION && SESSION.clinica) || 'Clínica Pediátrica Bertagnolli';
+      var esp    = CTX.esp  || 'Pediatria';
+      var cid2   = CTX.cid  || 'Porto Alegre, RS';
+      var ig     = CTX.ig   || '@clinicabertagnolli';
+      var ct     = CTX.ct   || '(51) 99999-0000';
+      var dif    = CTX.dif  || 'atendimento humanizado, equipe especializada, ambiente acolhedor';
+      var userQ  = messages[messages.length - 1] && messages[messages.length - 1].content || '';
+
+      var demoResponses = {
+        orientacao: '💙 Olá! Sou o assistente de saúde infantil da **' + nome + '**.\n\nEstou aqui para ajudar com informações educativas sobre pediatria e saúde da criança.\n\n' + (userQ.length > 5 ? '**Sobre sua pergunta:**\nEssa é uma dúvida muito comum entre pais e mães! Deixa eu te dar uma orientação geral:\n\nCom base no que você compartilhou, os principais pontos de atenção são:\n\n✅ **Observação:** Monitore os sintomas por 24–48h antes de qualquer decisão\n✅ **Sinais de alerta:** Febre acima de 38,5°C, recusa alimentar prolongada, choro inconsolável\n✅ **Hidratação:** Fundamental em qualquer quadro pediátrico\n✅ **Repouso:** Respeitar o ritmo da criança\n\n⚠️ **Importante:** Esta orientação é educativa e não substitui avaliação médica presencial. Para diagnóstico e tratamento, agende uma consulta.\n\n📅 **Na ' + nome + '**, temos disponibilidade esta semana.\n📞 Ligue: ' + ct + '\n📱 Instagram: ' + ig : 'Como posso te ajudar hoje? Pode perguntar sobre febre, alimentação, desenvolvimento infantil, vacinas, doenças comuns da infância ou qualquer dúvida sobre a saúde da criança.') + '\n\n---\n*Assistente da ' + nome + ' · ' + esp + ' · ' + cid2 + ' — Orientações educativas baseadas em evidências clínicas*',
+
+        instagram: '📱 **Conteúdo criado para ' + nome + '**\n\n---\n\n**TIPO:** Carrossel educativo (6 slides)\n**TEMA:** ' + (userQ.slice(0,50) || 'Saúde infantil') + '\n**FORMATO:** Instagram Feed + Reels\n\n---\n\n**📲 ROTEIRO DOS SLIDES:**\n\n**Slide 1 — Gancho:**\n"' + (userQ.slice(0,30) || 'Saúde infantil') + ': o que todo pai/mãe precisa saber"\n*Visual: imagem de impacto + logo ' + nome + '*\n\n**Slide 2 — Problema:**\nContextualização do tema. Por que isso importa para as famílias de ' + cid2 + '?\n*Visual: dado ou estatística em destaque*\n\n**Slide 3 — Educação:**\nInformação de valor. Conteúdo que o público não encontra facilmente.\n*Visual: infográfico clean*\n\n**Slide 4 — Dica prática:**\nAção concreta que o seguidor pode tomar hoje.\n*Visual: checklist ou passo a passo*\n\n**Slide 5 — Autoridade:**\nPor que a ' + nome + ' é referência neste tema em ' + cid2 + '.\n*Visual: foto real da equipe ou clínica*\n\n**Slide 6 — CTA:**\n"Dúvidas? Agende sua consulta!"\n*Visual: dados de contato + link na bio*\n\n---\n\n**✍️ LEGENDA COMPLETA:**\n\n💙 ' + (userQ || 'Saúde infantil') + ' — você sabe tudo que precisa?\n\nCriamos um guia completo para as famílias de ' + cid2 + '.\n\nArraste até o fim — o último slide tem a informação mais importante 👉\n\n💡 Salva para ter sempre à mão.\n\n📅 Quer orientação personalizada?\n➡️ Link na bio · ' + ig + '\n📞 ' + ct + '\n\n' + ['#saudeinfantil','#pediatria','#' + esp.toLowerCase().replace(/\s+/g,''),'#familia','#maternidade','#crianca','#saude','#prevencao','#' + nome.toLowerCase().replace(/\s+/g,'').slice(0,12),'#' + cid2.split(',')[0].toLowerCase().replace(/\s+/g,''),'#pediatra','#consultapediatrica','#puericultura','#filhos','#bebe','#desenvolvimento','#saudavel','#medicinapreventiva','#clinicapediatrica','#cuidado'].join(' ') + '\n\n---\n\n**⏰ MELHOR HORÁRIO:** Terças e quintas às 18h30\n**📈 DICA DE PERFORMANCE:** Responda todos os comentários nas primeiras 2h para maximizar alcance orgânico\n**💰 BOOST SUGERIDO:** R$30–50 por 3 dias para ampliar alcance na região de ' + cid2,
+
+        duvidas: '💬 **Central de Atendimento — ' + nome + '**\n\n' + (userQ.length > 5 ? '**Sua pergunta:** "' + userQ.slice(0,80) + '"\n\n**Resposta:**\n' : '') + 'Olá! Aqui estão as informações da **' + nome + '** em ' + cid2 + ':\n\n---\n\n**🕐 HORÁRIOS DE ATENDIMENTO**\n• Segunda a sexta: 8h às 18h\n• Sábados: 8h às 12h\n• Urgências pediátricas: mediante disponibilidade\n\n**📅 AGENDAMENTOS**\n• WhatsApp: ' + ct + '\n• Instagram: ' + ig + '\n• Resposta em até 2 horas no horário comercial\n\n**💳 CONVÊNIOS ACEITOS**\n• Unimed, SulAmérica, Bradesco Saúde, Porto Seguro\n• Amil, Hapvida, NotreDame Intermédica\n• Consulta particular com facilidade de pagamento\n\n**📋 DOCUMENTOS NECESSÁRIOS**\n• Carteirinha do convênio atualizada\n• Cartão de vacinas (para consultas de puericultura)\n• Exames anteriores, se houver\n\n**👶 ESPECIALIDADES**\n' + esp + ' — ' + dif + '\n\n**📍 LOCALIZAÇÃO**\n' + cid2 + ' · Endereço completo pelo WhatsApp\n\nPosso ajudar com mais alguma informação?'
+      };
+
+      return {
+        reply: demoResponses[aid] || '🏥 **' + nome + '** — Assistente Inteligente\n\nOlá! Sou o assistente da ' + nome + ', especializado em ' + esp + ' para as famílias de ' + cid2 + '.\n\nComo posso te ajudar hoje?\n\n' + (userQ ? '**Sobre:** "' + userQ.slice(0,60) + '"\n\nProcessando com base no perfil completo da clínica...' : 'Pergunte sobre saúde infantil, agendamentos, campanhas ou qualquer assunto da clínica.'),
+        demo: true
+      };
+    }
+
+    // Modo produção: chama backend seguro
+    var ctrl = new AbortController();
+    var tid = setTimeout(function(){ ctrl.abort(); }, 60000);
+    var res;
+
+    // Extrair mensagem do usuário — pegar a última mensagem com role 'user'
+    var lastUserMsg = '';
+    for (var mi = messages.length - 1; mi >= 0; mi--) {
+      if (messages[mi] && messages[mi].role !== 'assistant' && messages[mi].content) {
+        lastUserMsg = messages[mi].content;
+        break;
+      }
+    }
+    if (!lastUserMsg && messages.length > 0) {
+      lastUserMsg = messages[messages.length-1] && messages[messages.length-1].content || '';
+    }
+
+    // Mapear aid para intent
+    var intentMap = { orchestrator:'campaign', campanhas:'campaign', instagram:'social', duvidas:'faq', orientacao:'health', imagens:'image' };
+    var intentVal = intentMap[aid] || 'auto';
+
+    try {
+      res = await fetch(BACKEND_URL + '/api/ai/chat', {
+        method: 'POST', signal: ctrl.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SESSION.token
+        },
+        body: JSON.stringify({
+          message: lastUserMsg,
+          intent:  intentVal
+        })
+      });
+    } catch(e) {
+      clearTimeout(tid); this.logU(cid,aid,0,'error',Date.now()-t0);
+      throw e.name==='AbortError' ? { code:'TO', msg:'Tempo limite excedido. Tente novamente.' } : { code:'NW', msg:'Falha de conexão com o servidor.' };
+    }
+    clearTimeout(tid);
+    if (!res.ok) {
+      this.logU(cid,aid,0,'error',Date.now()-t0);
+      var errMap = { 401:{code:'AU',msg:'Sessão expirada. Faça login novamente.'}, 403:{code:'BL',msg:'Acesso negado.'}, 429:{code:'RL',msg:'Muitas requisições. Aguarde alguns segundos.'}, 500:{code:'SE',msg:'Erro interno do servidor. Tente novamente.'}, 503:{code:'DW',msg:'Serviço temporariamente indisponível.'} };
+      throw errMap[res.status] || { code:'H'+res.status, msg:'Erro ao processar sua solicitação.' };
+    }
+    var d = await res.json().catch(function(){ return null; });
+    if (!d) { this.logU(cid,aid,0,'error',Date.now()-t0); throw { code:'PR', msg:'Resposta inválida do servidor.' }; }
+    // Backend retorna { success:true, data:{ type, data, intent, conversationId, usage } }
+    var payload = d.data || d;
+    var reply;
+    if (payload.type === 'campaign') {
+      // payload.data é o objeto da campanha — serializar direto
+      reply = JSON.stringify(payload.data);
+    } else if (payload.type === 'image') {
+      reply = JSON.stringify(payload.data);
+    } else if (payload.type === 'text') {
+      reply = typeof payload.data === 'string' ? payload.data : JSON.stringify(payload.data);
+    } else {
+      // Fallback genérico
+      reply = payload.reply || (typeof payload.data === 'string' ? payload.data : JSON.stringify(payload.data)) || '';
+    }
+    if (!reply) { this.logU(cid,aid,0,'error',Date.now()-t0); throw { code:'ER', msg:'Resposta vazia. Reformule e tente.' }; }
+    var tk = (payload.usage && payload.usage.current) || 0;
+    this.logU(cid,aid,tk,'success',Date.now()-t0);
+    return { reply:reply, tokens:tk, demo:false, responseType: payload.type || 'text' };
+  }
+};
+
+/* ══════════════════════════════════════════════════════
+   AGENTES
+══════════════════════════════════════════════════════ */
+var AGENTS = {
+  orientacao: {
+    name: 'Orientação aos Pais',
+    welcome: 'Olá! Sou o assistente de Orientação aos Pais. Respondo dúvidas sobre saúde infantil de forma educativa e segura. Como posso ajudar?',
+    sys: function() { return AIO.enrich('Você é assistente especializado em saúde infantil de uma clínica médica de alto padrão.\nREGRAS ABSOLUTAS: nunca diagnostique doenças, nunca prescreva medicamentos, nunca substitua consulta médica.\nOriente de forma educativa, empática e profissional. Recomende avaliação presencial quando pertinente.\nResponda em português brasileiro.'); }
+  },
+  instagram: {
+    name: 'Conteúdo Instagram',
+    welcome: 'Olá! Vou criar conteúdo completo para o Instagram da clínica. Qual é o tema?',
+    sys: function() { return AIO.enrich('Você é especialista em marketing digital para clínicas médicas, focado em Instagram.\nEntregue: tipo de conteúdo, roteiro/script completo, legenda com emojis e CTA, 20-25 hashtags, melhor horário e 1 dica de performance.\nUse o nome, tom e estilo visual da clínica do contexto. Responda em português brasileiro.'); }
+  },
+  duvidas: {
+    name: 'Dúvidas Frequentes',
+    welcome: 'Olá! Pode perguntar sobre agendamentos, convênios, vacinas e funcionamento da clínica!',
+    sys: function() { return AIO.enrich('Você é o assistente de atendimento de uma clínica médica de alto padrão.\nResponda sobre: agendamentos, convênios aceitos, vacinas, documentos necessários, horários.\nUse as informações da clínica do contexto. Seja objetivo e cordial. Responda em português brasileiro.'); }
+  },
+  campanhas: {
+    name: 'Campanhas de Saúde',
+    welcome: 'Olá! Me diga o tema da campanha e entregarei nome, slogan, conteúdo, cronograma e briefing visual!',
+    sys: function() { return AIO.enrich('Você é especialista em campanhas de saúde pública e marketing médico.\nEntregue campanha completa com nome, slogan, conteúdo por canal, cronograma e métricas.\nUse nome, tom e diferenciais da clínica do contexto. Campanhas éticas. Português brasileiro.'); }
+  },
+  imagens: {
+    name: 'Visual Intelligence Engine',
+    welcome: 'Olá! Descreva a imagem e vou gerá-la com interpretação semântica avançada. Estilos: cartoon, anime, 3D, aquarela, pôster, foto realista, minimalista e mais.',
+    isImage: true,
+    sys: function() { return ''; }
+  },
+  orchestrator: {
+    name: 'AI Orchestrator',
+    welcome: 'Ótimo! Vou criar uma campanha completa. Qual é o tema?',
+    isOrch: true,
+    sys: function() { return ''; }
+  }
+};
+
+/* ══════════════════════════════════════════════════════
+   VISUAL INTELLIGENCE ENGINE — estilos
+══════════════════════════════════════════════════════ */
+var VS = {
+  cartoon:          { p:'Cartoon illustration style, bold black outlines, flat vibrant colors, expressive characters, Disney-Pixar 2D animation aesthetic', n:'realistic, photograph, 3d render, photorealistic, real skin texture' },
+  anime:            { p:'Anime illustration, Japanese anime style, cel shading, expressive large eyes, vibrant colors, Studio Ghibli quality', n:'realistic photo, photograph, western cartoon, 3d render' },
+  '3d':             { p:'3D render, octane render, ray-traced lighting, high-detail 3D model, Pixar-quality animation, cinematic depth, volumetric light', n:'2d, flat illustration, drawing, sketch, painting, anime outline' },
+  pixel_art:        { p:'Pixel art style, 16-bit retro game aesthetic, limited color palette, crisp pixel edges, dithering', n:'smooth, anti-aliased, photorealistic, blurry, 3d render, vector' },
+  watercolor:       { p:'Watercolor painting, traditional on paper, soft color washes, visible brush strokes, gentle bleeding edges, light pastel tones', n:'digital, sharp edges, photograph, 3d render, vector, plastic' },
+  digital_painting: { p:'Digital painting, painterly style, ArtStation quality, concept art, rich textures, dramatic lighting, masterful brushwork', n:'photograph, low quality, pixel art, flat color' },
+  cyberpunk:        { p:'Cyberpunk aesthetic, neon-lit urban night, futuristic city, holographic signs, magenta and cyan palette, Blade Runner inspired', n:'daylight, rural, vintage, watercolor, cartoon' },
+  minimalist:       { p:'Minimalist flat design, simple geometric shapes, 2-4 color palette, abundant negative space, clean uncluttered composition', n:'detailed, realistic, photograph, complex background, cluttered' },
+  futurist:         { p:'Futuristic sci-fi aesthetic, sleek polished surfaces, glowing tech accents, advanced technology, white and chrome with neon highlights', n:'vintage, retro, old, weathered, rustic' },
+  vintage:          { p:'Vintage aesthetic, retro 1950s-1970s style, faded warm tones, film grain texture, nostalgic mood, sepia palette', n:'modern, futuristic, neon, digital, glossy' },
+  realistic_photo:  { p:'Photorealistic photograph, DSLR camera quality, sharp focus, natural realistic lighting, fine texture and detail, lifelike', n:'cartoon, anime, illustration, drawing, 3d render, plastic' },
+  documentary_photo:{ p:'Documentary photograph, photojournalism style, natural candid moment, available light, authentic spontaneous mood, high realism', n:'cartoon, anime, illustration, 3d render, staged' },
+  product_photo:    { p:'Professional product photography, clean studio setup, soft diffused lighting, sharp macro focus, neutral background, commercial quality', n:'people, hands, cluttered background, blurry, cartoon' },
+  poster:           { p:'Modern poster design, bold graphic composition, typography-friendly layout, vibrant focal point, advertising aesthetic, visual impact', n:'snapshot photograph, blurry, amateur, low quality' },
+  infographic:      { p:'Educational infographic illustration, flat vector style, clear iconography, professional color palette, labeled diagrams', n:'photograph, realistic photo, 3d render, blurry' },
+  neutral:          { p:'High quality detailed image, balanced professional composition, good lighting, clear subject, sharp focus', n:'blurry, low quality, watermark, text artifacts, distorted, deformed' }
+};
+var UNEG = 'blurry, low resolution, watermark, signature, text overlay, jpeg artifacts, deformed anatomy, extra fingers, mutated hands, worst quality';
+var SLBL = { cartoon:'Cartoon/Animação', anime:'Anime', '3d':'3D Render', pixel_art:'Pixel Art', watercolor:'Aquarela', digital_painting:'Pintura Digital', cyberpunk:'Cyberpunk', minimalist:'Minimalista', futurist:'Futurista', vintage:'Vintage', realistic_photo:'Foto Realista', documentary_photo:'Foto Documental', product_photo:'Foto de Produto', poster:'Pôster/Campanha', infographic:'Infográfico', neutral:'Padrão' };
+
+</script>
+<script>
+/* ══════════════════════════════════════════════════════
+   ESTADO GLOBAL
+══════════════════════════════════════════════════════ */
+var SESSION = null, AUTHK = null, HIST = [], LOAD = false;
+
+/* UTILS */
+function dl(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
+function now() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function fN(n) { return Number(n).toLocaleString('pt-BR'); }
+function fDt(i) { return new Date(i).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+function esc(t) { var d=document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
+function fmt(t) {
+  return esc(t)
+    .replace(/\n/g,'<br>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^## (.*?)(<br>|$)/gm,'<strong style="font-size:14px;display:block;margin:10px 0 3px;color:var(--t1)">$1</strong>')
+    .replace(/^### (.*?)(<br>|$)/gm,'<strong style="display:block;margin:7px 0 2px">$1</strong>');
+}
+function $t(id,v) { var e=document.getElementById(id); if(e) e.textContent=v; }
+function mE(e) { var p=e.split('@'); return p[0][0]+'*'.repeat(Math.max(p[0].length-1,3))+'@'+p[1]; }
+function setE(id,msg) { var e=document.getElementById(id); e.textContent=msg; e.classList.remove('shk'); void e.offsetWidth; e.classList.add('shk'); }
+var ET = { AU:'Falha de autenticação', RL:'Muitas requisições', TO:'Tempo limite excedido', NW:'Falha de conexão', BL:'Conteúdo bloqueado', ER:'Resposta vazia', LM:'Limite atingido' };
+function etl(c) { return ET[c]||'Não foi possível processar'; }
+
+/* ── AUTH ── */
+async function doS1() {
+  var em=document.getElementById('in-em').value.trim(), pw=document.getElementById('in-pw').value.trim();
+  var b=document.getElementById('b1'), bt=document.getElementById('b1t');
+  document.getElementById('e1').textContent='';
+  if(!em){setE('e1','Informe seu e-mail.');return;}
+  if(!pw){setE('e1','Informe sua senha.');return;}
+  b.disabled=true; bt.textContent='Verificando…';
+  try {
+    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
+    if (BACKEND_URL) {
+      // Backend real
+      var res = await fetch(BACKEND_URL+'/api/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email:em, password:pw })
+      });
+      var data = await res.json();
+      if (!res.ok) throw { msg: data.error || 'Erro ao verificar.' };
+      AUTHK = em.toLowerCase().trim();
+    } else {
+      await MB.verifyCred(em,pw);
+      AUTHK = em.toLowerCase().trim();
+    }
+    $t('emask',mE(AUTHK));
+    document.getElementById('lslider').classList.add('s2');
+    document.getElementById('e2').textContent='';
+    setTimeout(function(){ document.getElementById('in-cod').focus(); },450);
+  } catch(e) { setE('e1',e.msg||'Erro. Tente novamente.'); }
+  finally { b.disabled=false; bt.textContent='Continuar'; document.getElementById('b1a').textContent='→'; }
+}
+async function doS2() {
+  var cod=document.getElementById('in-cod').value.trim();
+  var b=document.getElementById('b2'), bt=document.getElementById('b2t');
+  document.getElementById('e2').textContent='';
+  if(!cod){setE('e2','Digite o código.');return;}
+  if(!AUTHK){backS1();return;}
+  b.disabled=true; bt.textContent='Verificando…';
+  try {
+    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
+    if (BACKEND_URL) {
+      // Backend real — obtém JWT real
+      var res = await fetch(BACKEND_URL+'/api/auth/verify', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ emailKey:AUTHK, accessCode:cod })
+      });
+      var data = await res.json();
+      if (!res.ok) throw { msg: data.error || 'Código inválido.' };
+      // Montar SESSION com token real
+      SESSION = {
+        token:        data.data.accessToken,
+        refreshToken: data.data.refreshToken,
+        clientId:     data.data.clinic.id,
+        clinicId:     data.data.clinic.id,
+        nome:         data.data.user.name,
+        clinica:      data.data.clinic.name,
+        role:         data.data.user.role,
+        initials:     data.data.user.initials,
+        plan:         data.data.clinic.plan_id || 'Professional',
+        monthlyLimit: data.data.clinic.monthly_limit || 500,
+        agents:       ['orientacao','instagram','duvidas','campanhas','imagens']
+      };
+      // Pré-carregar contexto da clínica do banco
+      Object.assign(CTX, {
+        nom: data.data.clinic.name        || '',
+        esp: data.data.clinic.specialty   || '',
+        cid: data.data.clinic.city        || '',
+        tom: data.data.clinic.tone        || 'acolhedor e profissional',
+        est: data.data.clinic.visual_style|| 'moderno e clean',
+        c1:  data.data.clinic.brand_color1|| '#3B7FFF',
+        c2:  data.data.clinic.brand_color2|| '#C9A84C'
+      });
+    } else {
+      SESSION = await MB.verifyCode(AUTHK,cod);
+    }
+    loadCtx(); buildUI();
+    document.getElementById('ls').classList.remove('active');
+    document.getElementById('as').classList.add('active');
+    document.getElementById('lslider').classList.remove('s2');
+    document.getElementById('in-pw').value='';
+    AUTHK=null;
+  } catch(e) {
+    setE('e2',e.msg||'Código inválido.');
+    document.getElementById('in-cod').value='';
+    document.getElementById('in-cod').focus();
+  } finally { b.disabled=false; bt.textContent='Entrar na plataforma'; }
+}
+function backS1() { document.getElementById('lslider').classList.remove('s2'); document.getElementById('e1').textContent=''; document.getElementById('e2').textContent=''; AUTHK=null; setTimeout(function(){ document.getElementById('in-em').focus(); },420); }
+function doLogout() {
+  SESSION=null; AUTHK=null; HIST=[]; LOAD=false;
+  document.getElementById('as').classList.remove('active');
+  document.getElementById('ls').classList.add('active');
+  document.getElementById('lslider').classList.remove('s2');
+  ['in-pw'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['e1','e2'].forEach(function(id){ document.getElementById(id).textContent=''; });
+  setTimeout(function(){ document.getElementById('in-em').focus(); },100);
+}
+document.addEventListener('DOMContentLoaded',function(){
+  // Auto-fill para desenvolvimento — remover antes de produção
+  document.getElementById('in-em').value = 'doutorgregory@clinica.com.br';
+  document.getElementById('in-pw').value = 'MedAI@2025!';
+  document.getElementById('in-cod').value = 'BERG-7X4K';
+
+  document.getElementById('in-em').addEventListener('keydown',function(e){ if(e.key==='Enter') doS1(); });
+  document.getElementById('in-pw').addEventListener('keydown',function(e){ if(e.key==='Enter') doS1(); });
+  document.getElementById('in-em').focus();
+});
+
+/* ── BUILD UI ── */
+function buildUI() {
+  var s=SESSION;
+  $t('sbnm',s.nome); $t('sbrl',s.role+' · '+s.plan); $t('sbav',s.initials);
+  var h=new Date().getHours(), gr=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
+  $t('hgr',gr+', '+s.nome.split(' ')[0]+' 👋');
+  // Marketing brain sazonal
+  var mo=new Date().getMonth();
+  var sugs=['Dengue em alta — crie campanha de prevenção para engajar pacientes e fortalecer autoridade.','Verão: fale sobre hidratação, fotoproteção e acidentes no calor — alto interesse das famílias.','Ano letivo: vacinas obrigatórias e saúde escolar têm altíssimo engajamento agora.','Mês ideal para campanhas de check-up preventivo e consultas de rotina.','Vacinação infantil — tema com maior alcance e engajamento do ano.','Inverno chegando: gripes e viroses. Conteúdo preventivo tem alto impacto agora.','Pico de viroses: conteúdo sobre sintomas e quando ir ao médico tem altíssimo alcance.','Retorno às aulas: higiene e doenças contagiosas — essencial para pais.','Rinite e alergias sazonais — tema de alto interesse na transição climática.','Saúde emocional infantil: humanize a comunicação e amplie conexão com pacientes.','Prevenção de acidentes domésticos: tema muito compartilhado entre famílias.','Festas e saúde: alimentação, viagens com crianças e doenças do verão.'];
+  $t('brain-txt', sugs[mo]);
+  fillConf(); updCliCard(); updUI();
+}
+
+/* ── CONFIG ── */
+var CFG_MAP={'c-nom':'nom','c-esp':'esp','c-cid':'cid','c-pub':'pub','c-srv':'srv','c-tom':'tom','c-est':'est','c-dif':'dif','c-ig':'ig','c-ct':'ct','c-c1':'c1','c-c2':'c2'};
+function fillConf() { Object.keys(CFG_MAP).forEach(function(id){ var k=CFG_MAP[id]; var e=document.getElementById(id); if(e&&CTX[k]) e.value=CTX[k]; }); }
+function saveConf() { Object.keys(CFG_MAP).forEach(function(id){ var k=CFG_MAP[id]; var e=document.getElementById(id); if(e) CTX[k]=e.value; }); saveCtx(); updCliCard(); var sd=document.getElementById('csd'); sd.classList.add('show'); setTimeout(function(){ sd.classList.remove('show'); },2500); }
+function updCliCard() { $t('sbnm',(CTX.nom||(SESSION&&SESSION.nome)||'—')); }
+
+/* ── NAV ── */
+function sNav(el) { document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('active'); }); if(el) el.classList.add('active'); }
+function hidePgs() { ['pg-home','pg-cfg','pg-hist'].forEach(function(id){ document.getElementById(id).classList.remove('active'); }); }
+function goHome(el) { sNav(el||document.getElementById('nav-home')); hidePgs(); document.getElementById('pg-home').classList.add('active'); $t('tbt','MedAI Intelligence'); $t('tbs','Assistente operacional da clínica'); updUI(); setTimeout(function(){ document.getElementById('uni-ta').focus(); },100); }
+function goPage(pg,el) { sNav(el); hidePgs(); document.getElementById('pg-'+pg).classList.add('active'); var titles={'cfg':['Configurações','Personalize a IA para sua clínica'],'hist':['Histórico','Todas as interações desta sessão']}; if(titles[pg]){ $t('tbt',titles[pg][0]); $t('tbs',titles[pg][1]); } if(pg==='hist') updUI(); }
+
+/* ── USAGE ── */
+var ANAMES={orientacao:'Saúde',instagram:'Social',duvidas:'Atendimento',campanhas:'Marketing',imagens:'Visual',orchestrator:'Campanha',campaign:'Campanha',social:'Social',faq:'Atendimento',health:'Saúde',image:'Visual'};
+function updUI() {
+  if(!SESSION) return;
+  var log=MB.monthly(SESSION.clientId), tot=log.filter(function(r){return r.status!=='limit_exceeded';}).length;
+  var pct=Math.min(100,Math.round((tot/SESSION.monthlyLimit)*100));
+  var col=pct>=90?'var(--err)':pct>=70?'var(--wrn)':'var(--ok)';
+  var cls=pct>=90?'h':pct>=70?'m':'';
+  var f=document.getElementById('sbfil'); if(f){f.style.width=pct+'%';f.className='u-fil '+cls;}
+  var p=document.getElementById('sbpct'); if(p){p.textContent=pct+'%';p.style.color=col;}
+  $t('sbsub',tot+' / '+SESSION.monthlyLimit);
+  $t('mu-m',fN(tot)); $t('mu-p',SESSION.plan||'—'); $t('mu-l','/ '+SESSION.monthlyLimit);$t('mu-pct',pct+'%'); $t('mu-i',SESSION.nome+' · '+SESSION.clinica);
+  var mf=document.getElementById('mu-fil'); if(mf){mf.style.width=pct+'%';mf.style.background=col;}
+  var tb=document.getElementById('htb');
+  if(tb){
+    if(!log.length){ tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--t3)">Nenhuma interação ainda.</td></tr>'; }
+    else tb.innerHTML=log.slice().reverse().map(function(r){ return '<tr><td>'+fDt(r.ts)+'</td><td><span class="h-pill">'+(ANAMES[r.aid]||r.aid)+'</span></td><td class="'+(r.status==='success'?'h-ok':'h-err')+'">'+(r.status==='success'?'✓ OK':'✗ Erro')+'</td></tr>'; }).join('');
+  }
+}
+function openUM() { updUI(); document.getElementById('umod').classList.add('open'); }
+function closeUM() { document.getElementById('umod').classList.remove('open'); }
+
+/* ── LIMPAR CONVERSA ── */
+function clearConv() {
+  if (LOAD) return;
+  HIST = [];
+  document.getElementById('conv').innerHTML = '';
+  document.querySelector('.home').classList.remove('chat-active');
+  document.getElementById('clrbtn').classList.remove('visible');
+  var ta = document.getElementById('uni-ta');
+  ta.value = ''; ta.style.height = 'auto'; ta.focus();
+}
+
+function toggleClearBtn() {
+  var conv = document.getElementById('conv');
+  var btn  = document.getElementById('clrbtn');
+  if (!btn) return;
+  if (conv && conv.children.length > 0) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+}
+function onUniKey(e) { if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); uniSend(); } }
+function rszTa(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,160)+'px'; }
+function useHint(el) { var ta=document.getElementById('uni-ta'); ta.value=el.textContent; ta.focus(); rszTa(ta); }
+
+async function uniSend() {
+  if(LOAD||!SESSION) return;
+  var ta=document.getElementById('uni-ta');
+  var text=(ta.value||'').trim();
+  if(!text) return;
+  if(text.length>4000){ showErr('Mensagem muito longa','Máximo 4000 caracteres.'); return; }
+  ta.value=''; ta.style.height='auto';
+  addUserMsg(text);
+  LOAD=true;
+  document.getElementById('unibtn').disabled=true;
+  ta.disabled=true;
+  var loader=addLoader();
+  try { await routeAndExecute(text); }
+  catch(ex) { hideLoader(loader); showErr(etl(ex.code),ex.msg||ex.message||'Tente novamente.'); }
+  LOAD=false;
+  document.querySelector('.home').classList.add('chat-active');
+  document.getElementById('unibtn').disabled=false;
+  ta.disabled=false; ta.focus(); updUI(); toggleClearBtn();
+}
+
+/* ── CONVERSATION RENDERING ── */
+function addUserMsg(text) {
+  var conv=document.getElementById('conv');
+  var el=document.createElement('div');
+  el.className='msg-u';
+  el.innerHTML='<div class="bub">'+esc(text)+'</div><div class="msg-t">'+now()+'</div>';
+  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
+}
+
+function addAIMsg(text, imgUrl, promptUsed) {
+  var conv=document.getElementById('conv');
+  var el=document.createElement('div');
+  el.className='msg-ai';
+  var body='<div class="ai-body">'+fmt(text)+'</div>';
+  if(imgUrl){ body+='<img class="ai-img" src="'+imgUrl+'" alt="Imagem gerada" loading="lazy">'; if(promptUsed) body+='<div class="ai-prompt">📝 '+esc(promptUsed)+'</div>'; }
+  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">'+now()+'</span></div>'+body;
+  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
+  return el;
+}
+
+function addLoader() {
+  var conv=document.getElementById('conv');
+  var el=document.createElement('div');
+  el.className='msg-ai'; el.id='loader-el';
+  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">processando…</span></div><div class="ai-body"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div>';
+  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
+  return el;
+}
+function hideLoader(el) { if(el&&el.parentNode) el.remove(); var e=document.getElementById('loader-el'); if(e) e.remove(); }
+
+function addProgMsg(text) {
+  var conv=document.getElementById('conv');
+  var el=document.createElement('div');
+  el.className='msg-ai';
+  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="ai-body" style="display:flex;align-items:center;gap:10px"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div><span style="font-size:13px;color:var(--t2)">'+esc(text)+'</span></div>';
+  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
+  return el;
+}
+
+function showErr(title, detail, isWarn) {
+  var conv=document.getElementById('conv');
+  var el=document.createElement('div');
+  el.className='msg-ai';
+  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="emsg'+(isWarn?' w':'')+'"><div style="font-size:16px;flex-shrink:0">'+(isWarn?'⚠️':'⛔')+'</div><div><div class="e-t">'+esc(title)+'</div>'+(detail?'<div class="e-d">'+esc(detail)+'</div>':'')+'</div></div>';
+  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
+}
+
+/* ── HANDLERS ── */
+async function doTxt(text, agentId, sysPrompt) {
+  HIST.push({role:'user',content:text});
+  var r;
+  try { r=await MB.callAI(SESSION.clientId,agentId,HIST,sysPrompt); }
+  catch(e) { HIST.pop(); throw e; }
+  HIST.push({role:'assistant',content:r.reply});
+  addAIMsg(r.reply);
+}
+
+async function doOrch(text) {
+  var pg=addProgMsg('✦ Criando campanha completa — estratégia, copy, posts, stories, calendário…');
+  var r;
+  try { r=await AIO.campaign(text,SESSION.clientId); }
+  catch(e) { pg&&pg.remove(); throw e; }
+  pg&&pg.remove();
+
+  var camp=null;
+  try {
+    var raw=r.reply.replace(/```json|```/g,'').trim();
+    var parsed;
+    try {
+      parsed=JSON.parse(raw);
+    } catch(e1) {
+      var match=raw.match(/\{[\s\S]*\}/);
+      if(match) { try { parsed=JSON.parse(match[0]); } catch(e2) {} }
+    }
+    if(parsed) {
+      if(parsed.nome) camp=parsed;
+      else if(parsed.data && parsed.data.nome) camp=parsed.data;
+      else if(parsed.data && parsed.data.data && parsed.data.data.nome) camp=parsed.data.data;
+    }
+    console.log('[MedAI doOrch] raw length:', raw.length, '| parsed:', !!parsed, '| camp.nome:', camp&&camp.nome);
+  } catch(e) {
+    console.error('[MedAI doOrch] parse error:', e.message);
+    camp=null;
+  }
+
+  if(camp && camp.nome) renderCampaignDoc(camp,text);
+  else addAIMsg(r.reply);
+}
+
+async function doImg(text) {
+  if(text.length<3){ showErr('Descrição muito curta','Use ao menos algumas palavras.'); return; }
+  var a1=addProgMsg('🔍 Interpretando descrição com Visual Intelligence Engine…');
+  var s=await buildSP(text);
+  a1&&a1.remove();
+  var pos=s.pr+'. '+s.content;
+  var neg=[s.nr,UNEG,s.en].filter(Boolean).join(', ');
+  var seed=Math.floor(Math.random()*999999);
+  var url='https://image.pollinations.ai/prompt/'+encodeURIComponent(pos)+'?width=1024&height=1024&seed='+seed+'&nologo=true&model=flux&enhance=true&negative='+encodeURIComponent(neg);
+  var pg=addProgMsg('🎨 Gerando imagem… pode levar até 30 segundos.');
+  var done=false;
+  var tid=setTimeout(function(){ if(done)return; done=true; pg&&pg.remove(); MB.logU(SESSION.clientId,'imagens',0,'error',45000); updUI(); showErr('Tempo limite excedido','Tente descrição mais simples.'); },45000);
+  var img=new Image(); img.crossOrigin='anonymous';
+  img.onload=function(){
+    if(done)return; done=true; clearTimeout(tid); pg&&pg.remove();
+    if(img.naturalWidth<10){ MB.logU(SESSION.clientId,'imagens',0,'error',0); updUI(); showErr('Imagem inválida','Tente novamente.'); return; }
+    MB.logU(SESSION.clientId,'imagens',0,'success',0); updUI();
+    var lbl=SLBL[s.sk]||'Padrão';
+    var msg='✨ Imagem gerada!\n\n**Interpretado:** '+s.subject+'\n**Estilo:** '+lbl+(s.us?' (conforme solicitado)':' (automático)');
+    addAIMsg(msg,url,s.content);
+  };
+  img.onerror=function(){
+    if(done)return; done=true; clearTimeout(tid); pg&&pg.remove();
+    MB.logU(SESSION.clientId,'imagens',0,'error',0); updUI();
+    showErr('Falha ao gerar imagem','Tente reformular com mais detalhes.');
+  };
+  img.src=url;
+}
+
+/* ── CAMPAIGN DOCUMENT RENDERER ── */
+function renderCampaignDoc(c,topic) {
+  var conv=document.getElementById('conv');
+  var wrap=document.createElement('div');
+  wrap.className='msg-ai'; wrap.style.maxWidth='100%'; wrap.style.width='100%';
+  var uid='c'+Date.now();
+  var tabs=[{id:'estrategia',lbl:'📋 Estratégia'},{id:'copy',lbl:'✍️ Copy'},{id:'posts',lbl:'📱 Posts'},{id:'stories',lbl:'📲 Stories'},{id:'whatsapp',lbl:'💬 WhatsApp'},{id:'calendario',lbl:'📅 Calendário'},{id:'visual',lbl:'🎨 Visual'},{id:'versoes',lbl:'🔀 Versões'},{id:'metricas',lbl:'📊 Métricas'}];
+  var tabsH=tabs.map(function(t,i){return '<div class="c-tab'+(i===0?' on':'')+'" data-panel="panel-'+t.id+'-'+uid+'">'+t.lbl+'</div>';}).join('');
+  var s=c.estrategia||{};
+  var estratH='<div class="cs"><div class="cs-t">Estratégia</div><div class="strat-g">'+[['🎯 Objetivo',s.objetivo||'—'],['👥 Público',s.publicoAlvo||'—'],['💡 Abordagem',s.abordagem||'—'],['📣 CTA',s.ctaPrincipal||'—'],['🏥 Posicionamento',s.posicionamento||'—']].map(function(x){return '<div class="strat-i"><div class="strat-l">'+esc(x[0])+'</div><div class="strat-v">'+esc(x[1])+'</div></div>';}).join('')+'</div></div>';
+  var copyH='<div class="cs"><div class="cs-t">Copy de lançamento</div><div class="cp-blk"><div class="cp-lbl">Post principal · Instagram/Facebook</div><button class="cp-btn" id="'+uid+'_cm">Copiar</button>'+esc(c.copyPrincipal||'—').replace(/\n/g,'<br>')+'</div></div><div class="cs"><div class="cs-t">Hashtags</div><div class="htags">'+(c.hashtags||[]).map(function(h){return '<span class="htag" id="'+uid+'_ht_'+h.replace(/\W/g,'')+'">'+esc('#'+h)+'</span>';}).join('')+'</div></div>';
+  var postsH='<div class="cs"><div class="cs-t">Sequência de posts</div><div class="posts-g">'+(c.posts||[]).map(function(p){var slides=p.slides&&p.slides.length?'<div style="margin-top:9px;border-top:1px solid var(--bd);padding-top:9px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Slides</div>'+p.slides.map(function(s,i){return '<div style="font-size:12px;padding:6px 10px;background:var(--sf3);border-radius:var(--rs);margin-bottom:4px"><strong style="color:var(--blu-l);margin-right:5px">S'+(i+1)+'</strong>'+esc(s)+'</div>';}).join('')+'</div>':'';return '<div class="post-c"><div class="post-h"><span class="post-n">Post '+p.num+'</span><span class="post-tp">'+esc(p.tipo||'')+'</span></div><div class="post-ti">'+esc(p.titulo||'')+'</div><div class="post-b">'+esc(p.legenda||'').replace(/\n/g,'<br>')+'</div>'+slides+'</div>';}).join('')+'</div></div>';
+  var storH='<div class="cs"><div class="cs-t">Stories</div><div class="stor-g">'+(c.stories||[]).map(function(s){return '<div class="stor-c"><div class="stor-n">Story '+s.num+'</div><div class="stor-tp">'+esc(s.tipo||'')+'</div><div class="stor-b">'+esc(s.conteudo||'').replace(/\n/g,'<br>')+'</div></div>';}).join('')+'</div></div>';
+  var waH='<div class="cs"><div class="cs-t">Mensagem WhatsApp</div><div class="wa-blk"><button class="cp-btn" id="'+uid+'_wa">Copiar</button>'+esc(c.whatsapp||'—').replace(/\n/g,'<br>')+'</div></div>';
+  var calH='<div class="cs"><div class="cs-t">Calendário</div><div class="cal-g">'+(c.calendario||[]).map(function(d){return '<div class="cal-i"><div class="cal-d">'+esc(d.dia||'')+'</div><div><div class="cal-t">'+esc(d.acao||'')+'</div><div class="cal-s">'+esc(d.horario||'')+(d.obs?' · '+esc(d.obs):'')+'</div></div></div>';}).join('')+'</div></div>';
+  var bv=c.briefingVisual||{};
+  var imgPs=[];
+  if(bv.promptImagem) imgPs.push({lbl:'Imagem principal',prompt:bv.promptImagem});
+  if(c.posts&&c.posts[0]) imgPs.push({lbl:'Post 1 — '+c.posts[0].titulo,prompt:(c.posts[0].tipo||'illustration')+' about: '+(c.posts[0].titulo||topic)+'. '+(bv.estilo||'professional medical photography')+'.'});
+  if(c.stories&&c.stories[0]) imgPs.push({lbl:'Story de abertura',prompt:'Vertical story, '+topic+'. '+(bv.conceito||'')+'. Bold mobile composition.'});
+  var visH='<div class="cs"><div class="cs-t">Briefing visual</div><div class="vis-g">'+[['Conceito',bv.conceito||'—'],['Composição',bv.composicao||'—'],['Estilo',bv.estilo||'—'],['Emoção',bv.emocao||'—'],['Cores',bv.cores||'—']].map(function(x){return '<div class="vis-i"><div class="vis-l">'+esc(x[0])+'</div><div class="vis-v">'+esc(x[1])+'</div></div>';}).join('')+'</div></div>'+'<div class="cs"><div class="cs-t">Gerar imagens</div><div class="img-prompts">'+imgPs.map(function(ip,idx){return '<div class="img-p"><div class="img-pl">'+esc(ip.lbl)+'</div><div class="img-pt">'+esc(ip.prompt)+'</div><div class="img-pb"><button id="'+uid+'_ic'+idx+'" class="cp-btn" style="position:static">Copiar</button><button id="'+uid+'_ig'+idx+'" style="padding:5px 13px;background:var(--blu);border:none;border-radius:var(--rs);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">🎨 Gerar</button></div></div>';}).join('')+'</div></div>';
+  var tagMap={emocional:'em',profissional:'pr',institucional:'in',humanizado:'hu'};
+  var verH='<div class="cs"><div class="cs-t">Versões alternativas</div><div class="ver-g">'+(c.versoes||[]).map(function(v,vi){return '<div class="ver-c"><div class="ver-h"><span class="ver-tp '+(tagMap[v.tipo]||'pr')+'">'+esc(v.tag||v.tipo||'')+'</span><button class="cp-btn" style="position:static" id="'+uid+'_vc'+vi+'">Copiar</button></div><div class="ver-b">'+esc(v.copy||'').replace(/\n/g,'<br>')+'</div></div>';}).join('')+'</div></div>';
+  var metH='<div class="cs"><div class="cs-t">Métricas</div><div class="met-g">'+(c.metricas||[]).map(function(m){return '<div class="met-c"><div class="met-i">'+esc(m.icone||'📊')+'</div><div class="met-t">'+esc(m.titulo||'')+'</div><div class="met-s">'+esc(m.desc||'')+'</div></div>';}).join('')+'</div></div>';
+  var panelMap={estrategia:estratH,copy:copyH,posts:postsH,stories:storH,whatsapp:waH,calendario:calH,visual:visH,versoes:verH,metricas:metH};
+  var panelsH=tabs.map(function(t,i){return '<div class="c-panel'+(i===0?' on':'')+'" id="panel-'+t.id+'-'+uid+'">'+(panelMap[t.id]||'')+'</div>';}).join('');
+  wrap.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">'+now()+'</span></div><div class="camp-doc"><div class="camp-hdr"><div class="camp-ey">Campanha gerada · '+esc(topic)+'</div><div class="camp-nm">'+esc(c.nome||topic)+'</div><div class="camp-sl">'+esc(c.slogan||'')+'</div><div class="camp-meta"><span class="c-chip b">9 seções</span><span class="c-chip g">Pronto para publicar</span><span class="c-chip k">✓ Contextualizado</span></div></div><div class="camp-tabs">'+tabsH+'</div><div class="camp-panels">'+panelsH+'</div><div class="camp-foot"><span class="camp-fn">Gerado para '+esc(CTX.nom||(SESSION&&SESSION.clinica)||'sua clínica')+'</span><div class="camp-fb"><button class="cfb" id="'+uid+'_fi">🎨 Gerar imagem</button><button class="cfb p" id="'+uid+'_rf">Refinar →</button></div></div></div>';
+  conv.appendChild(wrap); conv.scrollTop=conv.scrollHeight;
+  // Event listeners
+  setTimeout(function(){
+    wrap.querySelectorAll('.c-tab').forEach(function(tab){
+      tab.addEventListener('click',function(){
+        wrap.querySelectorAll('.c-tab').forEach(function(t){t.classList.remove('on');});
+        wrap.querySelectorAll('.c-panel').forEach(function(p){p.classList.remove('on');});
+        tab.classList.add('on');
+        var pid=tab.getAttribute('data-panel');
+        var panel=document.getElementById(pid); if(panel) panel.classList.add('on');
+      });
+    });
+    function cpBtn(id,text){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(){ cpText(b,text); }); }
+    cpBtn(uid+'_cm',c.copyPrincipal||'');
+    cpBtn(uid+'_wa',c.whatsapp||'');
+    (c.versoes||[]).forEach(function(v,vi){ cpBtn(uid+'_vc'+vi,v.copy||''); });
+    (c.hashtags||[]).forEach(function(h){ var e=document.getElementById(uid+'_ht_'+h.replace(/\W/g,'')); if(e) e.addEventListener('click',function(){ cpText(null,'#'+h); }); });
+    imgPs.forEach(function(ip,idx){
+      var ic=document.getElementById(uid+'_ic'+idx); if(ic)(function(b,p){b.addEventListener('click',function(){cpText(b,p);});})(ic,ip.prompt);
+      var ig=document.getElementById(uid+'_ig'+idx); if(ig)(function(b,p){b.addEventListener('click',function(){genImgFromCampaign(p);});})(ig,ip.prompt);
+    });
+    var fi=document.getElementById(uid+'_fi'); if(fi){var fp=bv.promptImagem||c.nome||topic; fi.addEventListener('click',function(){genImgFromCampaign(fp);});}
+    var rf=document.getElementById(uid+'_rf'); if(rf) rf.addEventListener('click',function(){ document.getElementById('uni-ta').value='Crie uma versão mais curta para WhatsApp'; document.getElementById('uni-ta').focus(); });
+  },150);
+}
+
+function cpText(btn,text){
+  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
+  if(btn){btn.textContent='✓ Copiado';btn.classList.add('dn');setTimeout(function(){btn.textContent='Copiar';btn.classList.remove('dn');},2000);}
+}
+
+function genImgFromCampaign(prompt) {
+  if(!prompt||!prompt.trim()) return;
+  window.__IMG_PROMPT__=prompt.trim();
+  var tryRun=function(n){
+    if(!LOAD&&SESSION){
+      addUserMsg(window.__IMG_PROMPT__);
+      LOAD=true; document.getElementById('unibtn').disabled=true; document.getElementById('uni-ta').disabled=true;
+      var ld=addLoader();
+      doImg(window.__IMG_PROMPT__).then(function(){
+        LOAD=false; document.getElementById('unibtn').disabled=false; document.getElementById('uni-ta').disabled=false; updUI();
+        window.__IMG_PROMPT__=null;
+      }).catch(function(e){ hideLoader(ld); showErr(etl(e.code),e.msg); LOAD=false; document.getElementById('unibtn').disabled=false; document.getElementById('uni-ta').disabled=false; });
+    } else if(n>0) setTimeout(function(){tryRun(n-1);},200);
+  };
+  tryRun(20);
+}
+
+/* ── VIE buildSP ── */
+async function buildSP(inp) {
+  var ce=CTX.est||'', cc=CTX.c1!=='#3B7FFF'?CTX.c1:'';
+  var vsk=Object.keys(VS).filter(function(s){return s!=='neutral';}).join(' | ');
+  var spLines=['Você é um engenheiro de prompts visuais de elite.','Converta o pedido do usuário em português para um prompt técnico preciso em INGLÊS.','Separe o CONTEÚDO do ESTILO.',ce?'Estilo da clínica: '+ce+'.':'',cc?'Cor da marca: '+cc+'.':'','','Responda APENAS com JSON válido:','{"subject":"<máximo 12 palavras em PORTUGUÊS>","contentPrompt":"<25-55 palavras em INGLÊS, sem linguagem de estilo>","style":"<um destes: '+vsk+'>","userSpecifiedStyle":<bool>,"extraNegatives":"<máximo 8 palavras em PORTUGUÊS>"}','','MAPA DE ESTILOS: desenho animado/cartoon→cartoon | anime/mangá→anime | 3d/render/pixar→3d | pixel art→pixel_art | aquarela→watercolor | pintura digital→digital_painting | cyberpunk/neon→cyberpunk | minimalista→minimalist | futurista→futurist | vintage/retrô→vintage | foto/realista→realistic_photo | documentário→documentary_photo | produto/embalagem→product_photo | pôster/cartaz→poster | infográfico→infographic','Regra: subject deve estar sempre em PORTUGUÊS. contentPrompt sempre em INGLÊS.'].filter(Boolean).join('\n');
+  try {
+    var r=await MB.callAI(SESSION.clientId,'imagens',[{role:'user',content:inp}],spLines);
+    if(!r?.reply) throw new Error('empty');
+    var m=r.reply.match(/\{[\s\S]*\}/); if(!m) throw new Error('no-json');
+    var p=JSON.parse(m[0]);
+    if(!p.contentPrompt||p.contentPrompt.length<5) throw new Error('invalid');
+    var sk=VS[p.style]?p.style:'neutral';
+    return {subject:p.subject||inp,content:p.contentPrompt,sk:sk,pr:VS[sk].p,nr:VS[sk].n,en:p.extraNegatives||'',us:!!p.userSpecifiedStyle};
+  } catch(e) {
+    return {subject:inp,content:inp,sk:'neutral',pr:VS.neutral.p,nr:VS.neutral.n,en:'',us:false,fb:true};
+  }
+}
+</script>
+</body>
+</html>
