@@ -7,9 +7,9 @@ const apiLimiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 60,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.clinicId || req.ip,
+  keyGenerator: (req) => req.ip,
   handler: (req, res) => {
-    logger.warn('Rate limit hit', { ip: req.ip, clinicId: req.clinicId });
+    logger.warn('Rate limit hit', { ip: req.ip });
     res.status(429).json({ success: false, error: 'Muitas requisições. Aguarde e tente novamente.', code: 'RATE_LIMIT' });
   }
 });
@@ -27,4 +27,41 @@ const aiLimiter = rateLimit({
   }
 });
 
-module.exports = { apiLimiter, aiLimiter };
+// Rate limit para login — proteção anti-brute-force
+// 10 tentativas por IP a cada 15 minutos
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX) || 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  skipSuccessfulRequests: false,
+  handler: (req, res) => {
+    logger.warn('Auth rate limit hit — possible brute force', { ip: req.ip, path: req.path });
+    res.status(429).json({
+      success: false,
+      error: 'Muitas tentativas de login. Aguarde 15 minutos.',
+      code: 'AUTH_RATE_LIMIT'
+    });
+  }
+});
+
+// Rate limit para verificação de código — ainda mais restritivo
+// 5 tentativas por IP a cada 5 minutos
+const codeVerifyLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: parseInt(process.env.CODE_RATE_LIMIT_MAX) || 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  handler: (req, res) => {
+    logger.warn('Code verify rate limit hit — possible brute force', { ip: req.ip, emailKey: req.body?.emailKey });
+    res.status(429).json({
+      success: false,
+      error: 'Muitas tentativas. Aguarde 5 minutos.',
+      code: 'CODE_RATE_LIMIT'
+    });
+  }
+});
+
+module.exports = { apiLimiter, aiLimiter, authLimiter, codeVerifyLimiter };

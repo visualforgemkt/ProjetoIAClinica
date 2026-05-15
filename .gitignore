@@ -1,4 +1,45 @@
+# Dependências
 node_modules/
+.pnp
+.pnp.js
+
+# Ambiente — NUNCA versionar arquivos .env com segredos reais
 .env
+.env.*
+!.env.example
+*.env
+*Copy.env*
+* - Copy.env*
+
+# Builds
 dist/
+build/
 coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Chaves e certificados
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+secrets/

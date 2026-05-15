@@ -2,7 +2,7 @@ const express = require('express');
 const router  = express.Router();
 
 const { authMiddleware }  = require('../middleware/auth');
-const { aiLimiter }       = require('../middleware/rateLimiter');
+const { aiLimiter, authLimiter, codeVerifyLimiter } = require('../middleware/rateLimiter');
 const { validate, schemas } = require('../middleware/validator');
 
 const AuthController   = require('../controllers/authController');
@@ -10,9 +10,11 @@ const AIController     = require('../controllers/aiController');
 const ClinicController = require('../controllers/clinicController');
 
 // ── AUTH (público) ─────────────────────────────────────────────
-router.post('/auth/login',       validate(schemas.login),       AuthController.login);
-router.post('/auth/verify',      validate(schemas.verifyCode),  AuthController.verifyCode);
-router.post('/auth/refresh',     validate(schemas.refreshToken),AuthController.refresh);
+// authLimiter: 10 tentativas / 15min por IP (anti-brute-force)
+// codeVerifyLimiter: 5 tentativas / 5min por IP
+router.post('/auth/login',       authLimiter,       validate(schemas.login),        AuthController.login);
+router.post('/auth/verify',      codeVerifyLimiter, validate(schemas.verifyCode),   AuthController.verifyCode);
+router.post('/auth/refresh',     authLimiter,       validate(schemas.refreshToken), AuthController.refresh);
 router.post('/auth/logout',      AuthController.logout);
 
 // ── AUTH (protegido) ───────────────────────────────────────────

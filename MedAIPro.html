@@ -422,6 +422,10 @@ button,input,select,textarea { font-family:inherit; }
         <div class="lf"><label>E-mail</label><input type="email" id="in-em" placeholder="seu@clinica.com.br" autocomplete="email"></div>
         <div class="lf"><label>Senha</label><input type="password" id="in-pw" placeholder="••••••••" autocomplete="current-password"></div>
         <button class="l-btn" id="b1" onclick="doS1()"><span id="b1t">Continuar</span><span id="b1a">→</span></button>
+        <p style="font-size: 11px; color: var(--t3); text-align: center; margin-top: 20px; line-height: 1.4;">
+          Ao entrar, você concorda com nossos Termos de Uso e Política de Privacidade. <br>
+          Esta é uma ferramenta de apoio à decisão clínica.
+        </p>
         <div class="l-err" id="e1"></div>
         <div class="l-badge">🔒 Acesso restrito · Clínica Dr. Grégori Bertagnolli</div>
       </div>
@@ -518,6 +522,9 @@ button,input,select,textarea { font-family:inherit; }
               <button class="uni-send" id="unibtn" onclick="uniSend()" title="Enviar">➤</button>
             </div>
           </div>
+          <p style="font-size: 10px; color: var(--t3); text-align: center; margin-top: 10px; font-weight: 500; opacity: 0.7;">
+            A MedAI Pro pode cometer erros. Verifique informações médicas críticas com fontes oficiais.
+          </p>
         </div>
         <!-- Conversation history renders here -->
         <div class="conv-wrap" id="conv"></div>
@@ -599,1140 +606,482 @@ button,input,select,textarea { font-family:inherit; }
 </div>
 
 <script>
+/* ══════════════════════════════════════════════════════
+   MedAI Pro — Frontend v2 (Phase 1: Security Hardening)
+   - Toda lógica de IA exclusivamente no backend
+   - Zero mocks, zero credenciais, zero dual-auth
+   - Frontend: UI + chamadas de API apenas
+══════════════════════════════════════════════════════ */
+
 /* ── CONFIG ── */
-window.MEDAI_BACKEND_URL = 'http://localhost:3001';
+const BACKEND_URL = ((window.MEDAI_BACKEND_URL || 'http://localhost:3001')).replace(/\/$/, '');
 
-/* ══════════════════════════════════════════════════════
-   INTELLIGENCE ROUTER — interpreta intenção e roteia
-   para o agente interno correto, de forma invisível
-══════════════════════════════════════════════════════ */
-function classifyIntent(text) {
-  var t = text.toLowerCase();
-  // Campanha / marketing completo
-  if (/campanha|marketing|divulgar|promover|lançamento|awareness/.test(t)) return 'campaign';
-  // Instagram / redes sociais / conteúdo
-  if (/instagram|post|story|stories|feed|reels?|reel|legenda|hashtag|conteúdo para|social|engajamento/.test(t)) return 'social';
-  // Imagem / visual
-  if (/imagem|foto|gerar.*visual|visual.*gerar|ilustração|design|banner|pôster|criar.*foto|fotografia/.test(t)) return 'image';
-  // Dúvidas / atendimento / FAQ
-  if (/dúvida|pergunta|agendamento|convênio|horário|funciona|atende|contato|responder|paciente.*pergunta/.test(t)) return 'faq';
-  // Tudo que envolve paciente / crescimento = campanha
-  if (/paciente|crescimento|mais.*cliente|atrair|conseguir.*mais/.test(t)) return 'campaign';
-  // Orientação / saúde / pediatria
-  if (/saúde|pediatria|criança|bebê|vacina|febre|sintoma|doença|prevenção|orientação/.test(t)) return 'health';
-  // Default: campanha (o mais completo)
-  return 'campaign';
-}
-
-/* Roteia para o agente correto de forma transparente */
-async function routeAndExecute(text) {
-  var intent = classifyIntent(text);
-
-  if (intent === 'image') {
-    // Geração de imagem
-    await doImg(text);
-    return;
-  }
-
-  if (intent === 'campaign') {
-    // Campanha completa via Orchestrator
-    await doOrch(text);
-    return;
-  }
-
-  if (intent === 'social') {
-    // Conteúdo Instagram via agente social
-    HIST.push({ role:'user', content:text });
-    var r;
-    try { r = await MB.callAI(SESSION.clientId, 'instagram', HIST, AGENTS.instagram.sys()); }
-    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
-    HIST.push({ role:'assistant', content:r.reply });
-    addAIMsg(r.reply);
-    return;
-  }
-
-  if (intent === 'faq') {
-    // Dúvidas via agente de atendimento
-    HIST.push({ role:'user', content:text });
-    var r2;
-    try { r2 = await MB.callAI(SESSION.clientId, 'duvidas', HIST, AGENTS.duvidas.sys()); }
-    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
-    HIST.push({ role:'assistant', content:r2.reply });
-    addAIMsg(r2.reply);
-    return;
-  }
-
-  if (intent === 'health') {
-    // Orientação de saúde
-    HIST.push({ role:'user', content:text });
-    var r3;
-    try { r3 = await MB.callAI(SESSION.clientId, 'orientacao', HIST, AGENTS.orientacao.sys()); }
-    catch(e) { showErr(etl(e.code), e.msg); HIST.pop(); return; }
-    HIST.push({ role:'assistant', content:r3.reply });
-    addAIMsg(r3.reply);
-    return;
-  }
-}
-</script>
-<script>
-/* ══════════════════════════════════════════════════════
-   CORE INTELLIGENCE — AIO, CTX, buildDemoCampaign,
-   buildVIEDemo, MB, AGENTS, VS (extraídos do v3)
-══════════════════════════════════════════════════════ */
-</script>
-<script id="core-intelligence-placeholder">
-const AIO = {
-  buildCtx() {
-    const c = CTX, p = [];
-    if (c.nom) p.push('Clínica: '              + c.nom);
-    if (c.esp) p.push('Especialidade: '         + c.esp);
-    if (c.cid) p.push('Localização: '           + c.cid);
-    if (c.pub) p.push('Público-alvo: '          + c.pub);
-    if (c.srv) p.push('Serviços: '              + c.srv);
-    if (c.tom) p.push('Tom de comunicação: '    + c.tom);
-    if (c.est) p.push('Estilo visual da marca: '+ c.est);
-    if (c.dif) p.push('Diferenciais: '          + c.dif);
-    if (c.ig)  p.push('Instagram: '             + c.ig);
-    if (c.ct)  p.push('Contato: '               + c.ct);
-    if (c.c1 && c.c1 !== '#3B7FFF') p.push('Cor principal: ' + c.c1);
-    return p.length ? '\n\n[CONTEXTO DA CLÍNICA — use sempre]\n' + p.join('\n') : '';
-  },
-
-  enrich(sys) { return sys + this.buildCtx(); },
-
-  async campaign(topic, clientId) {
-    const nome = CTX.nom || SESSION?.clinica || 'a clínica';
-    const esp  = CTX.esp || 'médica';
-    const pub  = CTX.pub || 'pacientes e famílias';
-    const tom  = CTX.tom || 'acolhedor e profissional';
-    const est  = CTX.est || 'moderno e clean';
-    const extra = (CTX.dif ? ' Diferenciais: ' + CTX.dif + '.' : '')
-                + (CTX.ig  ? ' Instagram: '    + CTX.ig  + '.' : '')
-                + (CTX.ct  ? ' Contato: '      + CTX.ct  + '.' : '');
-
-    const seed   = Math.floor(Math.random() * 9000) + 1000;
-    const angulos = [
-      'EMOCIONAL: histórias reais, medo de perder, amor familiar como motor da ação',
-      'EDUCATIVO: dados, fatos científicos, mitos vs verdades, autoridade médica',
-      'PREVENTIVO: antecipação, checklist prático, empoderamento do paciente',
-      'AUTORIDADE: posicionamento da clínica, diferenciais, cases implícitos',
-      'SAZONAL: momento atual, tendência, por que agir agora'
-    ];
-    const angulo = angulos[seed % angulos.length];
-
-    const sysLines = [
-      'Você é uma equipe completa de marketing médico da MedAI Pro: estrategista, copywriter sênior, social media specialist e diretor criativo.',
-      this.buildCtx(),
-      '',
-      'MISSÃO: Campanha profissional completa sobre "' + topic + '" para ' + nome + ' (' + esp + ').',
-      'Público: ' + pub + '. Tom: ' + tom + '. Estilo: ' + est + '.' + extra,
-      '',
-      'ÂNGULO CRIATIVO (seed ' + seed + '): ' + angulo,
-      'Use este ângulo em todo o conteúdo. Gera variação mesmo no mesmo tema.',
-      '',
-      'REGRA: Responda APENAS com JSON válido. Sem texto antes ou depois.',
-      'Conteúdo real, específico para ' + nome + ' — sem placeholders ou exemplos genéricos.',
-      '',
-      'JSON esperado (português brasileiro):',
-      '{',
-      '  "nome": "Nome criativo da campanha",',
-      '  "slogan": "Slogan forte e memorável",',
-      '  "estrategia": {',
-      '    "objetivo": "Objetivo mensurável",',
-      '    "publicoAlvo": "Público detalhado",',
-      '    "abordagem": "Abordagem emocional e estratégica",',
-      '    "ctaPrincipal": "Call-to-action principal",',
-      '    "posicionamento": "Posicionamento da clínica"',
-      '  },',
-      '  "copyPrincipal": "Copy completo para post de lançamento. Mínimo 5 parágrafos reais com abertura forte, emoção, benefícios, prova social e CTA poderoso.",',
-      '  "posts": [',
-      '    {"num":1,"tipo":"Carrossel","titulo":"Título impactante","legenda":"Legenda completa 8+ linhas com emojis e CTA","slides":["Slide 1","Slide 2","Slide 3","Slide 4","Slide 5"]},',
-      '    {"num":2,"tipo":"Post educativo","titulo":"Título","legenda":"Legenda completa","slides":[]},',
-      '    {"num":3,"tipo":"Post autoridade","titulo":"Título","legenda":"Legenda completa","slides":[]}',
-      '  ],',
-      '  "stories": [',
-      '    {"num":1,"tipo":"Abertura","conteudo":"Texto do story 1"},',
-      '    {"num":2,"tipo":"Enquete","conteudo":"Texto com pergunta e 2 opções"},',
-      '    {"num":3,"tipo":"CTA","conteudo":"Story final com call-to-action"}',
-      '  ],',
-      '  "whatsapp": "Mensagem pessoal completa para base de pacientes. Mínimo 6 linhas.",',
-      '  "hashtags": ["25","hashtags","relevantes","sem","simbolo"],',
-      '  "calendario": [',
-      '    {"dia":"Dia 1","acao":"Post lançamento","horario":"18h","obs":"Prioridade máxima"},',
-      '    {"dia":"Dia 2","acao":"Stories","horario":"12h e 19h","obs":"Ampliar alcance"},',
-      '    {"dia":"Dia 3","acao":"WhatsApp","horario":"10h","obs":"Alta taxa abertura"},',
-      '    {"dia":"Dia 5","acao":"Post educativo","horario":"18h","obs":"Nutrir audiência"},',
-      '    {"dia":"Dia 8","acao":"Post autoridade","horario":"18h","obs":"Consolidar posição"},',
-      '    {"dia":"Dia 10","acao":"Reels/vídeo","horario":"20h","obs":"Alto alcance orgânico"}',
-      '  ],',
-      '  "briefingVisual": {',
-      '    "conceito": "Conceito visual",',
-      '    "composicao": "Como compor imagens",',
-      '    "estilo": "Estilo visual específico",',
-      '    "emocao": "Emoção a transmitir",',
-      '    "cores": "Paleta recomendada",',
-      '    "promptImagem": "Prompt detalhado em inglês para gerador de imagens"',
-      '  },',
-      '  "versoes": [',
-      '    {"tipo":"emocional","tag":"Emocional","copy":"Versão emocional real mínimo 4 linhas"},',
-      '    {"tipo":"profissional","tag":"Profissional","copy":"Versão técnica real mínimo 4 linhas"},',
-      '    {"tipo":"institucional","tag":"Institucional","copy":"Versão institucional real mínimo 4 linhas"},',
-      '    {"tipo":"humanizado","tag":"Humanizado","copy":"Versão conversacional real mínimo 4 linhas"}',
-      '  ],',
-      '  "metricas": [',
-      '    {"icone":"👁️","titulo":"Alcance esperado","desc":"Meta de impressões nas primeiras 72h"},',
-      '    {"icone":"💬","titulo":"Engajamento alvo","desc":"Taxa de saves e compartilhamentos esperada"},',
-      '    {"icone":"📅","titulo":"Conversões","desc":"Meta de agendamentos gerados"}',
-      '  ]',
-      '}'
-    ];
-    const sys = sysLines.join('\n');
-    return await MB.callAI(clientId, 'orchestrator', [{ role: 'user', content: 'Criar campanha sobre: ' + topic }], sys);
-  }
+/* Rótulos de estilo para exibição de imagens */
+const SLBL = {
+  cartoon:'Cartoon/Animação', anime:'Anime', '3d':'3D Render',
+  pixel_art:'Pixel Art', watercolor:'Aquarela', digital_painting:'Pintura Digital',
+  cyberpunk:'Cyberpunk', minimalist:'Minimalista', futurist:'Futurista',
+  vintage:'Vintage', realistic_photo:'Foto Realista', documentary_photo:'Foto Documental',
+  product_photo:'Foto de Produto', poster:'Pôster/Campanha',
+  infographic:'Infográfico', neutral:'Padrão'
 };
 
-/* ══════════════════════════════════════════════════════
-   CONTEXTO PERSISTENTE
-══════════════════════════════════════════════════════ */
-const CTX = { nom:'', esp:'', cid:'', pub:'', srv:'', tom:'acolhedor e profissional', est:'moderno e clean', dif:'', ig:'', ct:'', c1:'#3B7FFF', c2:'#C9A84C' };
-function loadCtx() { try { const s = sessionStorage.getItem('mctx'); if (s) Object.assign(CTX, JSON.parse(s)); } catch(e) {} }
-function saveCtx() { try { sessionStorage.setItem('mctx', JSON.stringify(CTX)); } catch(e) {} }
+/* ── ESTADO GLOBAL ── */
+let SESSION = null;
+let CTX = { nom:'', esp:'', cid:'', pub:'', srv:'', tom:'acolhedor e profissional', est:'moderno e clean', dif:'', ig:'', ct:'', c1:'#3B7FFF', c2:'#C9A84C' };
+let currentConversationId = null;
+let LOAD = false;
+let USAGE = { count: 0, limit: 500, percent: 0 };
 
-/* ══════════════════════════════════════════════════════
-   DEMO DINÂMICO DE CAMPANHA — varia por tema
-══════════════════════════════════════════════════════ */
-/* ══════════════════════════════════════════════════════
-   INTELLIGENCE ENGINE — Motor de geração de campanhas
-   Produz campanhas profissionais completas contextualmente,
-   variando ângulo criativo, profundidade e abordagem
-   por tema e perfil de clínica.
-══════════════════════════════════════════════════════ */
-function buildDemoCampaign(topic) {
-  var nome   = CTX.nom || (SESSION && SESSION.clinica) || 'Clínica Pediátrica Bertagnolli';
-  var esp    = CTX.esp || 'Pediatria';
-  var pub    = CTX.pub || 'pais e famílias com crianças de 0 a 12 anos';
-  var cid    = CTX.cid || 'Porto Alegre, RS';
-  var tom    = CTX.tom || 'acolhedor e profissional';
-  var est    = CTX.est || 'moderno e clean';
-  var dif    = CTX.dif || 'atendimento humanizado, equipe especializada, ambiente acolhedor';
-  var ig     = CTX.ig  || '@clinicabertagnolli';
-  var ct     = CTX.ct  || '(51) 99999-0000';
-  var cor1   = CTX.c1  || '#3B7FFF';
-
-  // Hash do tema → variação criativa determinística
-  var h = topic.split('').reduce(function(a,c){ return a + c.charCodeAt(0); }, 0);
-  var t = topic.charAt(0).toUpperCase() + topic.slice(1);
-
-  // Banco de ângulos criativos
-  var angulos = [
-    { nome: 'Proteção Familiar',    emocao: 'amor e proteção',       gancho: 'Quem ama, previne. Quem previne, cuida antes de precisar.' },
-    { nome: 'Autoridade Científica',emocao: 'confiança e expertise', gancho: 'A ciência confirma. A experiência comprova. O cuidado faz a diferença.' },
-    { nome: 'Urgência Preventiva',  emocao: 'responsabilidade',      gancho: 'O melhor momento para agir é antes do problema aparecer.' },
-    { nome: 'Empoderamento',        emocao: 'autonomia e segurança', gancho: 'Informação é o melhor remédio que existe. E começa aqui.' },
-    { nome: 'Vínculo Comunitário',  emocao: 'pertencimento',         gancho: 'Juntos, cuidamos melhor. Essa campanha é para toda a nossa comunidade.' }
-  ];
-  var angulo = angulos[h % angulos.length];
-  var emjs   = ['💙','💚','🌟','❤️','✨'];
-  var em     = emjs[h % emjs.length];
-
-  // Dados temáticos contextuais
-  var topicSlug = topic.toLowerCase().replace(/\s+/g,'');
-  var nomeSlug  = nome.toLowerCase().replace(/\s+/g,'').slice(0,16);
-  var espSlug   = esp.toLowerCase().replace(/\s+/g,'');
-
-  return {
-    nome: angulo.nome + ': ' + t,
-    slogan: angulo.gancho,
-
-    estrategia: {
-      objetivo: 'Posicionar ' + nome + ' como autoridade em ' + esp + ' na região de ' + cid + ' através de conteúdo estratégico sobre "' + topic + '", gerando engajamento orgânico e conversões em agendamentos. Meta: +20% de novos pacientes no trimestre.',
-      publicoAlvo: pub + ' — moradores de ' + cid + ' e região, pacientes ativos da base e indicações. Perfil: buscam informação confiável, valorizam atendimento humanizado e decidem por indicação e autoridade percebida.',
-      abordagem: 'Comunicação com ângulo "' + angulo.nome + '" — explorar a emoção de ' + angulo.emocao + ' para conectar o tema ao cotidiano do público. Linguagem: ' + tom + '. Evitar linguagem excessivamente técnica; priorizar clareza, empatia e chamada para ação.',
-      ctaPrincipal: 'Agende sua consulta na ' + nome + ' pelo ' + ct + ' ou pelo link na bio do Instagram ' + ig + '. Primeiras 10 respostas desta campanha recebem orientação preventiva gratuita por WhatsApp.',
-      posicionamento: nome + ' como o parceiro estratégico de saúde das famílias de ' + cid + ': não apenas trata — previne, educa e acompanha. Diferencial: ' + dif + '.'
-    },
-
-    copyPrincipal: em + ' Você sabia que ' + topic + ' afeta diretamente a qualidade de vida de milhares de crianças e famílias na nossa região todos os anos?\n\nNa ' + nome + ', acompanhamos famílias de ' + cid + ' há anos e vemos de perto como uma informação certa — chegando no momento certo — pode mudar completamente o desfecho de uma situação.\n\nNão é exagero dizer: conhecimento salva vidas.\n\nPor isso lançamos esta campanha. Não para vender uma consulta. Mas porque acreditamos que o cuidado real começa com educação — e que a ' + nome + ' tem a responsabilidade de ser essa fonte de informação confiável para você.\n\n' + em + ' O que você vai aprender nesta campanha:\n\n✅ O que toda família precisa saber sobre ' + topic + ' — sem jargão médico, sem alarme desnecessário\n✅ Quais sinais merecem atenção imediata e quais podem ser observados com calma\n✅ O que fazer nas primeiras horas — o protocolo que todo pai e mãe deveria conhecer\n✅ Quando é hora de buscar atendimento especializado — e como agilizar esse processo\n✅ Como a prevenção inteligente pode evitar 70% dos problemas mais comuns\n\nNa ' + nome + ', nossa missão vai além da consulta. É estar presente na vida das famílias de ' + cid + ' com informação de qualidade, atendimento humano e a certeza de que, quando você precisar, estaremos aqui.\n\n👉 Salva esse post. Compartilha com quem você ama. E quando precisar — a gente está a uma mensagem de distância.\n\n📞 ' + ct + ' | ' + ig,
-
-    posts: [
-      {
-        num: 1,
-        tipo: 'Carrossel educativo (5 slides)',
-        titulo: topic + ': O guia definitivo para famílias de ' + cid,
-        legenda: em + ' Esse post pode salvar a saúde do seu filho.\n\nCriamos o guia mais completo sobre ' + topic + ' para as famílias de ' + cid + '.\n\nArraste até o final — o slide 5 tem a informação mais importante. 👉\n\n💡 Salva agora para ter sempre à mão. Sua família vai agradecer.\n\n📅 Quer orientação personalizada para o seu caso?\nAgende pelo link na bio — ' + ig + '\n\n' + [topicSlug, espSlug, 'saudeinfantil', 'pediatria', nomeSlug, 'familia', 'prevencao', 'saude', cid.split(',')[0].toLowerCase().replace(/\s+/g,'')].map(function(h){ return '#'+h; }).join(' '),
-        slides: [
-          '📌 SLIDE 1 — ' + topic.toUpperCase() + '\nO que toda família de ' + cid + ' precisa saber — guia completo da ' + nome,
-          '🔍 SLIDE 2 — O QUE É E POR QUE IMPORTA\n' + topic + ' é responsável por milhares de atendimentos pediátricos por ano. Entender o tema é o primeiro passo para proteger sua família.',
-          '⚠️ SLIDE 3 — SINAIS DE ATENÇÃO\nFique atento a: alterações no comportamento da criança, sintomas persistentes por mais de 48h, febre acima de 38,5°C, recusa de alimentos por mais de 24h.',
-          '✅ SLIDE 4 — O QUE FAZER\nPasso 1: Mantenha a calma e observe os sintomas. Passo 2: Registre horários e intensidade. Passo 3: Ligue para seu pediatra antes de medicar. Passo 4: Em caso de dúvida, procure atendimento.',
-          '💙 SLIDE 5 — ' + nome.toUpperCase() + ' ESTÁ AQUI\nSomos a referência em ' + esp + ' de ' + cid + '. ' + dif + '.\n📞 ' + ct + ' | ' + ig
-        ]
-      },
-      {
-        num: 2,
-        tipo: 'Post educativo — Mitos e Verdades',
-        titulo: '5 mitos sobre ' + topic + ' que todo pai/mãe acredita (e não deveria)',
-        legenda: '🚫 "Vi na internet que..." — e aí o problema começa.\n\nExistem muitas informações erradas circulando sobre ' + topic + '. E elas podem atrasar um tratamento, gerar pânico desnecessário ou fazer você tomar a decisão errada.\n\nVou desmistificar os 5 maiores equívocos que chegam toda semana no nosso consultório:\n\n❌ Mito 1: "Se não tem febre, não é grave" — FALSO. Vários quadros sérios de ' + topic + ' surgem sem febre nas primeiras horas.\n\n❌ Mito 2: "Pode esperar passar sozinho" — DEPENDE. Alguns casos se resolvem, outros evoluem rapidamente. Só um especialista pode avaliar.\n\n❌ Mito 3: "Antibiótico resolve tudo" — ERRADO. A maioria dos casos pediátricos não responde a antibiótico e o uso inadequado cria resistência.\n\n❌ Mito 4: "Se a criança está brincando, está bem" — NEM SEMPRE. Crianças são resilientes e escondem sintomas.\n\n❌ Mito 5: "Isso não acontece com a minha família" — QUALQUER família pode ser afetada. Prevenção é para todos.\n\n💡 Salva e compartilha com outros pais! A informação certa chega quando mais precisamos.\n\n📩 Dúvidas? Manda mensagem: ' + ig + '\n\n#' + topicSlug + ' #mitos #verdades #' + espSlug + ' #' + nomeSlug,
-        slides: []
-      },
-      {
-        num: 3,
-        tipo: 'Post de autoridade — Bastidores da clínica',
-        titulo: 'O que vemos no consultório todos os dias sobre ' + topic,
-        legenda: '🏥 Depois de anos atendendo famílias de ' + cid + ', posso compartilhar algo importante:\n\nA maioria dos casos graves de ' + topic + ' que chegam até nós poderiam ter sido evitados ou tratados mais cedo — se a família tivesse a informação certa no momento certo.\n\nIsso não é crítica. É uma realidade que nos motiva a fazer mais.\n\nNa ' + nome + ', não esperamos o problema aparecer para agir. Nossa abordagem é preventiva, educativa e humanizada — porque acreditamos que cuidar é um ato contínuo, não pontual.\n\n' + dif + '.\n\nSe você está em ' + cid + ' e quer uma equipe de ' + esp + ' que vai estar presente em cada etapa do desenvolvimento da sua família — venha conversar com a gente.\n\n📅 Agendamentos: ' + ct + '\n🔗 Link na bio: ' + ig + '\n\n#' + espSlug + ' #' + nomeSlug + ' #' + cid.split(',')[0].toLowerCase().replace(/\s+/g,'') + ' #pediatra #saude #familia',
-        slides: []
-      }
-    ],
-
-    stories: [
-      {
-        num: 1, tipo: 'Abertura de impacto',
-        conteudo: '🔴 ATENÇÃO, PAIS DE ' + cid.split(',')[0].toUpperCase() + '\n\n[Imagem de impacto: criança com expressão preocupada ou símbolo do tema]\n\n' + topic.toUpperCase() + ':\no que você não sabe pode estar colocando sua família em risco.\n\n👆 Deslize para ver o guia completo\n\n[Sticker: Slide para aprender →]'
-      },
-      {
-        num: 2, tipo: 'Enquete interativa',
-        conteudo: '🤔 Pergunta rápida:\n\nVocê já recebeu orientação médica especializada sobre ' + topic + '?\n\n✅ SIM — já me informei\n❌ NÃO — preciso saber mais\n\n[Enquete aqui]\n\nSeja qual for sua resposta — a gente tem conteúdo especial pra você! ' + em + '\n\n[Sticker: Responde a enquete!]'
-      },
-      {
-        num: 3, tipo: 'CTA direto',
-        conteudo: em + ' Sua família merece o melhor da ' + esp + ' em ' + cid + '.\n\n' + nome + ':\n✓ ' + dif.split(',')[0].trim() + '\n✓ Equipe especializada\n✓ Agendamento fácil\n\nAgende agora:\n📞 ' + ct + '\n\n👇 ARRASTE PARA FALAR CONOSCO\n\n[Link na bio: ' + ig + ']'
-      }
-    ],
-
-    whatsapp: 'Olá! ' + em + ' Tudo bem?\n\nAqui é da equipe da ' + nome + ', sua clínica de ' + esp + ' em ' + cid + '.\n\nEstamos com uma campanha especial sobre "' + topic + '" e queríamos compartilhar algumas informações importantes com você e sua família.\n\nSabia que esse é um tema que afeta muitas famílias da nossa região — e que com as informações certas é possível prevenir a maioria dos casos mais graves?\n\nPreparamos um guia completo com:\n📌 O que toda família precisa saber sobre ' + topic + '\n⚠️ Sinais de atenção que exigem avaliação imediata\n✅ O protocolo de primeiros cuidados\n💡 Dicas de prevenção que realmente funcionam\n\nQuer receber o guia completo no WhatsApp? É gratuito.\n\nE se tiver qualquer dúvida ou precisar agendar uma avaliação, estamos à disposição:\n📞 ' + ct + '\n📱 ' + ig + '\n\nCuide-se! ' + em + '\n\nEquipe ' + nome + '\n' + esp + ' | ' + cid,
-
-    hashtags: [topicSlug, topicSlug+'saude', espSlug, nomeSlug, 'saude', 'saudeinfantil', 'pediatria', 'familia', 'prevencao', 'saudavel', 'criancasaudavel', 'medicinapreventiva', 'pediatra', 'consultapediatrica', 'puericultura', 'maternidade', cid.split(',')[0].toLowerCase().replace(/\s+/g,''), 'saude2025', 'clinicapediatrica', 'amor', 'cuidado', 'infancia', 'desenvolvimento', 'criança', 'bebe'],
-
-    calendario: [
-      { dia: 'Dia 1 — Ter',  acao: 'Publicar carrossel de lançamento', horario: '18h30', obs: 'Terça às 18h30 — pico de engajamento para saúde infantil. Boost pago recomendado R$30–50.' },
-      { dia: 'Dia 2 — Qua',  acao: 'Stories interativos (3 slides + enquete)', horario: '12h e 20h', obs: 'Dois envios: almoço e pós-jantar. Responder todos os DMs em até 2h.' },
-      { dia: 'Dia 3 — Qui',  acao: 'WhatsApp broadcast para base de pacientes', horario: '10h', obs: 'Horário comercial — maior taxa de abertura. Segmentar por faixa etária dos filhos.' },
-      { dia: 'Dia 5 — Sáb',  acao: 'Post "Mitos e Verdades" (post educativo)', horario: '09h', obs: 'Sábado de manhã tem alto alcance para público parental. Incentivar compartilhamento.' },
-      { dia: 'Dia 8 — Ter',  acao: 'Post de autoridade (bastidores da clínica)', horario: '19h', obs: 'Consolidar posicionamento. Responder comentários ativamente nas primeiras 2h.' },
-      { dia: 'Dia 10 — Qui', acao: 'Reels/vídeo curto (30–60s) sobre o tema', horario: '20h', obs: 'Formato vídeo gera 3x mais alcance orgânico. Roteiro: problema → causa → solução → CTA.' },
-      { dia: 'Dia 12 — Sáb', acao: 'Story de encerramento + CTA para agendamento', horario: '10h', obs: 'Recap da campanha com urgência: "últimas vagas desta semana". Converter audiência acumulada.' }
-    ],
-
-    briefingVisual: {
-      conceito: 'Campanha "' + angulo.nome + '" — paleta dominante ' + cor1 + ' (cor da marca) com brancos e tons neutros quentes. Visual clean, profissional e humano. Evitar imagens de banco de dados genéricas. Priorizar fotos com crianças reais em contexto clínico acolhedor.',
-      composicao: 'Plano médio ou close-up de criança/família em ambiente da clínica. Luz natural difusa. Profissional de saúde presente como figura de apoio (não de autoridade fria). Fundo desfocado, sujeito nítido. Regra dos terços.',
-      estilo: est + ' — fotografia editorial com toque documental. Evitar cenografia artificial. Preferir momentos genuínos de cuidado e interação.',
-      emocao: angulo.emocao + ' — o espectador precisa sentir que a clínica entende o universo dele. Não vender consulta: transmitir parceria.',
-      cores: 'Primária: ' + cor1 + '. Secundária: branco e cinza claro. Acento: verde saúde (#22C55E) para elementos de destaque positivo. Evitar vermelho (associação a alarme).',
-      promptImagem: 'Professional medical photography ' + cid + ', caring pediatrician gently examining a happy young child, warm modern clinic, soft natural window light, bokeh background, genuine smile, shallow depth of field, editorial healthcare style, ' + est.toLowerCase() + ' aesthetic, brand color ' + cor1
-    },
-
-    versoes: [
-      {
-        tipo: 'emocional', tag: 'Emocional',
-        copy: 'Tem uma cena que a gente nunca esquece.\n\nÉ quando um pai ou mãe entra no consultório, olhos vermelhos, com a criança no colo, e diz: "Se eu tivesse sabido antes..."\n\nA gente ouve isso com frequência. E dói.\n\nNão porque não haja solução — na maioria das vezes há. Mas porque aquele sofrimento poderia ter sido evitado com uma informação simples, disponível, acessível.\n\nÉ por isso que a ' + nome + ' criou esta campanha sobre ' + topic + '.\n\nNão para assustar. Mas para armar você com o conhecimento que protege quem você mais ama.\n\nPorque nós acreditamos que toda família merece chegar ao consultório informada — não em pânico.\n\n' + em + ' Compartilha com quem você ama. Talvez essa informação chegue exatamente para quem mais precisa hoje.'
-      },
-      {
-        tipo: 'profissional', tag: 'Profissional',
-        copy: 'Dados epidemiológicos recentes indicam que ' + topic + ' é responsável por uma parcela significativa dos atendimentos pediátricos de urgência na região Sul do Brasil — e que até 65% desses casos poderiam ter sido manejados ambulatorialmente com orientação preventiva adequada.\n\nNa ' + nome + ', adotamos protocolo baseado nas diretrizes da Sociedade Brasileira de Pediatria, com foco em:\n\n• Diagnóstico precoce e triagem de risco\n• Orientação familiar estruturada\n• Acompanhamento longitudinal do desenvolvimento\n• Integração entre atenção primária e especializada\n\nSe você busca uma equipe de ' + esp + ' em ' + cid + ' comprometida com evidências científicas e atualização contínua, agende uma consulta.\n\nContato: ' + ct + ' | ' + ig
-      },
-      {
-        tipo: 'institucional', tag: 'Institucional',
-        copy: nome + ' tem orgulho de ser referência em ' + esp + ' para as famílias de ' + cid + ' e região.\n\nEsta campanha sobre ' + topic + ' reflete nosso compromisso com o que sempre acreditamos: que saúde de qualidade começa com informação acessível, atendimento humanizado e uma equipe que genuinamente se importa com cada família.\n\nNossos pilares:\n✦ Excelência clínica baseada em evidências\n✦ ' + dif.split(',').map(function(d){ return d.trim(); }).join('\n✦ ') + '\n\nJuntos, construímos uma comunidade mais saudável em ' + cid + '.\n\nPara agendamentos e informações: ' + ct
-      },
-      {
-        tipo: 'humanizado', tag: 'Humanizado',
-        copy: 'Olha, vou ser honesta com você.\n\nSei que você já tem uma lista enorme de coisas para se preocupar. Trabalho, casa, escola, alimentação, sono... criar filho em ' + cid + ' não é tarefa fácil.\n\nMas esse assunto — ' + topic + ' — é um que a gente não pode deixar passar.\n\nNão porque vai dar trabalho. Mas porque uma informação de 5 minutos pode te poupar horas de angústia depois.\n\nNa ' + nome + ', a gente fala a língua de pai e mãe. Sem termos complicados, sem julgamento, sem pressa.\n\nVem conversar. Pode ser pelo WhatsApp mesmo: ' + ct + '\n\nA gente está aqui. ' + em
-      }
-    ],
-
-    metricas: [
-      {
-        icone: '👁️',
-        titulo: 'Alcance & Impressões',
-        desc: 'Meta: 3.000–8.000 impressões orgânicas em 10 dias. Com impulsionamento de R$50, potencial de 15.000–25.000. Benchmark: clínicas de ' + esp + ' em ' + cid + ' com perfil similar alcançam ~4.200 impressões/campanha.'
-      },
-      {
-        icone: '💬',
-        titulo: 'Engajamento',
-        desc: 'Meta: taxa de engajamento de 8–14% (saves + compartilhamentos + comentários). Carrosséis educativos neste nicho geram em média 2,3x mais saves que posts simples. Stories com enquete: meta de 40%+ de participação.'
-      },
-      {
-        icone: '📅',
-        titulo: 'Conversões',
-        desc: 'Meta principal: 12–20 novos agendamentos ou contatos qualificados nos 10 dias de campanha. Custo de aquisição estimado: R$8–15 por lead com impulsionamento. ROI médio do setor: R$180–400 por paciente convertido.'
-      }
-    ]
-  };
-}
-
-/* ══════════════════════════════════════════════════════
-   VISUAL INTELLIGENCE ENGINE — Demo semântico local
-   Retorna JSON válido que buildSP pode parsear,
-   detectando estilo e conteúdo do pedido do usuário
-   sem precisar de chamada de API.
-══════════════════════════════════════════════════════ */
-function buildVIEDemo(userInput) {
-  var inp = (userInput || '').toLowerCase();
-
-  // Detecção de estilo — mapeamento PT→style key
-  var styleMap = [
-    { keys:['desenho animado','cartoon','animação','animado','divertido','pixar','disney'],     style:'cartoon' },
-    { keys:['anime','mangá','manga','japonês','ghibli','estilo anime'],                          style:'anime' },
-    { keys:['3d','render','tridimensional','cgi','three d'],                                     style:'3d' },
-    { keys:['pixel art','pixel','8-bit','16-bit','retro game','8bit','16bit'],                   style:'pixel_art' },
-    { keys:['aquarela','watercolor','pintura aquarela','aquarelado'],                            style:'watercolor' },
-    { keys:['pintura digital','digital painting','concept art','ilustração digital'],            style:'digital_painting' },
-    { keys:['cyberpunk','neon','futurista neon','blade runner','neonfuturista'],                  style:'cyberpunk' },
-    { keys:['minimalista','minimal','minimalismo','simples clean'],                              style:'minimalist' },
-    { keys:['futurista','futuro','sci-fi','ficção científica','futuristic'],                     style:'futurist' },
-    { keys:['vintage','retrô','retro','anos 50','anos 70','old school','nostálgico'],            style:'vintage' },
-    { keys:['foto realista','fotorrealista','realista','fotografia real','dslr'],                style:'realistic_photo' },
-    { keys:['documentário','fotojornalismo','candid','documental'],                             style:'documentary_photo' },
-    { keys:['produto','embalagem','frasco','fundo branco','fundo neutro','isolado'],             style:'product_photo' },
-    { keys:['pôster','poster','cartaz','campanha publicitária','banner','campanha visual'],       style:'poster' },
-    { keys:['infográfico','infografico','diagrama','ilustração educativa','educativo visual'],   style:'infographic' }
-  ];
-
-  var detectedStyle = 'neutral';
-  var userSpecifiedStyle = false;
-  for (var i = 0; i < styleMap.length; i++) {
-    for (var j = 0; j < styleMap[i].keys.length; j++) {
-      if (inp.indexOf(styleMap[i].keys[j]) !== -1) {
-        detectedStyle = styleMap[i].style;
-        userSpecifiedStyle = true;
-        break;
-      }
-    }
-    if (userSpecifiedStyle) break;
-  }
-
-  // Se não especificou estilo, inferir pelo conteúdo
-  if (!userSpecifiedStyle) {
-    if (/vacina|frasco|seringa|medicamento|cápsula|comprimido|embalagem/.test(inp)) detectedStyle = 'product_photo';
-    else if (/criança|paciente|médico|consulta|procedimento|exame|bebê/.test(inp)) detectedStyle = 'documentary_photo';
-    else if (/campanha|prevenção|conscientização|combate|alerta|dengue|gripe/.test(inp)) detectedStyle = 'poster';
-    else if (/diagrama|esquema|explicar|como funciona|processo|etapas/.test(inp)) detectedStyle = 'infographic';
-    else detectedStyle = 'neutral';
-  }
-
-  // Extração de sujeito — remove palavras de estilo para isolar o conteúdo
-  var subject = userInput
-    .replace(/em (estilo )?(cartoon|anime|3d|aquarela|pixel art|minimalista|vintage|cyberpunk|futurista|realista|pôster|infográfico|pintura digital)/gi, '')
-    .replace(/(desenho animado|foto realista|fotorrealista|pintura digital)/gi, '')
-    .replace(/\s+/g, ' ').trim()
-    .slice(0, 80);
-
-  // Content prompt — descreve o QUE mostrar em inglês
-  var contentMap = [
-    { test:/criança.*feliz|feliz.*criança/,    en:'A cheerful young child with big smile, playful expression, simple colorful background, arms raised in joy' },
-    { test:/criança.*vacina|vacina.*criança/,  en:'A small child sitting calmly while a kind pediatrician administers a vaccine injection in the upper arm, warm clinic atmosphere' },
-    { test:/vacina.*polio|poliomielite/,       en:'A glass medical vial labeled polio vaccine with clear printed text, next to a sterile syringe, on a clean white surface' },
-    { test:/vacina/,                           en:'A medical vaccine vial with printed label, sterile syringe beside it, clean medical surface' },
-    { test:/bebê|recém-nascido/,               en:'A newborn baby with soft skin, peaceful sleeping expression, wrapped in a soft white blanket' },
-    { test:/médico|pediatra|doutor/,           en:'A caring pediatrician in a white coat, warm smile, interacting with a young patient in a modern clean clinic' },
-    { test:/família|pais.*filho|filho.*pais/,  en:'A loving family with young children in a warm home setting, natural expressions of care and happiness' },
-    { test:/dengue|mosquito/,                  en:'Bold public health awareness composition, Aedes aegypti mosquito silhouette over standing water, prevention theme, strong visual impact' },
-    { test:/gripe|resfriado|febre/,            en:'A parent gently caring for a sick child at home, thermometer, warm blanket, soft comforting light' },
-    { test:/alimentação|nutrição|comida/,      en:'Colorful fresh healthy foods and vegetables arranged on a clean white surface, nutritional variety' },
-    { test:/exercício|esporte|atividade física/,en:'Active child playing outdoors in natural light, energetic healthy lifestyle' },
-    { test:/logo|marca|símbolo/,               en:'A modern medical clinic logo featuring stylized caduceus or heart symbol, centered, premium feel' },
-    { test:/clínica|consultório/,              en:'Modern pediatric clinic interior, clean white walls, welcoming reception area, warm lighting, professional aesthetic' }
-  ];
-
-  var contentPrompt = '';
-  for (var k = 0; k < contentMap.length; k++) {
-    if (contentMap[k].test.test(inp)) {
-      contentPrompt = contentMap[k].en;
-      break;
-    }
-  }
-
-  // Fallback: traduz descrição genérica
-  if (!contentPrompt) {
-    contentPrompt = 'Professional medical themed visual: ' + subject.slice(0, 60) + '. Clean composition, medical context, warm professional atmosphere';
-  }
-
-  return {
-    subject: subject.slice(0, 60) || userInput.slice(0, 60),
-    contentPrompt: contentPrompt,
-    style: detectedStyle,
-    userSpecifiedStyle: userSpecifiedStyle,
-    extraNegatives: ''
-  };
-}
-const MB = {
-  clients: {
-    'doutorgregory@clinica.com.br': {
-      clientId: 'clinica-gregori',
-      nome: 'Dr. Grégori Bertagnolli',
-      clinica: 'Clínica Pediátrica Bertagnolli',
-      role: 'Admin', initials: 'GB',
-      plan: 'Professional', monthlyLimit: 500,
-      agents: ['orientacao','instagram','duvidas','campanhas','imagens'],
-      password: 'MedAI@2025!', accessCode: 'BERG-7X4K', active: true
-    }
-  },
-  log: [],
-
-  async verifyCred(email, pw) {
-    await dl(600);
-    const c = this.clients[(email || '').toLowerCase().trim()];
-    if (!c)        throw { code:'NF', msg:'E-mail não encontrado.' };
-    if (!c.active) throw { code:'IN', msg:'Conta desativada. Contate o suporte.' };
-    if (pw !== c.password) throw { code:'WP', msg:'Senha incorreta. Tente novamente.' };
-    return { ek: (email || '').toLowerCase().trim() };
-  },
-
-  async verifyCode(ek, code) {
-    await dl(400);
-    const c = this.clients[ek];
-    if (!c || !c.active) throw { code:'EX', msg:'Sessão expirada. Faça login novamente.' };
-    const inp = (code || '').trim().toUpperCase();
-    const stored = (c.accessCode || '').trim().toUpperCase();
-    if (!inp)          throw { code:'EM', msg:'Digite o código de acesso.' };
-    if (inp !== stored) throw { code:'WC', msg:'Código inválido. Tente novamente.' };
-    return {
-      token: 'tok_' + c.clientId + '_' + Date.now(),
-      clientId: c.clientId, nome: c.nome, clinica: c.clinica,
-      role: c.role, initials: c.initials, plan: c.plan,
-      monthlyLimit: c.monthlyLimit, agents: c.agents
-    };
-  },
-
-  monthly(cid) {
-    var n = new Date();
-    return this.log.filter(function(r) {
-      var d = new Date(r.ts);
-      return r.cid === cid && d.getMonth() === n.getMonth() && d.getFullYear() === n.getFullYear();
-    });
-  },
-
-  logU(cid, aid, tok, status, ms) {
-    this.log.push({ id:'U'+Date.now(), cid:cid, aid:aid, tok:tok, status:status, ts:new Date().toISOString(), ms:ms });
-  },
-
-  async callAI(cid, aid, messages, sys) {
-    var t0 = Date.now();
-    if (!SESSION || SESSION.clientId !== cid) throw { code:'AU', msg:'Sessão expirada.' };
-    var mu = this.monthly(cid).filter(function(r){ return r.status !== 'limit_exceeded'; });
-    if (mu.length >= SESSION.monthlyLimit) {
-      this.logU(cid, aid, 0, 'limit_exceeded', 0);
-      throw { code:'LM', msg:'Limite de ' + SESSION.monthlyLimit + ' mensagens atingido.' };
-    }
-    /* ── ROTEAMENTO DE IA ──────────────────────────────────
-       Arquitetura correta para SaaS:
-         Frontend → MB.callAI → /api/ai/chat (backend)
-                                     ↓
-                              AI Orchestrator
-                                     ↓
-                          Provider (Anthropic/OpenAI/etc)
-
-       Em produção: configurar MEDAI_BACKEND_URL para o
-       servidor Node.js que mantém a chave segura.
-       Em desenvolvimento: usa Intelligence Engine local.
-    ────────────────────────────────────────────────────── */
-    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
-
-    if (!BACKEND_URL) {
-      await dl(1200 + Math.random() * 600);
-      this.logU(cid, aid, 200, 'success', Date.now() - t0);
-
-      // Orchestrator / Campanhas → Campaign Document
-      if (aid === 'orchestrator' || aid === 'campanhas') {
-        var userMsg = messages[messages.length - 1] && messages[messages.length - 1].content || 'campanha';
-        var cleanTopic = userMsg
-          .replace(/^criar campanha (profissional completa )?sobre:\s*/i, '')
-          .replace(/^campanha (sobre\s*)?:\s*/i,'')
-          .replace(/^quero (uma )?campanha (sobre|de|para)\s*/i,'')
-          .trim();
-        return { reply: JSON.stringify(buildDemoCampaign(cleanTopic)), demo: true };
-      }
-
-      // Imagens → Visual Intelligence Engine retorna JSON semântico
-      // para que buildSP possa parseá-lo e gerar o prompt de imagem corretamente
-      if (aid === 'imagens') {
-        var userInput = messages[messages.length - 1] && messages[messages.length - 1].content || '';
-        var vieResult = buildVIEDemo(userInput);
-        return { reply: JSON.stringify(vieResult), demo: true };
-      }
-
-      var nome   = CTX.nom  || (SESSION && SESSION.clinica) || 'Clínica Pediátrica Bertagnolli';
-      var esp    = CTX.esp  || 'Pediatria';
-      var cid2   = CTX.cid  || 'Porto Alegre, RS';
-      var ig     = CTX.ig   || '@clinicabertagnolli';
-      var ct     = CTX.ct   || '(51) 99999-0000';
-      var dif    = CTX.dif  || 'atendimento humanizado, equipe especializada, ambiente acolhedor';
-      var userQ  = messages[messages.length - 1] && messages[messages.length - 1].content || '';
-
-      var demoResponses = {
-        orientacao: '💙 Olá! Sou o assistente de saúde infantil da **' + nome + '**.\n\nEstou aqui para ajudar com informações educativas sobre pediatria e saúde da criança.\n\n' + (userQ.length > 5 ? '**Sobre sua pergunta:**\nEssa é uma dúvida muito comum entre pais e mães! Deixa eu te dar uma orientação geral:\n\nCom base no que você compartilhou, os principais pontos de atenção são:\n\n✅ **Observação:** Monitore os sintomas por 24–48h antes de qualquer decisão\n✅ **Sinais de alerta:** Febre acima de 38,5°C, recusa alimentar prolongada, choro inconsolável\n✅ **Hidratação:** Fundamental em qualquer quadro pediátrico\n✅ **Repouso:** Respeitar o ritmo da criança\n\n⚠️ **Importante:** Esta orientação é educativa e não substitui avaliação médica presencial. Para diagnóstico e tratamento, agende uma consulta.\n\n📅 **Na ' + nome + '**, temos disponibilidade esta semana.\n📞 Ligue: ' + ct + '\n📱 Instagram: ' + ig : 'Como posso te ajudar hoje? Pode perguntar sobre febre, alimentação, desenvolvimento infantil, vacinas, doenças comuns da infância ou qualquer dúvida sobre a saúde da criança.') + '\n\n---\n*Assistente da ' + nome + ' · ' + esp + ' · ' + cid2 + ' — Orientações educativas baseadas em evidências clínicas*',
-
-        instagram: '📱 **Conteúdo criado para ' + nome + '**\n\n---\n\n**TIPO:** Carrossel educativo (6 slides)\n**TEMA:** ' + (userQ.slice(0,50) || 'Saúde infantil') + '\n**FORMATO:** Instagram Feed + Reels\n\n---\n\n**📲 ROTEIRO DOS SLIDES:**\n\n**Slide 1 — Gancho:**\n"' + (userQ.slice(0,30) || 'Saúde infantil') + ': o que todo pai/mãe precisa saber"\n*Visual: imagem de impacto + logo ' + nome + '*\n\n**Slide 2 — Problema:**\nContextualização do tema. Por que isso importa para as famílias de ' + cid2 + '?\n*Visual: dado ou estatística em destaque*\n\n**Slide 3 — Educação:**\nInformação de valor. Conteúdo que o público não encontra facilmente.\n*Visual: infográfico clean*\n\n**Slide 4 — Dica prática:**\nAção concreta que o seguidor pode tomar hoje.\n*Visual: checklist ou passo a passo*\n\n**Slide 5 — Autoridade:**\nPor que a ' + nome + ' é referência neste tema em ' + cid2 + '.\n*Visual: foto real da equipe ou clínica*\n\n**Slide 6 — CTA:**\n"Dúvidas? Agende sua consulta!"\n*Visual: dados de contato + link na bio*\n\n---\n\n**✍️ LEGENDA COMPLETA:**\n\n💙 ' + (userQ || 'Saúde infantil') + ' — você sabe tudo que precisa?\n\nCriamos um guia completo para as famílias de ' + cid2 + '.\n\nArraste até o fim — o último slide tem a informação mais importante 👉\n\n💡 Salva para ter sempre à mão.\n\n📅 Quer orientação personalizada?\n➡️ Link na bio · ' + ig + '\n📞 ' + ct + '\n\n' + ['#saudeinfantil','#pediatria','#' + esp.toLowerCase().replace(/\s+/g,''),'#familia','#maternidade','#crianca','#saude','#prevencao','#' + nome.toLowerCase().replace(/\s+/g,'').slice(0,12),'#' + cid2.split(',')[0].toLowerCase().replace(/\s+/g,''),'#pediatra','#consultapediatrica','#puericultura','#filhos','#bebe','#desenvolvimento','#saudavel','#medicinapreventiva','#clinicapediatrica','#cuidado'].join(' ') + '\n\n---\n\n**⏰ MELHOR HORÁRIO:** Terças e quintas às 18h30\n**📈 DICA DE PERFORMANCE:** Responda todos os comentários nas primeiras 2h para maximizar alcance orgânico\n**💰 BOOST SUGERIDO:** R$30–50 por 3 dias para ampliar alcance na região de ' + cid2,
-
-        duvidas: '💬 **Central de Atendimento — ' + nome + '**\n\n' + (userQ.length > 5 ? '**Sua pergunta:** "' + userQ.slice(0,80) + '"\n\n**Resposta:**\n' : '') + 'Olá! Aqui estão as informações da **' + nome + '** em ' + cid2 + ':\n\n---\n\n**🕐 HORÁRIOS DE ATENDIMENTO**\n• Segunda a sexta: 8h às 18h\n• Sábados: 8h às 12h\n• Urgências pediátricas: mediante disponibilidade\n\n**📅 AGENDAMENTOS**\n• WhatsApp: ' + ct + '\n• Instagram: ' + ig + '\n• Resposta em até 2 horas no horário comercial\n\n**💳 CONVÊNIOS ACEITOS**\n• Unimed, SulAmérica, Bradesco Saúde, Porto Seguro\n• Amil, Hapvida, NotreDame Intermédica\n• Consulta particular com facilidade de pagamento\n\n**📋 DOCUMENTOS NECESSÁRIOS**\n• Carteirinha do convênio atualizada\n• Cartão de vacinas (para consultas de puericultura)\n• Exames anteriores, se houver\n\n**👶 ESPECIALIDADES**\n' + esp + ' — ' + dif + '\n\n**📍 LOCALIZAÇÃO**\n' + cid2 + ' · Endereço completo pelo WhatsApp\n\nPosso ajudar com mais alguma informação?'
-      };
-
-      return {
-        reply: demoResponses[aid] || '🏥 **' + nome + '** — Assistente Inteligente\n\nOlá! Sou o assistente da ' + nome + ', especializado em ' + esp + ' para as famílias de ' + cid2 + '.\n\nComo posso te ajudar hoje?\n\n' + (userQ ? '**Sobre:** "' + userQ.slice(0,60) + '"\n\nProcessando com base no perfil completo da clínica...' : 'Pergunte sobre saúde infantil, agendamentos, campanhas ou qualquer assunto da clínica.'),
-        demo: true
-      };
-    }
-
-    // Modo produção: chama backend seguro
-    var ctrl = new AbortController();
-    var tid = setTimeout(function(){ ctrl.abort(); }, 60000);
-    var res;
-
-    // Extrair mensagem do usuário — pegar a última mensagem com role 'user'
-    var lastUserMsg = '';
-    for (var mi = messages.length - 1; mi >= 0; mi--) {
-      if (messages[mi] && messages[mi].role !== 'assistant' && messages[mi].content) {
-        lastUserMsg = messages[mi].content;
-        break;
-      }
-    }
-    if (!lastUserMsg && messages.length > 0) {
-      lastUserMsg = messages[messages.length-1] && messages[messages.length-1].content || '';
-    }
-
-    // Mapear aid para intent
-    var intentMap = { orchestrator:'campaign', campanhas:'campaign', instagram:'social', duvidas:'faq', orientacao:'health', imagens:'image' };
-    var intentVal = intentMap[aid] || 'auto';
-
-    try {
-      res = await fetch(BACKEND_URL + '/api/ai/chat', {
-        method: 'POST', signal: ctrl.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + SESSION.token
-        },
-        body: JSON.stringify({
-          message: lastUserMsg,
-          intent:  intentVal
-        })
-      });
-    } catch(e) {
-      clearTimeout(tid); this.logU(cid,aid,0,'error',Date.now()-t0);
-      throw e.name==='AbortError' ? { code:'TO', msg:'Tempo limite excedido. Tente novamente.' } : { code:'NW', msg:'Falha de conexão com o servidor.' };
-    }
-    clearTimeout(tid);
-    if (!res.ok) {
-      this.logU(cid,aid,0,'error',Date.now()-t0);
-      var errMap = { 401:{code:'AU',msg:'Sessão expirada. Faça login novamente.'}, 403:{code:'BL',msg:'Acesso negado.'}, 429:{code:'RL',msg:'Muitas requisições. Aguarde alguns segundos.'}, 500:{code:'SE',msg:'Erro interno do servidor. Tente novamente.'}, 503:{code:'DW',msg:'Serviço temporariamente indisponível.'} };
-      throw errMap[res.status] || { code:'H'+res.status, msg:'Erro ao processar sua solicitação.' };
-    }
-    var d = await res.json().catch(function(){ return null; });
-    if (!d) { this.logU(cid,aid,0,'error',Date.now()-t0); throw { code:'PR', msg:'Resposta inválida do servidor.' }; }
-    // Backend retorna { success:true, data:{ type, data, intent, conversationId, usage } }
-    var payload = d.data || d;
-    var reply;
-    if (payload.type === 'campaign') {
-      // payload.data é o objeto da campanha — serializar direto
-      reply = JSON.stringify(payload.data);
-    } else if (payload.type === 'image') {
-      reply = JSON.stringify(payload.data);
-    } else if (payload.type === 'text') {
-      reply = typeof payload.data === 'string' ? payload.data : JSON.stringify(payload.data);
-    } else {
-      // Fallback genérico
-      reply = payload.reply || (typeof payload.data === 'string' ? payload.data : JSON.stringify(payload.data)) || '';
-    }
-    if (!reply) { this.logU(cid,aid,0,'error',Date.now()-t0); throw { code:'ER', msg:'Resposta vazia. Reformule e tente.' }; }
-    var tk = (payload.usage && payload.usage.current) || 0;
-    this.logU(cid,aid,tk,'success',Date.now()-t0);
-    return { reply:reply, tokens:tk, demo:false, responseType: payload.type || 'text' };
-  }
-};
-
-/* ══════════════════════════════════════════════════════
-   AGENTES
-══════════════════════════════════════════════════════ */
-var AGENTS = {
-  orientacao: {
-    name: 'Orientação aos Pais',
-    welcome: 'Olá! Sou o assistente de Orientação aos Pais. Respondo dúvidas sobre saúde infantil de forma educativa e segura. Como posso ajudar?',
-    sys: function() { return AIO.enrich('Você é assistente especializado em saúde infantil de uma clínica médica de alto padrão.\nREGRAS ABSOLUTAS: nunca diagnostique doenças, nunca prescreva medicamentos, nunca substitua consulta médica.\nOriente de forma educativa, empática e profissional. Recomende avaliação presencial quando pertinente.\nResponda em português brasileiro.'); }
-  },
-  instagram: {
-    name: 'Conteúdo Instagram',
-    welcome: 'Olá! Vou criar conteúdo completo para o Instagram da clínica. Qual é o tema?',
-    sys: function() { return AIO.enrich('Você é especialista em marketing digital para clínicas médicas, focado em Instagram.\nEntregue: tipo de conteúdo, roteiro/script completo, legenda com emojis e CTA, 20-25 hashtags, melhor horário e 1 dica de performance.\nUse o nome, tom e estilo visual da clínica do contexto. Responda em português brasileiro.'); }
-  },
-  duvidas: {
-    name: 'Dúvidas Frequentes',
-    welcome: 'Olá! Pode perguntar sobre agendamentos, convênios, vacinas e funcionamento da clínica!',
-    sys: function() { return AIO.enrich('Você é o assistente de atendimento de uma clínica médica de alto padrão.\nResponda sobre: agendamentos, convênios aceitos, vacinas, documentos necessários, horários.\nUse as informações da clínica do contexto. Seja objetivo e cordial. Responda em português brasileiro.'); }
-  },
-  campanhas: {
-    name: 'Campanhas de Saúde',
-    welcome: 'Olá! Me diga o tema da campanha e entregarei nome, slogan, conteúdo, cronograma e briefing visual!',
-    sys: function() { return AIO.enrich('Você é especialista em campanhas de saúde pública e marketing médico.\nEntregue campanha completa com nome, slogan, conteúdo por canal, cronograma e métricas.\nUse nome, tom e diferenciais da clínica do contexto. Campanhas éticas. Português brasileiro.'); }
-  },
-  imagens: {
-    name: 'Visual Intelligence Engine',
-    welcome: 'Olá! Descreva a imagem e vou gerá-la com interpretação semântica avançada. Estilos: cartoon, anime, 3D, aquarela, pôster, foto realista, minimalista e mais.',
-    isImage: true,
-    sys: function() { return ''; }
-  },
-  orchestrator: {
-    name: 'AI Orchestrator',
-    welcome: 'Ótimo! Vou criar uma campanha completa. Qual é o tema?',
-    isOrch: true,
-    sys: function() { return ''; }
-  }
-};
-
-/* ══════════════════════════════════════════════════════
-   VISUAL INTELLIGENCE ENGINE — estilos
-══════════════════════════════════════════════════════ */
-var VS = {
-  cartoon:          { p:'Cartoon illustration style, bold black outlines, flat vibrant colors, expressive characters, Disney-Pixar 2D animation aesthetic', n:'realistic, photograph, 3d render, photorealistic, real skin texture' },
-  anime:            { p:'Anime illustration, Japanese anime style, cel shading, expressive large eyes, vibrant colors, Studio Ghibli quality', n:'realistic photo, photograph, western cartoon, 3d render' },
-  '3d':             { p:'3D render, octane render, ray-traced lighting, high-detail 3D model, Pixar-quality animation, cinematic depth, volumetric light', n:'2d, flat illustration, drawing, sketch, painting, anime outline' },
-  pixel_art:        { p:'Pixel art style, 16-bit retro game aesthetic, limited color palette, crisp pixel edges, dithering', n:'smooth, anti-aliased, photorealistic, blurry, 3d render, vector' },
-  watercolor:       { p:'Watercolor painting, traditional on paper, soft color washes, visible brush strokes, gentle bleeding edges, light pastel tones', n:'digital, sharp edges, photograph, 3d render, vector, plastic' },
-  digital_painting: { p:'Digital painting, painterly style, ArtStation quality, concept art, rich textures, dramatic lighting, masterful brushwork', n:'photograph, low quality, pixel art, flat color' },
-  cyberpunk:        { p:'Cyberpunk aesthetic, neon-lit urban night, futuristic city, holographic signs, magenta and cyan palette, Blade Runner inspired', n:'daylight, rural, vintage, watercolor, cartoon' },
-  minimalist:       { p:'Minimalist flat design, simple geometric shapes, 2-4 color palette, abundant negative space, clean uncluttered composition', n:'detailed, realistic, photograph, complex background, cluttered' },
-  futurist:         { p:'Futuristic sci-fi aesthetic, sleek polished surfaces, glowing tech accents, advanced technology, white and chrome with neon highlights', n:'vintage, retro, old, weathered, rustic' },
-  vintage:          { p:'Vintage aesthetic, retro 1950s-1970s style, faded warm tones, film grain texture, nostalgic mood, sepia palette', n:'modern, futuristic, neon, digital, glossy' },
-  realistic_photo:  { p:'Photorealistic photograph, DSLR camera quality, sharp focus, natural realistic lighting, fine texture and detail, lifelike', n:'cartoon, anime, illustration, drawing, 3d render, plastic' },
-  documentary_photo:{ p:'Documentary photograph, photojournalism style, natural candid moment, available light, authentic spontaneous mood, high realism', n:'cartoon, anime, illustration, 3d render, staged' },
-  product_photo:    { p:'Professional product photography, clean studio setup, soft diffused lighting, sharp macro focus, neutral background, commercial quality', n:'people, hands, cluttered background, blurry, cartoon' },
-  poster:           { p:'Modern poster design, bold graphic composition, typography-friendly layout, vibrant focal point, advertising aesthetic, visual impact', n:'snapshot photograph, blurry, amateur, low quality' },
-  infographic:      { p:'Educational infographic illustration, flat vector style, clear iconography, professional color palette, labeled diagrams', n:'photograph, realistic photo, 3d render, blurry' },
-  neutral:          { p:'High quality detailed image, balanced professional composition, good lighting, clear subject, sharp focus', n:'blurry, low quality, watermark, text artifacts, distorted, deformed' }
-};
-var UNEG = 'blurry, low resolution, watermark, signature, text overlay, jpeg artifacts, deformed anatomy, extra fingers, mutated hands, worst quality';
-var SLBL = { cartoon:'Cartoon/Animação', anime:'Anime', '3d':'3D Render', pixel_art:'Pixel Art', watercolor:'Aquarela', digital_painting:'Pintura Digital', cyberpunk:'Cyberpunk', minimalist:'Minimalista', futurist:'Futurista', vintage:'Vintage', realistic_photo:'Foto Realista', documentary_photo:'Foto Documental', product_photo:'Foto de Produto', poster:'Pôster/Campanha', infographic:'Infográfico', neutral:'Padrão' };
-
-</script>
-<script>
-/* ══════════════════════════════════════════════════════
-   ESTADO GLOBAL
-══════════════════════════════════════════════════════ */
-var SESSION = null, AUTHK = null, HIST = [], LOAD = false;
-
-/* UTILS */
-function dl(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
-function now() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+/* ── UTILS ── */
+function dl(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }); }
 function fN(n) { return Number(n).toLocaleString('pt-BR'); }
-function fDt(i) { return new Date(i).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); }
-function esc(t) { var d=document.createElement('div'); d.appendChild(document.createTextNode(t)); return d.innerHTML; }
+function fDt(i) { return new Date(i).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+function esc(t) { const d = document.createElement('div'); d.appendChild(document.createTextNode(String(t||''))); return d.innerHTML; }
 function fmt(t) {
   return esc(t)
-    .replace(/\n/g,'<br>')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^## (.*?)(<br>|$)/gm,'<strong style="font-size:14px;display:block;margin:10px 0 3px;color:var(--t1)">$1</strong>')
-    .replace(/^### (.*?)(<br>|$)/gm,'<strong style="display:block;margin:7px 0 2px">$1</strong>');
+    .replace(/\n/g, '<br>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^## (.*?)(<br>|$)/gm, '<strong style="font-size:14px;display:block;margin:10px 0 3px;color:var(--t1)">$1</strong>')
+    .replace(/^### (.*?)(<br>|$)/gm, '<strong style="display:block;margin:7px 0 2px">$1</strong>');
 }
-function $t(id,v) { var e=document.getElementById(id); if(e) e.textContent=v; }
-function mE(e) { var p=e.split('@'); return p[0][0]+'*'.repeat(Math.max(p[0].length-1,3))+'@'+p[1]; }
-function setE(id,msg) { var e=document.getElementById(id); e.textContent=msg; e.classList.remove('shk'); void e.offsetWidth; e.classList.add('shk'); }
-var ET = { AU:'Falha de autenticação', RL:'Muitas requisições', TO:'Tempo limite excedido', NW:'Falha de conexão', BL:'Conteúdo bloqueado', ER:'Resposta vazia', LM:'Limite atingido' };
-function etl(c) { return ET[c]||'Não foi possível processar'; }
+function $t(id, v) { const e = document.getElementById(id); if (e) e.textContent = v; }
+function mE(e) { const p = e.split('@'); return p[0][0] + '*'.repeat(Math.max(p[0].length-1,3)) + '@' + p[1]; }
+function setE(id, msg) { const e = document.getElementById(id); e.textContent = msg; e.classList.remove('shk'); void e.offsetWidth; e.classList.add('shk'); }
+
+/* ── API CLIENT ── */
+async function apiFetch(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (SESSION?.token) headers['Authorization'] = 'Bearer ' + SESSION.token;
+
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), options.timeout || 90000);
+
+  let res;
+  try {
+    res = await fetch(BACKEND_URL + path, { ...options, headers, signal: ctrl.signal });
+  } catch(e) {
+    clearTimeout(tid);
+    if (e.name === 'AbortError') throw { code:'TO', msg:'Tempo limite excedido. Tente novamente.' };
+    throw { code:'NW', msg:'Falha de conexão com o servidor.' };
+  }
+  clearTimeout(tid);
+
+  /* Auto-refresh em 401 TOKEN_EXPIRED (exceto nas rotas de auth) */
+  if (res.status === 401 && SESSION?.refreshToken && !path.startsWith('/api/auth/')) {
+    const body = await res.json().catch(() => ({}));
+    if (body.code === 'TOKEN_EXPIRED') {
+      try { await doRefreshToken(); return apiFetch(path, options); }
+      catch(_) { doLogout(false); throw { code:'AU', msg:'Sessão expirada. Faça login novamente.' }; }
+    }
+  }
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    const msgs = { 401:'Sessão expirada.', 403:'Acesso negado.', 422: data?.error||'Dados inválidos.', 429:'Muitas requisições. Aguarde.', 500:'Erro interno do servidor.', 503:'Serviço temporariamente indisponível.' };
+    throw { code: data?.code || ('H'+res.status), msg: data?.error || msgs[res.status] || 'Erro ao processar.' };
+  }
+  if (!data) throw { code:'PR', msg:'Resposta inválida do servidor.' };
+  return data;
+}
+
+async function doRefreshToken() {
+  if (!SESSION?.refreshToken) throw new Error('No refresh token');
+  const data = await apiFetch('/api/auth/refresh', {
+    method: 'POST', body: JSON.stringify({ refreshToken: SESSION.refreshToken })
+  });
+  SESSION.token = data.data.accessToken;
+}
 
 /* ── AUTH ── */
 async function doS1() {
-  var em=document.getElementById('in-em').value.trim(), pw=document.getElementById('in-pw').value.trim();
-  var b=document.getElementById('b1'), bt=document.getElementById('b1t');
-  document.getElementById('e1').textContent='';
-  if(!em){setE('e1','Informe seu e-mail.');return;}
-  if(!pw){setE('e1','Informe sua senha.');return;}
-  b.disabled=true; bt.textContent='Verificando…';
+  const em = document.getElementById('in-em').value.trim();
+  const pw = document.getElementById('in-pw').value.trim();
+  const b = document.getElementById('b1'), bt = document.getElementById('b1t');
+  document.getElementById('e1').textContent = '';
+  if (!em) { setE('e1','Informe seu e-mail.'); return; }
+  if (!pw) { setE('e1','Informe sua senha.'); return; }
+  b.disabled = true; bt.textContent = 'Verificando…';
   try {
-    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
-    if (BACKEND_URL) {
-      // Backend real
-      var res = await fetch(BACKEND_URL+'/api/auth/login', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email:em, password:pw })
-      });
-      var data = await res.json();
-      if (!res.ok) throw { msg: data.error || 'Erro ao verificar.' };
-      AUTHK = em.toLowerCase().trim();
-    } else {
-      await MB.verifyCred(em,pw);
-      AUTHK = em.toLowerCase().trim();
-    }
-    $t('emask',mE(AUTHK));
+    const data = await apiFetch('/api/auth/login', { method:'POST', body: JSON.stringify({ email:em, password:pw }) });
+    if (!data.success) throw { msg: data.error || 'Erro ao verificar.' };
+    sessionStorage.setItem('_ak', em.toLowerCase().trim());
+    $t('emask', mE(em.toLowerCase().trim()));
     document.getElementById('lslider').classList.add('s2');
-    document.getElementById('e2').textContent='';
-    setTimeout(function(){ document.getElementById('in-cod').focus(); },450);
-  } catch(e) { setE('e1',e.msg||'Erro. Tente novamente.'); }
-  finally { b.disabled=false; bt.textContent='Continuar'; document.getElementById('b1a').textContent='→'; }
+    document.getElementById('e2').textContent = '';
+    setTimeout(() => document.getElementById('in-cod').focus(), 450);
+  } catch(e) {
+    setE('e1', e.msg || 'Erro. Tente novamente.');
+  } finally {
+    b.disabled = false; bt.textContent = 'Continuar';
+    document.getElementById('b1a').textContent = '→';
+  }
 }
+
 async function doS2() {
-  var cod=document.getElementById('in-cod').value.trim();
-  var b=document.getElementById('b2'), bt=document.getElementById('b2t');
-  document.getElementById('e2').textContent='';
-  if(!cod){setE('e2','Digite o código.');return;}
-  if(!AUTHK){backS1();return;}
-  b.disabled=true; bt.textContent='Verificando…';
+  const cod = document.getElementById('in-cod').value.trim();
+  const b = document.getElementById('b2'), bt = document.getElementById('b2t');
+  document.getElementById('e2').textContent = '';
+  const authKey = sessionStorage.getItem('_ak');
+  if (!cod) { setE('e2','Digite o código.'); return; }
+  if (!authKey) { backS1(); return; }
+  b.disabled = true; bt.textContent = 'Verificando…';
   try {
-    var BACKEND_URL = window.MEDAI_BACKEND_URL || null;
-    if (BACKEND_URL) {
-      // Backend real — obtém JWT real
-      var res = await fetch(BACKEND_URL+'/api/auth/verify', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ emailKey:AUTHK, accessCode:cod })
-      });
-      var data = await res.json();
-      if (!res.ok) throw { msg: data.error || 'Código inválido.' };
-      // Montar SESSION com token real
-      SESSION = {
-        token:        data.data.accessToken,
-        refreshToken: data.data.refreshToken,
-        clientId:     data.data.clinic.id,
-        clinicId:     data.data.clinic.id,
-        nome:         data.data.user.name,
-        clinica:      data.data.clinic.name,
-        role:         data.data.user.role,
-        initials:     data.data.user.initials,
-        plan:         data.data.clinic.plan_id || 'Professional',
-        monthlyLimit: data.data.clinic.monthly_limit || 500,
-        agents:       ['orientacao','instagram','duvidas','campanhas','imagens']
-      };
-      // Pré-carregar contexto da clínica do banco
-      Object.assign(CTX, {
-        nom: data.data.clinic.name        || '',
-        esp: data.data.clinic.specialty   || '',
-        cid: data.data.clinic.city        || '',
-        tom: data.data.clinic.tone        || 'acolhedor e profissional',
-        est: data.data.clinic.visual_style|| 'moderno e clean',
-        c1:  data.data.clinic.brand_color1|| '#3B7FFF',
-        c2:  data.data.clinic.brand_color2|| '#C9A84C'
-      });
-    } else {
-      SESSION = await MB.verifyCode(AUTHK,cod);
+    const data = await apiFetch('/api/auth/verify', { method:'POST', body: JSON.stringify({ emailKey:authKey, accessCode:cod }) });
+    if (!data.success) throw { msg: data.error || 'Código inválido.' };
+    const d = data.data;
+    SESSION = {
+      token: d.accessToken, refreshToken: d.refreshToken,
+      clinicId: d.clinic.id, nome: d.user.name, clinica: d.clinic.name,
+      role: d.user.role, initials: d.user.initials,
+      plan: d.clinic.plan_id || 'Professional', monthlyLimit: d.clinic.monthly_limit || 500
+    };
+    sessionStorage.removeItem('_ak');
+    /* Carregar contexto completo da clínica */
+    try {
+      const ctx = await apiFetch('/api/clinic/context');
+      if (ctx.success && ctx.data) loadClinicCtx(ctx.data);
+    } catch(_) {
+      loadClinicCtx({ name:d.clinic.name, specialty:d.clinic.specialty, city:d.clinic.city,
+        tone:d.clinic.tone, visual_style:d.clinic.visual_style,
+        brand_color1:d.clinic.brand_color1, brand_color2:d.clinic.brand_color2 });
     }
-    loadCtx(); buildUI();
+    buildUI();
     document.getElementById('ls').classList.remove('active');
     document.getElementById('as').classList.add('active');
     document.getElementById('lslider').classList.remove('s2');
-    document.getElementById('in-pw').value='';
-    AUTHK=null;
+    document.getElementById('in-pw').value = '';
+    document.getElementById('in-cod').value = '';
   } catch(e) {
-    setE('e2',e.msg||'Código inválido.');
-    document.getElementById('in-cod').value='';
+    setE('e2', e.msg || 'Código inválido.');
+    document.getElementById('in-cod').value = '';
     document.getElementById('in-cod').focus();
-  } finally { b.disabled=false; bt.textContent='Entrar na plataforma'; }
+  } finally { b.disabled = false; bt.textContent = 'Entrar na plataforma'; }
 }
-function backS1() { document.getElementById('lslider').classList.remove('s2'); document.getElementById('e1').textContent=''; document.getElementById('e2').textContent=''; AUTHK=null; setTimeout(function(){ document.getElementById('in-em').focus(); },420); }
-function doLogout() {
-  SESSION=null; AUTHK=null; HIST=[]; LOAD=false;
+
+function backS1() {
+  document.getElementById('lslider').classList.remove('s2');
+  document.getElementById('e1').textContent = '';
+  document.getElementById('e2').textContent = '';
+  sessionStorage.removeItem('_ak');
+  setTimeout(() => document.getElementById('in-em').focus(), 420);
+}
+
+function doLogout(callServer = true) {
+  if (callServer && SESSION?.refreshToken) {
+    apiFetch('/api/auth/logout', { method:'POST', body: JSON.stringify({ refreshToken: SESSION.refreshToken }) }).catch(() => {});
+  }
+  SESSION = null; CTX = {}; currentConversationId = null; LOAD = false; USAGE = { count:0, limit:500, percent:0 };
   document.getElementById('as').classList.remove('active');
   document.getElementById('ls').classList.add('active');
   document.getElementById('lslider').classList.remove('s2');
-  ['in-pw'].forEach(function(id){ document.getElementById(id).value=''; });
-  ['e1','e2'].forEach(function(id){ document.getElementById(id).textContent=''; });
-  setTimeout(function(){ document.getElementById('in-em').focus(); },100);
+  document.getElementById('in-pw').value = '';
+  document.getElementById('in-cod').value = '';
+  document.getElementById('e1').textContent = '';
+  document.getElementById('e2').textContent = '';
+  setTimeout(() => document.getElementById('in-em').focus(), 100);
 }
-document.addEventListener('DOMContentLoaded',function(){
-  // Auto-fill para desenvolvimento — remover antes de produção
-  document.getElementById('in-em').value = 'doutorgregory@clinica.com.br';
-  document.getElementById('in-pw').value = 'MedAI@2025!';
-  document.getElementById('in-cod').value = 'BERG-7X4K';
 
-  document.getElementById('in-em').addEventListener('keydown',function(e){ if(e.key==='Enter') doS1(); });
-  document.getElementById('in-pw').addEventListener('keydown',function(e){ if(e.key==='Enter') doS1(); });
+function loadClinicCtx(c) {
+  if (!c) return;
+  CTX.nom = c.name        || CTX.nom;
+  CTX.esp = c.specialty   || CTX.esp;
+  CTX.cid = c.city        || CTX.cid;
+  CTX.pub = c.target_public|| CTX.pub;
+  CTX.srv = c.services    || CTX.srv;
+  CTX.dif = c.differentials|| CTX.dif;
+  CTX.ig  = c.instagram   || CTX.ig;
+  CTX.ct  = c.contact     || CTX.ct;
+  CTX.tom = c.tone        || CTX.tom;
+  CTX.est = c.visual_style|| CTX.est;
+  CTX.c1  = c.brand_color1|| CTX.c1;
+  CTX.c2  = c.brand_color2|| CTX.c2;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('in-em').addEventListener('keydown', e => { if (e.key === 'Enter') doS1(); });
+  document.getElementById('in-pw').addEventListener('keydown', e => { if (e.key === 'Enter') doS1(); });
+  document.getElementById('in-cod').addEventListener('keydown', e => { if (e.key === 'Enter') doS2(); });
   document.getElementById('in-em').focus();
 });
+</script>
+<script>
+/* ── CONFIG MAP ── */
+const CFG_MAP = { 'c-nom':'nom','c-esp':'esp','c-cid':'cid','c-pub':'pub','c-srv':'srv','c-tom':'tom','c-est':'est','c-dif':'dif','c-ig':'ig','c-ct':'ct','c-c1':'c1','c-c2':'c2' };
 
 /* ── BUILD UI ── */
 function buildUI() {
-  var s=SESSION;
-  $t('sbnm',s.nome); $t('sbrl',s.role+' · '+s.plan); $t('sbav',s.initials);
-  var h=new Date().getHours(), gr=h<12?'Bom dia':h<18?'Boa tarde':'Boa noite';
-  $t('hgr',gr+', '+s.nome.split(' ')[0]+' 👋');
-  // Marketing brain sazonal
-  var mo=new Date().getMonth();
-  var sugs=['Dengue em alta — crie campanha de prevenção para engajar pacientes e fortalecer autoridade.','Verão: fale sobre hidratação, fotoproteção e acidentes no calor — alto interesse das famílias.','Ano letivo: vacinas obrigatórias e saúde escolar têm altíssimo engajamento agora.','Mês ideal para campanhas de check-up preventivo e consultas de rotina.','Vacinação infantil — tema com maior alcance e engajamento do ano.','Inverno chegando: gripes e viroses. Conteúdo preventivo tem alto impacto agora.','Pico de viroses: conteúdo sobre sintomas e quando ir ao médico tem altíssimo alcance.','Retorno às aulas: higiene e doenças contagiosas — essencial para pais.','Rinite e alergias sazonais — tema de alto interesse na transição climática.','Saúde emocional infantil: humanize a comunicação e amplie conexão com pacientes.','Prevenção de acidentes domésticos: tema muito compartilhado entre famílias.','Festas e saúde: alimentação, viagens com crianças e doenças do verão.'];
-  $t('brain-txt', sugs[mo]);
-  fillConf(); updCliCard(); updUI();
+  $t('sbnm', SESSION.nome);
+  $t('sbrl', SESSION.role + ' · ' + SESSION.plan);
+  $t('sbav', SESSION.initials);
+  const h = new Date().getHours();
+  $t('hgr', (h<12?'Bom dia':h<18?'Boa tarde':'Boa noite') + ', ' + SESSION.nome.split(' ')[0] + ' 👋');
+  const sugs = ['Dengue em alta — crie campanha de prevenção.','Verão: fale sobre hidratação e fotoproteção.','Ano letivo: vacinas e saúde escolar têm alto engajamento.','Mês ideal para campanhas de check-up preventivo.','Vacinação infantil — tema com maior alcance do ano.','Inverno chegando: gripes e viroses. Crie conteúdo preventivo.','Pico de viroses: quando ir ao médico — alto alcance.','Retorno às aulas: higiene e doenças contagiosas.','Rinite e alergias sazonais — alto interesse agora.','Saúde emocional infantil: humanize a comunicação.','Prevenção de acidentes domésticos — muito compartilhado.','Festas e saúde: alimentação, viagens com crianças.'];
+  $t('brain-txt', sugs[new Date().getMonth()]);
+  fillConf();
+  updCliCard();
+  loadUsage();
 }
 
-/* ── CONFIG ── */
-var CFG_MAP={'c-nom':'nom','c-esp':'esp','c-cid':'cid','c-pub':'pub','c-srv':'srv','c-tom':'tom','c-est':'est','c-dif':'dif','c-ig':'ig','c-ct':'ct','c-c1':'c1','c-c2':'c2'};
-function fillConf() { Object.keys(CFG_MAP).forEach(function(id){ var k=CFG_MAP[id]; var e=document.getElementById(id); if(e&&CTX[k]) e.value=CTX[k]; }); }
-function saveConf() { Object.keys(CFG_MAP).forEach(function(id){ var k=CFG_MAP[id]; var e=document.getElementById(id); if(e) CTX[k]=e.value; }); saveCtx(); updCliCard(); var sd=document.getElementById('csd'); sd.classList.add('show'); setTimeout(function(){ sd.classList.remove('show'); },2500); }
-function updCliCard() { $t('sbnm',(CTX.nom||(SESSION&&SESSION.nome)||'—')); }
+function fillConf() {
+  Object.keys(CFG_MAP).forEach(id => {
+    const k = CFG_MAP[id], e = document.getElementById(id);
+    if (e && CTX[k]) e.value = CTX[k];
+  });
+}
+
+async function saveConf() {
+  Object.keys(CFG_MAP).forEach(id => {
+    const k = CFG_MAP[id], e = document.getElementById(id);
+    if (e) CTX[k] = e.value;
+  });
+  try {
+    await apiFetch('/api/clinic/context', {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: CTX.nom, specialty: CTX.esp, city: CTX.cid, target_public: CTX.pub,
+        services: CTX.srv, differentials: CTX.dif, instagram: CTX.ig, contact: CTX.ct,
+        tone: CTX.tom, visual_style: CTX.est, brand_color1: CTX.c1, brand_color2: CTX.c2
+      })
+    });
+  } catch(_) { /* salvo localmente mesmo se backend falhar */ }
+  updCliCard();
+  const sd = document.getElementById('csd');
+  sd.classList.add('show');
+  setTimeout(() => sd.classList.remove('show'), 2500);
+}
+
+function updCliCard() { $t('sbnm', CTX.nom || (SESSION && SESSION.nome) || '—'); }
 
 /* ── NAV ── */
-function sNav(el) { document.querySelectorAll('.ni').forEach(function(n){ n.classList.remove('active'); }); if(el) el.classList.add('active'); }
-function hidePgs() { ['pg-home','pg-cfg','pg-hist'].forEach(function(id){ document.getElementById(id).classList.remove('active'); }); }
-function goHome(el) { sNav(el||document.getElementById('nav-home')); hidePgs(); document.getElementById('pg-home').classList.add('active'); $t('tbt','MedAI Intelligence'); $t('tbs','Assistente operacional da clínica'); updUI(); setTimeout(function(){ document.getElementById('uni-ta').focus(); },100); }
-function goPage(pg,el) { sNav(el); hidePgs(); document.getElementById('pg-'+pg).classList.add('active'); var titles={'cfg':['Configurações','Personalize a IA para sua clínica'],'hist':['Histórico','Todas as interações desta sessão']}; if(titles[pg]){ $t('tbt',titles[pg][0]); $t('tbs',titles[pg][1]); } if(pg==='hist') updUI(); }
+function sNav(el) { document.querySelectorAll('.ni').forEach(n => n.classList.remove('active')); if (el) el.classList.add('active'); }
+function hidePgs() { ['pg-home','pg-cfg','pg-hist'].forEach(id => document.getElementById(id).classList.remove('active')); }
+function goHome(el) {
+  sNav(el || document.getElementById('nav-home')); hidePgs();
+  document.getElementById('pg-home').classList.add('active');
+  $t('tbt','MedAI Intelligence'); $t('tbs','Assistente operacional da clínica');
+  setTimeout(() => document.getElementById('uni-ta').focus(), 100);
+}
+function goPage(pg, el) {
+  sNav(el); hidePgs();
+  document.getElementById('pg-'+pg).classList.add('active');
+  const titles = { cfg:['Configurações','Personalize a IA para sua clínica'], hist:['Histórico','Interações desta sessão'] };
+  if (titles[pg]) { $t('tbt', titles[pg][0]); $t('tbs', titles[pg][1]); }
+  if (pg === 'hist') updHist();
+}
 
 /* ── USAGE ── */
-var ANAMES={orientacao:'Saúde',instagram:'Social',duvidas:'Atendimento',campanhas:'Marketing',imagens:'Visual',orchestrator:'Campanha',campaign:'Campanha',social:'Social',faq:'Atendimento',health:'Saúde',image:'Visual'};
+const HIST_LOG = [];
 function updUI() {
-  if(!SESSION) return;
-  var log=MB.monthly(SESSION.clientId), tot=log.filter(function(r){return r.status!=='limit_exceeded';}).length;
-  var pct=Math.min(100,Math.round((tot/SESSION.monthlyLimit)*100));
-  var col=pct>=90?'var(--err)':pct>=70?'var(--wrn)':'var(--ok)';
-  var cls=pct>=90?'h':pct>=70?'m':'';
-  var f=document.getElementById('sbfil'); if(f){f.style.width=pct+'%';f.className='u-fil '+cls;}
-  var p=document.getElementById('sbpct'); if(p){p.textContent=pct+'%';p.style.color=col;}
-  $t('sbsub',tot+' / '+SESSION.monthlyLimit);
-  $t('mu-m',fN(tot)); $t('mu-p',SESSION.plan||'—'); $t('mu-l','/ '+SESSION.monthlyLimit);$t('mu-pct',pct+'%'); $t('mu-i',SESSION.nome+' · '+SESSION.clinica);
-  var mf=document.getElementById('mu-fil'); if(mf){mf.style.width=pct+'%';mf.style.background=col;}
-  var tb=document.getElementById('htb');
-  if(tb){
-    if(!log.length){ tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--t3)">Nenhuma interação ainda.</td></tr>'; }
-    else tb.innerHTML=log.slice().reverse().map(function(r){ return '<tr><td>'+fDt(r.ts)+'</td><td><span class="h-pill">'+(ANAMES[r.aid]||r.aid)+'</span></td><td class="'+(r.status==='success'?'h-ok':'h-err')+'">'+(r.status==='success'?'✓ OK':'✗ Erro')+'</td></tr>'; }).join('');
-  }
+  if (!SESSION) return;
+  const pct = Math.min(100, Math.round((USAGE.count / SESSION.monthlyLimit) * 100));
+  const col = pct>=90?'var(--err)':pct>=70?'var(--wrn)':'var(--ok)';
+  const cls = pct>=90?'h':pct>=70?'m':'';
+  const f = document.getElementById('sbfil'); if (f) { f.style.width=pct+'%'; f.className='u-fil '+cls; }
+  const p = document.getElementById('sbpct'); if (p) { p.textContent=pct+'%'; p.style.color=col; }
+  $t('sbsub', USAGE.count+' / '+SESSION.monthlyLimit);
+  $t('mu-m', fN(USAGE.count)); $t('mu-p', SESSION.plan||'—');
+  $t('mu-l', '/ '+SESSION.monthlyLimit); $t('mu-pct', pct+'%');
+  $t('mu-i', SESSION.nome+' · '+SESSION.clinica);
+  const mf = document.getElementById('mu-fil'); if (mf) { mf.style.width=pct+'%'; mf.style.background=col; }
 }
-function openUM() { updUI(); document.getElementById('umod').classList.add('open'); }
+async function loadUsage() {
+  try {
+    const data = await apiFetch('/api/ai/usage');
+    if (data.success && data.data) {
+      USAGE.count = data.data.monthly_count || 0;
+      USAGE.limit = SESSION.monthlyLimit;
+    }
+  } catch(_) {}
+  updUI();
+}
+function updHist() {
+  const tb = document.getElementById('htb');
+  if (!tb) return;
+  if (!HIST_LOG.length) { tb.innerHTML='<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--t3)">Nenhuma interação ainda.</td></tr>'; return; }
+  tb.innerHTML = HIST_LOG.slice().reverse().map(r =>
+    `<tr><td>${fDt(r.ts)}</td><td><span class="h-pill">${esc(r.type)}</span></td><td class="${r.ok?'h-ok':'h-err'}">${r.ok?'✓ OK':'✗ Erro'}</td></tr>`
+  ).join('');
+}
+function openUM() { loadUsage(); document.getElementById('umod').classList.add('open'); }
 function closeUM() { document.getElementById('umod').classList.remove('open'); }
 
-/* ── LIMPAR CONVERSA ── */
+/* ── CHAT ── */
 function clearConv() {
   if (LOAD) return;
-  HIST = [];
+  currentConversationId = null;
   document.getElementById('conv').innerHTML = '';
   document.querySelector('.home').classList.remove('chat-active');
   document.getElementById('clrbtn').classList.remove('visible');
-  var ta = document.getElementById('uni-ta');
+  const ta = document.getElementById('uni-ta');
   ta.value = ''; ta.style.height = 'auto'; ta.focus();
 }
-
 function toggleClearBtn() {
-  var conv = document.getElementById('conv');
-  var btn  = document.getElementById('clrbtn');
+  const conv = document.getElementById('conv'), btn = document.getElementById('clrbtn');
   if (!btn) return;
-  if (conv && conv.children.length > 0) btn.classList.add('visible');
-  else btn.classList.remove('visible');
+  conv && conv.children.length > 0 ? btn.classList.add('visible') : btn.classList.remove('visible');
 }
-function onUniKey(e) { if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); uniSend(); } }
+function onUniKey(e) { if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); uniSend(); } }
 function rszTa(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,160)+'px'; }
-function useHint(el) { var ta=document.getElementById('uni-ta'); ta.value=el.textContent; ta.focus(); rszTa(ta); }
+function useHint(el) { const ta=document.getElementById('uni-ta'); ta.value=el.textContent; ta.focus(); rszTa(ta); }
 
 async function uniSend() {
-  if(LOAD||!SESSION) return;
-  var ta=document.getElementById('uni-ta');
-  var text=(ta.value||'').trim();
-  if(!text) return;
-  if(text.length>4000){ showErr('Mensagem muito longa','Máximo 4000 caracteres.'); return; }
-  ta.value=''; ta.style.height='auto';
+  if (LOAD || !SESSION) return;
+  const ta = document.getElementById('uni-ta');
+  const text = (ta.value||'').trim();
+  if (!text) return;
+  if (text.length > 4000) { showErr('Mensagem muito longa','Máximo 4.000 caracteres.'); return; }
+  ta.value = ''; ta.style.height = 'auto';
   addUserMsg(text);
-  LOAD=true;
-  document.getElementById('unibtn').disabled=true;
-  ta.disabled=true;
-  var loader=addLoader();
-  try { await routeAndExecute(text); }
-  catch(ex) { hideLoader(loader); showErr(etl(ex.code),ex.msg||ex.message||'Tente novamente.'); }
-  LOAD=false;
-  document.querySelector('.home').classList.add('chat-active');
-  document.getElementById('unibtn').disabled=false;
-  ta.disabled=false; ta.focus(); updUI(); toggleClearBtn();
-}
-
-/* ── CONVERSATION RENDERING ── */
-function addUserMsg(text) {
-  var conv=document.getElementById('conv');
-  var el=document.createElement('div');
-  el.className='msg-u';
-  el.innerHTML='<div class="bub">'+esc(text)+'</div><div class="msg-t">'+now()+'</div>';
-  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
-}
-
-function addAIMsg(text, imgUrl, promptUsed) {
-  var conv=document.getElementById('conv');
-  var el=document.createElement('div');
-  el.className='msg-ai';
-  var body='<div class="ai-body">'+fmt(text)+'</div>';
-  if(imgUrl){ body+='<img class="ai-img" src="'+imgUrl+'" alt="Imagem gerada" loading="lazy">'; if(promptUsed) body+='<div class="ai-prompt">📝 '+esc(promptUsed)+'</div>'; }
-  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">'+now()+'</span></div>'+body;
-  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
-  return el;
-}
-
-function addLoader() {
-  var conv=document.getElementById('conv');
-  var el=document.createElement('div');
-  el.className='msg-ai'; el.id='loader-el';
-  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">processando…</span></div><div class="ai-body"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div>';
-  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
-  return el;
-}
-function hideLoader(el) { if(el&&el.parentNode) el.remove(); var e=document.getElementById('loader-el'); if(e) e.remove(); }
-
-function addProgMsg(text) {
-  var conv=document.getElementById('conv');
-  var el=document.createElement('div');
-  el.className='msg-ai';
-  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="ai-body" style="display:flex;align-items:center;gap:10px"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div><span style="font-size:13px;color:var(--t2)">'+esc(text)+'</span></div>';
-  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
-  return el;
-}
-
-function showErr(title, detail, isWarn) {
-  var conv=document.getElementById('conv');
-  var el=document.createElement('div');
-  el.className='msg-ai';
-  el.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="emsg'+(isWarn?' w':'')+'"><div style="font-size:16px;flex-shrink:0">'+(isWarn?'⚠️':'⛔')+'</div><div><div class="e-t">'+esc(title)+'</div>'+(detail?'<div class="e-d">'+esc(detail)+'</div>':'')+'</div></div>';
-  conv.appendChild(el); conv.scrollTop=conv.scrollHeight;
-}
-
-/* ── HANDLERS ── */
-async function doTxt(text, agentId, sysPrompt) {
-  HIST.push({role:'user',content:text});
-  var r;
-  try { r=await MB.callAI(SESSION.clientId,agentId,HIST,sysPrompt); }
-  catch(e) { HIST.pop(); throw e; }
-  HIST.push({role:'assistant',content:r.reply});
-  addAIMsg(r.reply);
-}
-
-async function doOrch(text) {
-  var pg=addProgMsg('✦ Criando campanha completa — estratégia, copy, posts, stories, calendário…');
-  var r;
-  try { r=await AIO.campaign(text,SESSION.clientId); }
-  catch(e) { pg&&pg.remove(); throw e; }
-  pg&&pg.remove();
-
-  var camp=null;
+  LOAD = true;
+  document.getElementById('unibtn').disabled = true;
+  ta.disabled = true;
+  const loader = addLoader();
   try {
-    var raw=r.reply.replace(/```json|```/g,'').trim();
-    var parsed;
-    try {
-      parsed=JSON.parse(raw);
-    } catch(e1) {
-      var match=raw.match(/\{[\s\S]*\}/);
-      if(match) { try { parsed=JSON.parse(match[0]); } catch(e2) {} }
-    }
-    if(parsed) {
-      if(parsed.nome) camp=parsed;
-      else if(parsed.data && parsed.data.nome) camp=parsed.data;
-      else if(parsed.data && parsed.data.data && parsed.data.data.nome) camp=parsed.data.data;
-    }
-    console.log('[MedAI doOrch] raw length:', raw.length, '| parsed:', !!parsed, '| camp.nome:', camp&&camp.nome);
-  } catch(e) {
-    console.error('[MedAI doOrch] parse error:', e.message);
-    camp=null;
+    const result = await callBackend(text, currentConversationId);
+    hideLoader(loader);
+    if (result.conversationId) currentConversationId = result.conversationId;
+    if (result.usage) { USAGE.count = result.usage.current || USAGE.count; }
+    HIST_LOG.push({ ts: new Date().toISOString(), type: result.type || 'text', ok: true });
+    if (result.type === 'campaign') renderCampaignDoc(result.data, text);
+    else if (result.type === 'image') renderImageMsg(result.data);
+    else addAIMsg(typeof result.data === 'string' ? result.data : JSON.stringify(result.data));
+  } catch(ex) {
+    hideLoader(loader);
+    HIST_LOG.push({ ts: new Date().toISOString(), type: 'error', ok: false });
+    showErr(ex.msg || 'Erro', ex.code ? '('+ex.code+') Tente novamente.' : 'Tente novamente.');
   }
-
-  if(camp && camp.nome) renderCampaignDoc(camp,text);
-  else addAIMsg(r.reply);
+  LOAD = false;
+  document.querySelector('.home').classList.add('chat-active');
+  document.getElementById('unibtn').disabled = false;
+  ta.disabled = false; ta.focus();
+  updUI(); toggleClearBtn();
 }
 
-async function doImg(text) {
-  if(text.length<3){ showErr('Descrição muito curta','Use ao menos algumas palavras.'); return; }
-  var a1=addProgMsg('🔍 Interpretando descrição com Visual Intelligence Engine…');
-  var s=await buildSP(text);
-  a1&&a1.remove();
-  var pos=s.pr+'. '+s.content;
-  var neg=[s.nr,UNEG,s.en].filter(Boolean).join(', ');
-  var seed=Math.floor(Math.random()*999999);
-  var url='https://image.pollinations.ai/prompt/'+encodeURIComponent(pos)+'?width=1024&height=1024&seed='+seed+'&nologo=true&model=flux&enhance=true&negative='+encodeURIComponent(neg);
-  var pg=addProgMsg('🎨 Gerando imagem… pode levar até 30 segundos.');
-  var done=false;
-  var tid=setTimeout(function(){ if(done)return; done=true; pg&&pg.remove(); MB.logU(SESSION.clientId,'imagens',0,'error',45000); updUI(); showErr('Tempo limite excedido','Tente descrição mais simples.'); },45000);
-  var img=new Image(); img.crossOrigin='anonymous';
-  img.onload=function(){
-    if(done)return; done=true; clearTimeout(tid); pg&&pg.remove();
-    if(img.naturalWidth<10){ MB.logU(SESSION.clientId,'imagens',0,'error',0); updUI(); showErr('Imagem inválida','Tente novamente.'); return; }
-    MB.logU(SESSION.clientId,'imagens',0,'success',0); updUI();
-    var lbl=SLBL[s.sk]||'Padrão';
-    var msg='✨ Imagem gerada!\n\n**Interpretado:** '+s.subject+'\n**Estilo:** '+lbl+(s.us?' (conforme solicitado)':' (automático)');
-    addAIMsg(msg,url,s.content);
+async function callBackend(message, conversationId) {
+  const body = { message };
+  if (conversationId) body.conversationId = conversationId;
+  const data = await apiFetch('/api/ai/chat', { method:'POST', body: JSON.stringify(body) });
+  if (!data.success) throw { msg: data.error || 'Erro do servidor.' };
+  const payload = data.data;
+  return {
+    type: payload.type,
+    data: payload.data,
+    conversationId: payload.conversationId,
+    usage: payload.usage
   };
-  img.onerror=function(){
-    if(done)return; done=true; clearTimeout(tid); pg&&pg.remove();
-    MB.logU(SESSION.clientId,'imagens',0,'error',0); updUI();
-    showErr('Falha ao gerar imagem','Tente reformular com mais detalhes.');
-  };
-  img.src=url;
+}
+
+/* ── RENDERING ── */
+function addUserMsg(text) {
+  const conv = document.getElementById('conv'), el = document.createElement('div');
+  el.className = 'msg-u';
+  el.innerHTML = `<div class="bub">${esc(text)}</div><div class="msg-t">${now()}</div>`;
+  conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+}
+function addAIMsg(text, imgUrl, promptUsed) {
+  const conv = document.getElementById('conv'), el = document.createElement('div');
+  el.className = 'msg-ai';
+  let body = `<div class="ai-body">${fmt(text)}</div>`;
+  if (imgUrl) { body += `<img class="ai-img" src="${imgUrl}" alt="Imagem gerada" loading="lazy">`; if (promptUsed) body += `<div class="ai-prompt">📝 ${esc(promptUsed)}</div>`; }
+  el.innerHTML = `<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">${now()}</span></div>${body}`;
+  conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+  return el;
+}
+function addLoader() {
+  const conv = document.getElementById('conv'), el = document.createElement('div');
+  el.className = 'msg-ai'; el.id = 'loader-el';
+  el.innerHTML = `<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">processando…</span></div><div class="ai-body"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div></div>`;
+  conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+  return el;
+}
+function hideLoader(el) { if (el && el.parentNode) el.remove(); const e = document.getElementById('loader-el'); if (e) e.remove(); }
+function addProgMsg(text) {
+  const conv = document.getElementById('conv'), el = document.createElement('div');
+  el.className = 'msg-ai';
+  el.innerHTML = `<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="ai-body" style="display:flex;align-items:center;gap:10px"><div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div><span style="font-size:13px;color:var(--t2)">${esc(text)}</span></div>`;
+  conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+  return el;
+}
+function showErr(title, detail, isWarn) {
+  const conv = document.getElementById('conv'), el = document.createElement('div');
+  el.className = 'msg-ai';
+  el.innerHTML = `<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span></div><div class="emsg${isWarn?' w':''}"><div style="font-size:16px;flex-shrink:0">${isWarn?'⚠️':'⛔'}</div><div><div class="e-t">${esc(title)}</div>${detail?`<div class="e-d">${esc(detail)}</div>`:''}</div></div>`;
+  conv.appendChild(el); conv.scrollTop = conv.scrollHeight;
+}
+function renderImageMsg(data) {
+  if (!data || !data.imageUrl) { showErr('Imagem não gerada', 'Tente reformular a descrição.'); return; }
+  const lbl = SLBL[data.style] || 'Padrão';
+  const msg = `✨ Imagem gerada!\n\n**Interpretado:** ${data.subject||'—'}\n**Estilo:** ${lbl}${data.userSpecifiedStyle?' (conforme solicitado)':' (automático)'}`;
+  addAIMsg(msg, data.imageUrl, data.prompt || data.contentPrompt || '');
 }
 
 /* ── CAMPAIGN DOCUMENT RENDERER ── */
-function renderCampaignDoc(c,topic) {
-  var conv=document.getElementById('conv');
-  var wrap=document.createElement('div');
-  wrap.className='msg-ai'; wrap.style.maxWidth='100%'; wrap.style.width='100%';
-  var uid='c'+Date.now();
-  var tabs=[{id:'estrategia',lbl:'📋 Estratégia'},{id:'copy',lbl:'✍️ Copy'},{id:'posts',lbl:'📱 Posts'},{id:'stories',lbl:'📲 Stories'},{id:'whatsapp',lbl:'💬 WhatsApp'},{id:'calendario',lbl:'📅 Calendário'},{id:'visual',lbl:'🎨 Visual'},{id:'versoes',lbl:'🔀 Versões'},{id:'metricas',lbl:'📊 Métricas'}];
-  var tabsH=tabs.map(function(t,i){return '<div class="c-tab'+(i===0?' on':'')+'" data-panel="panel-'+t.id+'-'+uid+'">'+t.lbl+'</div>';}).join('');
-  var s=c.estrategia||{};
-  var estratH='<div class="cs"><div class="cs-t">Estratégia</div><div class="strat-g">'+[['🎯 Objetivo',s.objetivo||'—'],['👥 Público',s.publicoAlvo||'—'],['💡 Abordagem',s.abordagem||'—'],['📣 CTA',s.ctaPrincipal||'—'],['🏥 Posicionamento',s.posicionamento||'—']].map(function(x){return '<div class="strat-i"><div class="strat-l">'+esc(x[0])+'</div><div class="strat-v">'+esc(x[1])+'</div></div>';}).join('')+'</div></div>';
-  var copyH='<div class="cs"><div class="cs-t">Copy de lançamento</div><div class="cp-blk"><div class="cp-lbl">Post principal · Instagram/Facebook</div><button class="cp-btn" id="'+uid+'_cm">Copiar</button>'+esc(c.copyPrincipal||'—').replace(/\n/g,'<br>')+'</div></div><div class="cs"><div class="cs-t">Hashtags</div><div class="htags">'+(c.hashtags||[]).map(function(h){return '<span class="htag" id="'+uid+'_ht_'+h.replace(/\W/g,'')+'">'+esc('#'+h)+'</span>';}).join('')+'</div></div>';
-  var postsH='<div class="cs"><div class="cs-t">Sequência de posts</div><div class="posts-g">'+(c.posts||[]).map(function(p){var slides=p.slides&&p.slides.length?'<div style="margin-top:9px;border-top:1px solid var(--bd);padding-top:9px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Slides</div>'+p.slides.map(function(s,i){return '<div style="font-size:12px;padding:6px 10px;background:var(--sf3);border-radius:var(--rs);margin-bottom:4px"><strong style="color:var(--blu-l);margin-right:5px">S'+(i+1)+'</strong>'+esc(s)+'</div>';}).join('')+'</div>':'';return '<div class="post-c"><div class="post-h"><span class="post-n">Post '+p.num+'</span><span class="post-tp">'+esc(p.tipo||'')+'</span></div><div class="post-ti">'+esc(p.titulo||'')+'</div><div class="post-b">'+esc(p.legenda||'').replace(/\n/g,'<br>')+'</div>'+slides+'</div>';}).join('')+'</div></div>';
-  var storH='<div class="cs"><div class="cs-t">Stories</div><div class="stor-g">'+(c.stories||[]).map(function(s){return '<div class="stor-c"><div class="stor-n">Story '+s.num+'</div><div class="stor-tp">'+esc(s.tipo||'')+'</div><div class="stor-b">'+esc(s.conteudo||'').replace(/\n/g,'<br>')+'</div></div>';}).join('')+'</div></div>';
-  var waH='<div class="cs"><div class="cs-t">Mensagem WhatsApp</div><div class="wa-blk"><button class="cp-btn" id="'+uid+'_wa">Copiar</button>'+esc(c.whatsapp||'—').replace(/\n/g,'<br>')+'</div></div>';
-  var calH='<div class="cs"><div class="cs-t">Calendário</div><div class="cal-g">'+(c.calendario||[]).map(function(d){return '<div class="cal-i"><div class="cal-d">'+esc(d.dia||'')+'</div><div><div class="cal-t">'+esc(d.acao||'')+'</div><div class="cal-s">'+esc(d.horario||'')+(d.obs?' · '+esc(d.obs):'')+'</div></div></div>';}).join('')+'</div></div>';
-  var bv=c.briefingVisual||{};
-  var imgPs=[];
-  if(bv.promptImagem) imgPs.push({lbl:'Imagem principal',prompt:bv.promptImagem});
-  if(c.posts&&c.posts[0]) imgPs.push({lbl:'Post 1 — '+c.posts[0].titulo,prompt:(c.posts[0].tipo||'illustration')+' about: '+(c.posts[0].titulo||topic)+'. '+(bv.estilo||'professional medical photography')+'.'});
-  if(c.stories&&c.stories[0]) imgPs.push({lbl:'Story de abertura',prompt:'Vertical story, '+topic+'. '+(bv.conceito||'')+'. Bold mobile composition.'});
-  var visH='<div class="cs"><div class="cs-t">Briefing visual</div><div class="vis-g">'+[['Conceito',bv.conceito||'—'],['Composição',bv.composicao||'—'],['Estilo',bv.estilo||'—'],['Emoção',bv.emocao||'—'],['Cores',bv.cores||'—']].map(function(x){return '<div class="vis-i"><div class="vis-l">'+esc(x[0])+'</div><div class="vis-v">'+esc(x[1])+'</div></div>';}).join('')+'</div></div>'+'<div class="cs"><div class="cs-t">Gerar imagens</div><div class="img-prompts">'+imgPs.map(function(ip,idx){return '<div class="img-p"><div class="img-pl">'+esc(ip.lbl)+'</div><div class="img-pt">'+esc(ip.prompt)+'</div><div class="img-pb"><button id="'+uid+'_ic'+idx+'" class="cp-btn" style="position:static">Copiar</button><button id="'+uid+'_ig'+idx+'" style="padding:5px 13px;background:var(--blu);border:none;border-radius:var(--rs);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">🎨 Gerar</button></div></div>';}).join('')+'</div></div>';
-  var tagMap={emocional:'em',profissional:'pr',institucional:'in',humanizado:'hu'};
-  var verH='<div class="cs"><div class="cs-t">Versões alternativas</div><div class="ver-g">'+(c.versoes||[]).map(function(v,vi){return '<div class="ver-c"><div class="ver-h"><span class="ver-tp '+(tagMap[v.tipo]||'pr')+'">'+esc(v.tag||v.tipo||'')+'</span><button class="cp-btn" style="position:static" id="'+uid+'_vc'+vi+'">Copiar</button></div><div class="ver-b">'+esc(v.copy||'').replace(/\n/g,'<br>')+'</div></div>';}).join('')+'</div></div>';
-  var metH='<div class="cs"><div class="cs-t">Métricas</div><div class="met-g">'+(c.metricas||[]).map(function(m){return '<div class="met-c"><div class="met-i">'+esc(m.icone||'📊')+'</div><div class="met-t">'+esc(m.titulo||'')+'</div><div class="met-s">'+esc(m.desc||'')+'</div></div>';}).join('')+'</div></div>';
-  var panelMap={estrategia:estratH,copy:copyH,posts:postsH,stories:storH,whatsapp:waH,calendario:calH,visual:visH,versoes:verH,metricas:metH};
-  var panelsH=tabs.map(function(t,i){return '<div class="c-panel'+(i===0?' on':'')+'" id="panel-'+t.id+'-'+uid+'">'+(panelMap[t.id]||'')+'</div>';}).join('');
-  wrap.innerHTML='<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">'+now()+'</span></div><div class="camp-doc"><div class="camp-hdr"><div class="camp-ey">Campanha gerada · '+esc(topic)+'</div><div class="camp-nm">'+esc(c.nome||topic)+'</div><div class="camp-sl">'+esc(c.slogan||'')+'</div><div class="camp-meta"><span class="c-chip b">9 seções</span><span class="c-chip g">Pronto para publicar</span><span class="c-chip k">✓ Contextualizado</span></div></div><div class="camp-tabs">'+tabsH+'</div><div class="camp-panels">'+panelsH+'</div><div class="camp-foot"><span class="camp-fn">Gerado para '+esc(CTX.nom||(SESSION&&SESSION.clinica)||'sua clínica')+'</span><div class="camp-fb"><button class="cfb" id="'+uid+'_fi">🎨 Gerar imagem</button><button class="cfb p" id="'+uid+'_rf">Refinar →</button></div></div></div>';
-  conv.appendChild(wrap); conv.scrollTop=conv.scrollHeight;
-  // Event listeners
-  setTimeout(function(){
-    wrap.querySelectorAll('.c-tab').forEach(function(tab){
-      tab.addEventListener('click',function(){
-        wrap.querySelectorAll('.c-tab').forEach(function(t){t.classList.remove('on');});
-        wrap.querySelectorAll('.c-panel').forEach(function(p){p.classList.remove('on');});
+function renderCampaignDoc(c, topic) {
+  if (!c || !c.nome) { addAIMsg(typeof c === 'string' ? c : JSON.stringify(c)); return; }
+  const conv = document.getElementById('conv');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-ai'; wrap.style.maxWidth='100%'; wrap.style.width='100%';
+  const uid = 'c' + Date.now();
+  const tabs = [{id:'estrategia',lbl:'📋 Estratégia'},{id:'copy',lbl:'✍️ Copy'},{id:'posts',lbl:'📱 Posts'},{id:'stories',lbl:'📲 Stories'},{id:'whatsapp',lbl:'💬 WhatsApp'},{id:'calendario',lbl:'📅 Calendário'},{id:'visual',lbl:'🎨 Visual'},{id:'versoes',lbl:'🔀 Versões'},{id:'metricas',lbl:'📊 Métricas'}];
+  const tabsH = tabs.map((t,i)=>`<div class="c-tab${i===0?' on':''}" data-panel="panel-${t.id}-${uid}">${t.lbl}</div>`).join('');
+  const s = c.estrategia||{};
+  const estratH = `<div class="cs"><div class="cs-t">Estratégia</div><div class="strat-g">${[['🎯 Objetivo',s.objetivo||'—'],['👥 Público',s.publicoAlvo||'—'],['💡 Abordagem',s.abordagem||'—'],['📣 CTA',s.ctaPrincipal||'—'],['🏥 Posicionamento',s.posicionamento||'—']].map(x=>`<div class="strat-i"><div class="strat-l">${esc(x[0])}</div><div class="strat-v">${esc(x[1])}</div></div>`).join('')}</div></div>`;
+  const copyH = `<div class="cs"><div class="cs-t">Copy principal</div><div class="cp-blk"><div class="cp-lbl">Post · Instagram/Facebook</div><button class="cp-btn" id="${uid}_cm">Copiar</button>${esc(c.copyPrincipal||'—').replace(/\n/g,'<br>')}</div></div><div class="cs"><div class="cs-t">Hashtags</div><div class="htags">${(c.hashtags||[]).map(h=>`<span class="htag" id="${uid}_ht_${h.replace(/\W/g,'')}">#${esc(h)}</span>`).join('')}</div></div>`;
+  const postsH = `<div class="cs"><div class="cs-t">Posts</div><div class="posts-g">${(c.posts||[]).map(p=>{const sl=p.slides&&p.slides.length?`<div style="margin-top:9px;border-top:1px solid var(--bd);padding-top:9px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Slides</div>${p.slides.map((s,i)=>`<div style="font-size:12px;padding:6px 10px;background:var(--sf3);border-radius:var(--rs);margin-bottom:4px"><strong style="color:var(--blu-l);margin-right:5px">S${i+1}</strong>${esc(s)}</div>`).join('')}</div>`:'';return `<div class="post-c"><div class="post-h"><span class="post-n">Post ${p.num}</span><span class="post-tp">${esc(p.tipo||'')}</span></div><div class="post-ti">${esc(p.titulo||'')}</div><div class="post-b">${esc(p.legenda||'').replace(/\n/g,'<br>')}</div>${sl}</div>`;}).join('')}</div></div>`;
+  const storH = `<div class="cs"><div class="cs-t">Stories</div><div class="stor-g">${(c.stories||[]).map(s=>`<div class="stor-c"><div class="stor-n">Story ${s.num}</div><div class="stor-tp">${esc(s.tipo||'')}</div><div class="stor-b">${esc(s.conteudo||'').replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`;
+  const waH = `<div class="cs"><div class="cs-t">WhatsApp</div><div class="wa-blk"><button class="cp-btn" id="${uid}_wa">Copiar</button>${esc(c.whatsapp||'—').replace(/\n/g,'<br>')}</div></div>`;
+  const calH = `<div class="cs"><div class="cs-t">Calendário</div><div class="cal-g">${(c.calendario||[]).map(d=>`<div class="cal-i"><div class="cal-d">${esc(d.dia||'')}</div><div><div class="cal-t">${esc(d.acao||'')}</div><div class="cal-s">${esc(d.horario||'')}${d.obs?' · '+esc(d.obs):''}</div></div></div>`).join('')}</div></div>`;
+  const bv = c.briefingVisual||{};
+  const imgPs = [];
+  if (bv.promptImagem) imgPs.push({lbl:'Imagem principal',prompt:bv.promptImagem});
+  if (c.posts&&c.posts[0]) imgPs.push({lbl:'Post 1',prompt:(c.posts[0].tipo||'illustration')+' about: '+(c.posts[0].titulo||topic)+'. '+(bv.estilo||'professional medical photography')+'.'});
+  if (c.stories&&c.stories[0]) imgPs.push({lbl:'Story abertura',prompt:'Vertical story, '+topic+'. '+(bv.conceito||'')+'. Bold mobile composition.'});
+  const visH = `<div class="cs"><div class="cs-t">Briefing visual</div><div class="vis-g">${[['Conceito',bv.conceito||'—'],['Composição',bv.composicao||'—'],['Estilo',bv.estilo||'—'],['Emoção',bv.emocao||'—'],['Cores',bv.cores||'—']].map(x=>`<div class="vis-i"><div class="vis-l">${esc(x[0])}</div><div class="vis-v">${esc(x[1])}</div></div>`).join('')}</div></div><div class="cs"><div class="cs-t">Gerar imagens</div><div class="img-prompts">${imgPs.map((ip,idx)=>`<div class="img-p"><div class="img-pl">${esc(ip.lbl)}</div><div class="img-pt">${esc(ip.prompt)}</div><div class="img-pb"><button id="${uid}_ic${idx}" class="cp-btn" style="position:static">Copiar</button><button id="${uid}_ig${idx}" style="padding:5px 13px;background:var(--blu);border:none;border-radius:var(--rs);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)">🎨 Gerar</button></div></div>`).join('')}</div></div>`;
+  const tagMap = {emocional:'em',profissional:'pr',institucional:'in',humanizado:'hu'};
+  const verH = `<div class="cs"><div class="cs-t">Versões alternativas</div><div class="ver-g">${(c.versoes||[]).map((v,vi)=>`<div class="ver-c"><div class="ver-h"><span class="ver-tp ${tagMap[v.tipo]||'pr'}">${esc(v.tag||v.tipo||'')}</span><button class="cp-btn" style="position:static" id="${uid}_vc${vi}">Copiar</button></div><div class="ver-b">${esc(v.copy||'').replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`;
+  const metH = `<div class="cs"><div class="cs-t">Métricas</div><div class="met-g">${(c.metricas||[]).map(m=>`<div class="met-c"><div class="met-i">${esc(m.icone||'📊')}</div><div class="met-t">${esc(m.titulo||'')}</div><div class="met-s">${esc(m.desc||'')}</div></div>`).join('')}</div></div>`;
+  const panelMap = {estrategia:estratH,copy:copyH,posts:postsH,stories:storH,whatsapp:waH,calendario:calH,visual:visH,versoes:verH,metricas:metH};
+  const panelsH = tabs.map((t,i)=>`<div class="c-panel${i===0?' on':''}" id="panel-${t.id}-${uid}">${panelMap[t.id]||''}</div>`).join('');
+  wrap.innerHTML = `<div class="ai-header"><div class="ai-avatar">✦</div><span class="ai-name">MedAI</span><span class="ai-time">${now()}</span></div><div class="camp-doc"><div class="camp-hdr"><div class="camp-ey">Campanha gerada · ${esc(topic)}</div><div class="camp-nm">${esc(c.nome||topic)}</div><div class="camp-sl">${esc(c.slogan||'')}</div><div class="camp-meta"><span class="c-chip b">9 seções</span><span class="c-chip g">Pronto para publicar</span><span class="c-chip k">✓ Contextualizado</span></div></div><div class="camp-tabs">${tabsH}</div><div class="camp-panels">${panelsH}</div><div class="camp-foot"><span class="camp-fn">Gerado para ${esc(CTX.nom||(SESSION&&SESSION.clinica)||'sua clínica')}</span><div class="camp-fb"><button class="cfb" id="${uid}_fi">🎨 Gerar imagem</button><button class="cfb p" id="${uid}_rf">Refinar →</button></div></div></div>`;
+  conv.appendChild(wrap); conv.scrollTop = conv.scrollHeight;
+  setTimeout(() => {
+    wrap.querySelectorAll('.c-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        wrap.querySelectorAll('.c-tab').forEach(t => t.classList.remove('on'));
+        wrap.querySelectorAll('.c-panel').forEach(p => p.classList.remove('on'));
         tab.classList.add('on');
-        var pid=tab.getAttribute('data-panel');
-        var panel=document.getElementById(pid); if(panel) panel.classList.add('on');
+        const panel = document.getElementById(tab.getAttribute('data-panel'));
+        if (panel) panel.classList.add('on');
       });
     });
-    function cpBtn(id,text){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(){ cpText(b,text); }); }
-    cpBtn(uid+'_cm',c.copyPrincipal||'');
-    cpBtn(uid+'_wa',c.whatsapp||'');
-    (c.versoes||[]).forEach(function(v,vi){ cpBtn(uid+'_vc'+vi,v.copy||''); });
-    (c.hashtags||[]).forEach(function(h){ var e=document.getElementById(uid+'_ht_'+h.replace(/\W/g,'')); if(e) e.addEventListener('click',function(){ cpText(null,'#'+h); }); });
-    imgPs.forEach(function(ip,idx){
-      var ic=document.getElementById(uid+'_ic'+idx); if(ic)(function(b,p){b.addEventListener('click',function(){cpText(b,p);});})(ic,ip.prompt);
-      var ig=document.getElementById(uid+'_ig'+idx); if(ig)(function(b,p){b.addEventListener('click',function(){genImgFromCampaign(p);});})(ig,ip.prompt);
+    const cpBtn = (id, text) => { const b = document.getElementById(id); if (b) b.addEventListener('click', () => cpText(b, text)); };
+    cpBtn(uid+'_cm', c.copyPrincipal||'');
+    cpBtn(uid+'_wa', c.whatsapp||'');
+    (c.versoes||[]).forEach((v,vi) => cpBtn(uid+'_vc'+vi, v.copy||''));
+    (c.hashtags||[]).forEach(h => { const e = document.getElementById(uid+'_ht_'+h.replace(/\W/g,'')); if (e) e.addEventListener('click', () => cpText(null,'#'+h)); });
+    imgPs.forEach((ip, idx) => {
+      const ic = document.getElementById(uid+'_ic'+idx); if (ic) ic.addEventListener('click', () => cpText(ic, ip.prompt));
+      const ig = document.getElementById(uid+'_ig'+idx); if (ig) ig.addEventListener('click', () => genImgFromCampaign(ip.prompt));
     });
-    var fi=document.getElementById(uid+'_fi'); if(fi){var fp=bv.promptImagem||c.nome||topic; fi.addEventListener('click',function(){genImgFromCampaign(fp);});}
-    var rf=document.getElementById(uid+'_rf'); if(rf) rf.addEventListener('click',function(){ document.getElementById('uni-ta').value='Crie uma versão mais curta para WhatsApp'; document.getElementById('uni-ta').focus(); });
-  },150);
+    const fi = document.getElementById(uid+'_fi'); if (fi) fi.addEventListener('click', () => genImgFromCampaign(bv.promptImagem||c.nome||topic));
+    const rf = document.getElementById(uid+'_rf'); if (rf) rf.addEventListener('click', () => { document.getElementById('uni-ta').value='Crie uma versão mais curta para WhatsApp'; document.getElementById('uni-ta').focus(); });
+  }, 150);
 }
 
-function cpText(btn,text){
-  if(navigator.clipboard) navigator.clipboard.writeText(text).catch(function(){});
-  if(btn){btn.textContent='✓ Copiado';btn.classList.add('dn');setTimeout(function(){btn.textContent='Copiar';btn.classList.remove('dn');},2000);}
+function cpText(btn, text) {
+  if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+  if (btn) { btn.textContent='✓ Copiado'; btn.classList.add('dn'); setTimeout(() => { btn.textContent='Copiar'; btn.classList.remove('dn'); }, 2000); }
 }
 
 function genImgFromCampaign(prompt) {
-  if(!prompt||!prompt.trim()) return;
-  window.__IMG_PROMPT__=prompt.trim();
-  var tryRun=function(n){
-    if(!LOAD&&SESSION){
-      addUserMsg(window.__IMG_PROMPT__);
-      LOAD=true; document.getElementById('unibtn').disabled=true; document.getElementById('uni-ta').disabled=true;
-      var ld=addLoader();
-      doImg(window.__IMG_PROMPT__).then(function(){
-        LOAD=false; document.getElementById('unibtn').disabled=false; document.getElementById('uni-ta').disabled=false; updUI();
-        window.__IMG_PROMPT__=null;
-      }).catch(function(e){ hideLoader(ld); showErr(etl(e.code),e.msg); LOAD=false; document.getElementById('unibtn').disabled=false; document.getElementById('uni-ta').disabled=false; });
-    } else if(n>0) setTimeout(function(){tryRun(n-1);},200);
-  };
-  tryRun(20);
-}
-
-/* ── VIE buildSP ── */
-async function buildSP(inp) {
-  var ce=CTX.est||'', cc=CTX.c1!=='#3B7FFF'?CTX.c1:'';
-  var vsk=Object.keys(VS).filter(function(s){return s!=='neutral';}).join(' | ');
-  var spLines=['Você é um engenheiro de prompts visuais de elite.','Converta o pedido do usuário em português para um prompt técnico preciso em INGLÊS.','Separe o CONTEÚDO do ESTILO.',ce?'Estilo da clínica: '+ce+'.':'',cc?'Cor da marca: '+cc+'.':'','','Responda APENAS com JSON válido:','{"subject":"<máximo 12 palavras em PORTUGUÊS>","contentPrompt":"<25-55 palavras em INGLÊS, sem linguagem de estilo>","style":"<um destes: '+vsk+'>","userSpecifiedStyle":<bool>,"extraNegatives":"<máximo 8 palavras em PORTUGUÊS>"}','','MAPA DE ESTILOS: desenho animado/cartoon→cartoon | anime/mangá→anime | 3d/render/pixar→3d | pixel art→pixel_art | aquarela→watercolor | pintura digital→digital_painting | cyberpunk/neon→cyberpunk | minimalista→minimalist | futurista→futurist | vintage/retrô→vintage | foto/realista→realistic_photo | documentário→documentary_photo | produto/embalagem→product_photo | pôster/cartaz→poster | infográfico→infographic','Regra: subject deve estar sempre em PORTUGUÊS. contentPrompt sempre em INGLÊS.'].filter(Boolean).join('\n');
-  try {
-    var r=await MB.callAI(SESSION.clientId,'imagens',[{role:'user',content:inp}],spLines);
-    if(!r?.reply) throw new Error('empty');
-    var m=r.reply.match(/\{[\s\S]*\}/); if(!m) throw new Error('no-json');
-    var p=JSON.parse(m[0]);
-    if(!p.contentPrompt||p.contentPrompt.length<5) throw new Error('invalid');
-    var sk=VS[p.style]?p.style:'neutral';
-    return {subject:p.subject||inp,content:p.contentPrompt,sk:sk,pr:VS[sk].p,nr:VS[sk].n,en:p.extraNegatives||'',us:!!p.userSpecifiedStyle};
-  } catch(e) {
-    return {subject:inp,content:inp,sk:'neutral',pr:VS.neutral.p,nr:VS.neutral.n,en:'',us:false,fb:true};
-  }
+  if (!prompt || !prompt.trim()) return;
+  const ta = document.getElementById('uni-ta');
+  ta.value = prompt.trim();
+  rszTa(ta);
+  ta.focus();
+  uniSend();
 }
 </script>
 </body>
