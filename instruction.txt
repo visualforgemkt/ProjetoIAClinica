@@ -1,0 +1,52 @@
+﻿<USER_REQUEST>
+Quero realizar uma AUDITORIA COMPLETA E PROFUNDA da MedAI Pro.
+
+O objetivo desta fase NÃƒO Ã© adicionar features.
+
+O objetivo Ã©:
+
+* revisar
+* mapear
+* validar
+* estruturar
+* identificar riscos
+* consolidar arquitetura
+
+A MedAI Pro jÃ¡ deixou de ser um protÃ³tipo simples.
+
+Agora estamos entrando em uma fase de:
+
+* produto SaaS IA real
+* arquitetura escalÃ¡vel
+* clientes reais
+* responsabilidade tÃ©cnica
+* responsabilidade jurÃ­dica
+
+Portanto:
+preciso de uma revisÃ£o TOTAL da plataforma.
+
+==================================================
+OBJETIVO PRINCIPAL
+==================
+
+Quero um diagnÃ³stico tÃ©cnico COMPLETO da MedAI Pro.
+
+Mapear:
+
+* tudo que jÃ¡ existe
+* tudo que jÃ¡ funciona
+* tudo que ainda Ã© mock
+* tudo que estÃ¡ improvisado
+* tudo que precisa ser corrigido
+* tudo que representa risco
+* tudo que precisa ser estruturado antes do lanÃ§amento
+
+==================================================
+IMPORTANTE
+==========
+
+Quero uma auditoria REAL.
+
+NÃƒO quero respostas superficiais.
+
+<truncated 7651 bytes>

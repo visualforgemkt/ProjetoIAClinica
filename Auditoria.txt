@@ -1,0 +1,63 @@
+INSTRUÇÕES PARA AUDITORIA COMPLETA E PROFUNDA - MedAI Pro
+
+OBJETIVO:
+Realizar uma revisão TOTAL da plataforma MedAI Pro, focando em:
+* Revisar, mapear, validar e estruturar a arquitetura.
+* Identificar riscos técnicos e jurídicos.
+* Consolidar a plataforma para um ambiente SaaS real com clientes reais.
+
+--------------------------------------------------
+OBJETIVO PRINCIPAL:
+--------------------------------------------------
+Gerar um diagnóstico técnico COMPLETO mapeando:
+* Tudo que já existe e funciona.
+* Tudo que ainda é mock ou improvisado.
+* Tudo que precisa ser corrigido ou representa risco.
+* Tudo que precisa ser estruturado antes do lançamento.
+
+--------------------------------------------------
+PONTOS DE FOCO (CHECKLIST):
+--------------------------------------------------
+
+1. SEGURANÇA (CRÍTICO):
+- Vazamento de chaves e segredos.
+- Mocks de autenticação.
+- Vulnerabilidades (SQL Injection, XSS, etc.).
+- Rate Limiting e proteção de rotas.
+
+2. BACKEND (NODE/EXPRESS):
+- Consistência da arquitetura.
+- Robustez no tratamento de erros.
+- Qualidade e cobertura de logs.
+- Performance de queries.
+
+3. FRONTEND (HTML/JS MONOLÍTICO):
+- Gerenciamento de estado.
+- Lógica sensível exposta no cliente.
+- Manutenibilidade do código.
+
+4. IA (ORCHESTRATOR/GATEWAY):
+- Estrutura e eficácia dos prompts.
+- Mecanismos de fallback entre providers.
+- Eficiência de custos e uso de tokens.
+- Otimização da janela de contexto.
+
+5. BANCO DE DADOS (SUPABASE/POSTGRES):
+- Normalização do schema.
+- Políticas de RLS (Row Level Security).
+- Identificação de gargalos e falta de índices.
+
+6. SAAS READINESS:
+- Multi-tenancy: Isolamento de dados entre clínicas (100% garantido?).
+- Suporte a limites de uso e planos.
+
+--------------------------------------------------
+RESULTADO ESPERADO:
+--------------------------------------------------
+Um relatório detalhado em Markdown, dividido por categorias, contendo:
+- Achados (o que foi encontrado).
+- Riscos (o que pode dar errado).
+- Recomendações (como corrigir).
+- Prioridade (P0, P1, P2).
+
+Sempre que solicitado, o auditor deve ler este arquivo e executar a auditoria novamente com base no estado ATUAL do código.
