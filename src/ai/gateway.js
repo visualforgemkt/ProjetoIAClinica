@@ -92,6 +92,17 @@ class OpenAIProvider extends BaseProvider {
       provider: 'openai'
     };
   }
+
+  async generateImage({ prompt, model = "dall-e-3", size = '1024x1024', quality = 'standard' }) {
+    const response = await this.client.images.generate({
+      model,
+      prompt,
+      n: 1,
+      size,
+      quality: model === 'dall-e-3' ? quality : undefined
+    });
+    return response.data[0].url;
+  }
 }
 
 // ── Registry ───────────────────────────────────────────────────
@@ -175,8 +186,39 @@ const AIGateway = {
         throw { code: 'AI_AUTH_ERROR', message: 'Erro de autenticação com o provider de IA.' };
       }
 
-      logger.error('AI Gateway error', { error: err.message, duration, clinicId });
-      throw { code: 'AI_ERROR', message: 'Erro ao processar com IA. Tente novamente.' };
+      logger.error('AI Gateway error', { 
+        error: err.message, 
+        duration, 
+        clinicId,
+        stack: err.stack,
+        originalError: err.response?.data || err 
+      });
+      throw { code: 'AI_ERROR', message: `Erro na IA: ${err.message || 'Erro desconhecido'}` };
+    }
+  },
+
+  /**
+   * P0 — IMAGE GENERATION (DALL-E 3)
+   */
+  async generateImage(options) {
+    const { prompt, clinicId } = options;
+    try {
+      const p = getProvider('openai');
+      if (!p.generateImage) throw new Error('Provider não suporta geração de imagem');
+      
+      logger.info('AI Image Generation request', { clinicId });
+      try {
+        return await p.generateImage({ prompt, model: "dall-e-3" });
+      } catch (e3) {
+        if (e3.message.includes('does not exist') || e3.message.includes('billing')) {
+          logger.warn('DALL-E 3 unavailable, trying DALL-E 2', { error: e3.message });
+          return await p.generateImage({ prompt, model: "dall-e-2", size: '512x512' });
+        }
+        throw e3;
+      }
+    } catch (err) {
+      logger.error('AI Image Generation error', { error: err.message, clinicId });
+      return null; // Fallback handled by orchestrator
     }
   }
 };

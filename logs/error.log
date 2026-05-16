@@ -31,3 +31,11 @@
 {"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:48:14.577Z","type":"campaign"}
 {"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.247Z"}
 {"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-16T12:48:15.259Z"}
+{"details":"\"nome\" is required, \"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:54:50.331Z","type":"campaign"}
+{"error":"Unexpected token ] in JSON at position 11719","level":"error","message":"Parser falhou mesmo com autofix","service":"medai-pro","timestamp":"2026-05-16T12:57:57.279Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"PARSING_FAILURE","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-16T12:57:57.718Z"}
+{"error":"Unexpected token { in JSON at position 14698","level":"error","message":"Parser falhou mesmo com autofix","service":"medai-pro","timestamp":"2026-05-16T12:59:03.432Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"PARSING_FAILURE","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-16T12:59:03.652Z"}
+{"details":"\"nome\" is required, \"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T13:11:15.971Z","type":"campaign"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:12:40.490Z"}
+{"clinicId":"test","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:14:14.704Z"}

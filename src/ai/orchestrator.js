@@ -80,10 +80,27 @@ class AgentLayer {
 
 // ── Image URL Generator ────────────────────────────────────────
 class ImageUrlGenerator {
-  static generate(prompt, style = 'neutral') {
+  static async generate(prompt, style = 'neutral', clinicId = null) {
     if (!prompt) return null;
+
+    // Se tivermos OpenAI API Key, usamos DALL-E 3 (Profissional)
+    if (process.env.OPENAI_API_KEY) {
+      try {
+        const url = await AIGateway.generateImage({ 
+          prompt: `${prompt}, high quality medical style, ${style}`, 
+          clinicId 
+        });
+        if (url) return url;
+      } catch (err) {
+        logger.warn('DALL-E 3 failed, falling back to Pollinations', { error: err.message });
+      }
+    }
+
+    // Fallback: Pollinations (Gratuito/Aberto)
     const seed = Math.floor(Math.random() * 1000000);
-    const fullPrompt = style !== 'neutral' ? `${prompt}, style: ${style}` : prompt;
+    // Encurtar prompt para evitar URLs gigantes que quebram em alguns browsers
+    const shortPrompt = prompt.split('.').slice(0, 2).join('.') || prompt;
+    const fullPrompt = style !== 'neutral' ? `${shortPrompt}, style: ${style}` : shortPrompt;
     const encoded = encodeURIComponent(fullPrompt);
     return `https://pollinations.ai/p/${encoded}?width=1024&height=1024&seed=${seed}&nologo=true`;
   }
@@ -183,13 +200,26 @@ const AIOrchestrator = {
 
     if (resolvedIntent === 'campaign') {
       const aiResult = await AgentLayer.executeCampaign(message, clinic);
-      result = OutputLayer.parseCampaign(aiResult.text);
+      try {
+        result = OutputLayer.parseCampaign(aiResult.text);
+      } catch (err) {
+        logger.error('Orchestrator Campaign Parsing Failed', { error: err.message, text: aiResult.text });
+        result = { 
+          type: 'campaign', 
+          data: { 
+            nome: 'Erro na geração da campanha', 
+            copyPrincipal: 'A IA teve um problema ao formatar a resposta. Por favor, tente novamente com um tema mais específico.',
+            _error: true 
+          } 
+        };
+      }
       
       // Gerar imagem para o briefing visual se houver prompt
       if (result.type === 'campaign' && result.data?.briefingVisual?.promptImagem) {
-        result.data.briefingVisual.imageUrl = ImageUrlGenerator.generate(
+        result.data.briefingVisual.imageUrl = await ImageUrlGenerator.generate(
           result.data.briefingVisual.promptImagem,
-          result.data.briefingVisual.estilo || 'poster'
+          result.data.briefingVisual.estilo || 'poster',
+          clinic?.id
         );
       }
 
@@ -210,9 +240,10 @@ const AIOrchestrator = {
       const vieResult = await AgentLayer.executeVIE(message, clinic);
       const parsed    = OutputLayer.parseVIE(vieResult.text);
       
-      const imageUrl = ImageUrlGenerator.generate(
+      const imageUrl = await ImageUrlGenerator.generate(
         parsed?.contentPrompt || message,
-        parsed?.style || 'neutral'
+        parsed?.style || 'neutral',
+        clinic?.id
       );
 
       result = {

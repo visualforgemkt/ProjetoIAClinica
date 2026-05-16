@@ -512,7 +512,7 @@ button,input,select,textarea { font-family:inherit; }
             <textarea class="uni-ta" id="uni-ta" placeholder="Descreva o que deseja criar ou fazer para a clínica…" rows="2" onkeydown="onUniKey(event)" oninput="rszTa(this)"></textarea>
             <div class="uni-footer">
               <div class="uni-hints" id="uni-hints">
-                <span class="uni-hint" onclick="useHint(this)">Campanha de vacinação</span>
+                <span class="uni-hint" onclick="useHint(this)">Criar Campanha Completa</span>
                 <span class="uni-hint" onclick="useHint(this)">Post para Instagram</span>
                 <span class="uni-hint" onclick="useHint(this)">Gerar imagem</span>
                 <span class="uni-hint" onclick="useHint(this)">Responder dúvidas</span>
@@ -1027,7 +1027,14 @@ function renderCampaignDoc(c, topic) {
   const tabs = [{id:'estrategia',lbl:'📋 Estratégia'},{id:'copy',lbl:'✍️ Copy'},{id:'posts',lbl:'📱 Posts'},{id:'stories',lbl:'📲 Stories'},{id:'whatsapp',lbl:'💬 WhatsApp'},{id:'calendario',lbl:'📅 Calendário'},{id:'visual',lbl:'🎨 Visual'},{id:'versoes',lbl:'🔀 Versões'},{id:'metricas',lbl:'📊 Métricas'}];
   const tabsH = tabs.map((t,i)=>`<div class="c-tab${i===0?' on':''}" data-panel="panel-${t.id}-${uid}">${t.lbl}</div>`).join('');
   const s = c.estrategia||{};
-  const estratH = `<div class="cs"><div class="cs-t">Estratégia</div><div class="strat-g">${[['🎯 Objetivo',s.objetivo||'—'],['👥 Público',s.publicoAlvo||'—'],['💡 Abordagem',s.abordagem||'—'],['📣 CTA',s.ctaPrincipal||'—'],['🏥 Posicionamento',s.posicionamento||'—']].map(x=>`<div class="strat-i"><div class="strat-l">${esc(x[0])}</div><div class="strat-v">${esc(x[1])}</div></div>`).join('')}</div></div>`;
+  const getV = (obj, keys) => { for(let k of keys) { if(obj[k]) return obj[k]; } return '—'; };
+  const estratH = `<div class="cs"><div class="cs-t">Estratégia</div><div class="strat-g">${[
+    ['🎯 Objetivo', getV(s, ['objetivo', 'goal', 'objective'])],
+    ['👥 Público', getV(s, ['publicoAlvo', 'publico_alvo', 'target', 'audience'])],
+    ['💡 Abordagem', getV(s, ['abordagem', 'approach'])],
+    ['📣 CTA', getV(s, ['ctaPrincipal', 'cta_principal', 'cta'])],
+    ['🏥 Posicionamento', getV(s, ['posicionamento', 'positioning'])]
+  ].map(x=>`<div class="strat-i"><div class="strat-l">${esc(x[0])}</div><div class="strat-v">${esc(x[1])}</div></div>`).join('')}</div></div>`;
   const copyH = `<div class="cs"><div class="cs-t">Copy principal</div><div class="cp-blk"><div class="cp-lbl">Post · Instagram/Facebook</div><button class="cp-btn" id="${uid}_cm">Copiar</button>${esc(c.copyPrincipal||'—').replace(/\n/g,'<br>')}</div></div><div class="cs"><div class="cs-t">Hashtags</div><div class="htags">${(c.hashtags||[]).map(h=>`<span class="htag" id="${uid}_ht_${h.replace(/\W/g,'')}">#${esc(h)}</span>`).join('')}</div></div>`;
   const postsH = `<div class="cs"><div class="cs-t">Posts</div><div class="posts-g">${(c.posts||[]).map(p=>{const sl=p.slides&&p.slides.length?`<div style="margin-top:9px;border-top:1px solid var(--bd);padding-top:9px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--t3);margin-bottom:6px">Slides</div>${p.slides.map((s,i)=>`<div style="font-size:12px;padding:6px 10px;background:var(--sf3);border-radius:var(--rs);margin-bottom:4px"><strong style="color:var(--blu-l);margin-right:5px">S${i+1}</strong>${esc(s)}</div>`).join('')}</div>`:'';return `<div class="post-c"><div class="post-h"><span class="post-n">Post ${p.num}</span><span class="post-tp">${esc(p.tipo||'')}</span></div><div class="post-ti">${esc(p.titulo||'')}</div><div class="post-b">${esc(p.legenda||'').replace(/\n/g,'<br>')}</div>${sl}</div>`;}).join('')}</div></div>`;
   const storH = `<div class="cs"><div class="cs-t">Stories</div><div class="stor-g">${(c.stories||[]).map(s=>`<div class="stor-c"><div class="stor-n">Story ${s.num}</div><div class="stor-tp">${esc(s.tipo||'')}</div><div class="stor-b">${esc(s.conteudo||'').replace(/\n/g,'<br>')}</div></div>`).join('')}</div></div>`;

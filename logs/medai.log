@@ -202,3 +202,100 @@
 {"clinicId":"clinic-123","durationMs":1,"level":"info","message":"[EventBus] Processed FAQ_UTILIZED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.990Z"}
 {"clinicId":"clinic-1","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-16T12:48:16.149Z","userId":"uuid-1"}
 {"clinicId":"clinic-1","durationMs":15,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-16T12:48:16.163Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T12:53:11.452Z"}
+{"level":"info","message":"POST /api/auth/login 200 1119.147 ms - 0b481da0-7e11-493e-853c-ca63d901039e","service":"medai-pro","timestamp":"2026-05-16T12:53:15.907Z"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:53:15.908Z","userId":null}
+{"email":"doutorgregory@clinica.com.br","level":"info","message":"User logged in","service":"medai-pro","timestamp":"2026-05-16T12:53:21.622Z"}
+{"level":"info","message":"POST /api/auth/verify 200 867.980 ms - 7f71dd61-57e5-4978-8471-e911f5a30647","service":"medai-pro","timestamp":"2026-05-16T12:53:21.624Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-16T12:53:21.625Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:53:21.629Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":165,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-16T12:53:21.790Z"}
+{"level":"info","message":"GET /api/clinic/context 200 633.442 ms - 2c1a4120-706e-4d4f-8b35-1c907803c4ad","service":"medai-pro","timestamp":"2026-05-16T12:53:22.267Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:53:22.269Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"level":"info","message":"GET /api/ai/usage 200 511.460 ms - 340ca20e-5f4a-453d-b530-87ac92ca97b4","service":"medai-pro","timestamp":"2026-05-16T12:53:22.808Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:53:22.810Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"level":"info","message":"GET /api/ai/usage 304 483.062 ms - 88bfe588-b1ab-45f8-9a6e-e1152bad6fbe","service":"medai-pro","timestamp":"2026-05-16T12:53:28.646Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:53:28.647Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":24,"service":"medai-pro","timestamp":"2026-05-16T12:53:46.576Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:53:46.577Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":63745,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:54:50.322Z","tokens":8565}
+{"error":"Unexpected end of JSON input","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:54:50.326Z"}
+{"details":"\"nome\" is required, \"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:54:50.331Z","type":"campaign"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting CAMPAIGN_CREATED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T12:54:50.336Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":484,"level":"info","message":"[EventBus] Processed CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T12:54:50.820Z"}
+{"level":"info","message":"POST /api/ai/chat 200 66653.234 ms - 2b602dc0-df9c-4727-901c-25baabde9147","service":"medai-pro","timestamp":"2026-05-16T12:54:51.540Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:54:51.543Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"social","level":"info","message":"Orchestrator processing","messageLength":40,"service":"medai-pro","timestamp":"2026-05-16T12:55:23.384Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:55:23.385Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":17749,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:55:41.134Z","tokens":1952}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting AI_TRIGGERED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T12:55:41.141Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":205,"level":"info","message":"[EventBus] Processed AI_TRIGGERED","service":"medai-pro","timestamp":"2026-05-16T12:55:41.346Z"}
+{"level":"info","message":"POST /api/ai/chat 200 19295.723 ms - c8eb3c05-c9a2-4984-b0ce-6e872b08aa24","service":"medai-pro","timestamp":"2026-05-16T12:55:41.838Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:55:41.839Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":36,"service":"medai-pro","timestamp":"2026-05-16T12:56:48.695Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:56:48.696Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":68578,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:57:57.275Z","tokens":8574}
+{"error":"Unexpected token ] in JSON at position 11719","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:57:57.277Z"}
+{"error":"Unexpected token ] in JSON at position 11719","level":"error","message":"Parser falhou mesmo com autofix","service":"medai-pro","timestamp":"2026-05-16T12:57:57.279Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"PARSING_FAILURE","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-16T12:57:57.718Z"}
+{"level":"info","message":"POST /api/ai/chat 500 69760.198 ms - 9457a036-cce8-47bd-8ce6-2e8a44617e8b","service":"medai-pro","timestamp":"2026-05-16T12:57:57.720Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:57:57.721Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":36,"service":"medai-pro","timestamp":"2026-05-16T12:58:09.099Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:58:09.100Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":54326,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T12:59:03.426Z","tokens":7768}
+{"error":"Unexpected token { in JSON at position 14698","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:59:03.430Z"}
+{"error":"Unexpected token { in JSON at position 14698","level":"error","message":"Parser falhou mesmo com autofix","service":"medai-pro","timestamp":"2026-05-16T12:59:03.432Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"PARSING_FAILURE","level":"error","message":"AI chat error","service":"medai-pro","timestamp":"2026-05-16T12:59:03.652Z"}
+{"level":"info","message":"POST /api/ai/chat 500 55226.696 ms - 6fac48e9-b8cc-478b-855d-f3cd816704e6","service":"medai-pro","timestamp":"2026-05-16T12:59:03.658Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T12:59:03.659Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:02:44.330Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:02:54.768Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:03:07.607Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:09:38.106Z"}
+{"level":"info","message":"POST /api/auth/login 200 1029.031 ms - 4ab9fcdc-6d8a-4b3c-adb1-c22a2e2cef5c","service":"medai-pro","timestamp":"2026-05-16T13:09:52.989Z"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:09:52.990Z","userId":null}
+{"email":"doutorgregory@clinica.com.br","level":"info","message":"User logged in","service":"medai-pro","timestamp":"2026-05-16T13:09:57.277Z"}
+{"level":"info","message":"POST /api/auth/verify 200 734.748 ms - cc11cd54-8853-4414-9130-958463fa7522","service":"medai-pro","timestamp":"2026-05-16T13:09:57.278Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-16T13:09:57.279Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:09:57.284Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":200,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-16T13:09:57.479Z"}
+{"level":"info","message":"GET /api/clinic/context 304 450.537 ms - d1aa2aee-14f8-4cfc-857f-6fc60820675a","service":"medai-pro","timestamp":"2026-05-16T13:09:57.738Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:09:57.760Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"level":"info","message":"GET /api/ai/usage 200 542.324 ms - 2fa65360-7e4b-4c85-8fc8-48b66434715e","service":"medai-pro","timestamp":"2026-05-16T13:09:58.326Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:09:58.326Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":43,"service":"medai-pro","timestamp":"2026-05-16T13:10:08.022Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:10:08.024Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":67929,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:11:15.953Z","tokens":8580}
+{"error":"Unexpected end of JSON input","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T13:11:15.957Z"}
+{"details":"\"nome\" is required, \"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T13:11:15.971Z","type":"campaign"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting CAMPAIGN_CREATED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T13:11:15.976Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":237,"level":"info","message":"[EventBus] Processed CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T13:11:16.213Z"}
+{"level":"info","message":"POST /api/ai/chat 200 69571.536 ms - f97a402d-4024-41fa-8c4f-56e890562126","service":"medai-pro","timestamp":"2026-05-16T13:11:16.935Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:11:16.936Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"social","level":"info","message":"Orchestrator processing","messageLength":35,"service":"medai-pro","timestamp":"2026-05-16T13:11:57.644Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:11:57.645Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":12602,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:12:10.247Z","tokens":1399}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting AI_TRIGGERED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T13:12:10.259Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":204,"level":"info","message":"[EventBus] Processed AI_TRIGGERED","service":"medai-pro","timestamp":"2026-05-16T13:12:10.463Z"}
+{"level":"info","message":"POST /api/ai/chat 200 14296.636 ms - 324d9e22-1963-4ca3-a2d3-2cde8621cd8a","service":"medai-pro","timestamp":"2026-05-16T13:12:10.992Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:12:10.993Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","intent":"image","level":"info","message":"Orchestrator processing","messageLength":61,"service":"medai-pro","timestamp":"2026-05-16T13:12:35.334Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:12:35.340Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":3431,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-16T13:12:38.770Z","tokens":696}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Image Generation request","service":"medai-pro","timestamp":"2026-05-16T13:12:38.788Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:12:40.490Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting IMAGE_GENERATED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T13:12:40.499Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":207,"level":"info","message":"[EventBus] Processed IMAGE_GENERATED","service":"medai-pro","timestamp":"2026-05-16T13:12:40.706Z"}
+{"level":"info","message":"POST /api/ai/chat 200 6636.551 ms - ade63759-5c26-4cdb-bdc5-bb00c0754998","service":"medai-pro","timestamp":"2026-05-16T13:12:41.200Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:12:41.201Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:13:55.838Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:14:08.669Z"}
+{"clinicId":"test","level":"info","message":"AI Image Generation request","service":"medai-pro","timestamp":"2026-05-16T13:14:14.121Z"}
+{"clinicId":"test","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:14:14.704Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:14:27.119Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:14:34.544Z"}
+{"level":"info","message":"GET /api/ai/usage 200 1199.602 ms - 70c22cf4-823a-4a86-885f-858e6a76d8e0","service":"medai-pro","timestamp":"2026-05-16T13:14:37.459Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-16T13:14:37.502Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:15:03.521Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:15:11.667Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-16T13:15:19.594Z"}

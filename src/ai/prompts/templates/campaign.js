@@ -30,9 +30,25 @@ function buildCampaignSystem(clinic, topic) {
     `ÂNGULO CRIATIVO (seed ${seed}): ${angulo}`,
     'Use este ângulo em todo o conteúdo. Garanta variação.',
     '',
-    'REGRA: Responda APENAS com JSON válido. O Output DEVE respeitar o Schema CampaignResponse.',
-    `Conteúdo real, específico para ${nome}. Nunca genérico.`,
+    'REGRA: Responda APENAS com JSON válido conforme o exemplo abaixo:',
+    JSON.stringify({
+      nome: "Nome da Campanha",
+      slogan: "Slogan Curto",
+      estrategia: {
+        objetivo: "...",
+        publicoAlvo: "...",
+        abordagem: "...",
+        ctaPrincipal: "...",
+        posicionamento: "..."
+      },
+      copyPrincipal: "Texto longo do post...",
+      hashtags: ["tag1", "tag2"],
+      calendario: [{ dia: "Dia 1", acao: "Postar X", horario: "09:00", obs: "..." }],
+      briefingVisual: { conceito: "...", promptImagem: "Prompt em inglês para gerador de imagem" },
+      metricas: [{ titulo: "Engajamento", desc: "...", icone: "📈" }]
+    }, null, 2),
     '',
+    'Lembre-se: use camelCase exatamente como mostrado acima (ex: publicoAlvo, ctaPrincipal).',
     'Lembre-se de sempre gerar o campo confidenceScore e riskScore (de 0 a 100).',
   ].join('\n');
 }
