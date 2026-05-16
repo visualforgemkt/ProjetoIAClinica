@@ -163,3 +163,14 @@
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"AI Gateway request","messageCount":1,"provider":"anthropic","service":"medai-pro","timestamp":"2026-05-15T14:26:14.211Z"}
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","duration":44658,"level":"info","message":"AI Gateway success","model":"claude-haiku-4-5-20251001","provider":"anthropic","service":"medai-pro","timestamp":"2026-05-15T14:26:58.869Z","tokens":6083}
 {"level":"info","message":"POST /api/ai/chat 200 46565.918 ms - 6d7ddb15-eebf-499a-bdad-f65276d00428","service":"medai-pro","timestamp":"2026-05-15T14:27:00.023Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:10:55.694Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:10:55.734Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:12:33.709Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:12:33.741Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:13:10.735Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:13:10.775Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:13:47.868Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:13:47.908Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.844Z"}
+{"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.886Z"}
+{"email":"inexistente@clinica.com","error":"Not found","level":"error","message":"findUserByEmail database error","service":"medai-pro","timestamp":"2026-05-16T12:15:41.478Z"}

@@ -9,22 +9,23 @@ app.use(express.json());
 // Mock de verificação JWT
 jest.mock('jsonwebtoken', () => ({
   verify: jest.fn((token) => {
-    if (token === 'token_clinica_A') return { id: 'userA', clinicId: 'clinic_A' };
-    if (token === 'token_clinica_B') return { id: 'userB', clinicId: 'clinic_B' };
+    if (token === 'token_clinica_A') return { userId: 'userA' };
+    if (token === 'token_clinica_B') return { userId: 'userB' };
     throw new Error('Invalid token');
   })
 }));
 
-const supabase = require('../../src/config/supabase');
-jest.mock('../../src/config/supabase', () => ({
-  from: jest.fn().mockReturnThis(),
-  select: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  single: jest.fn().mockImplementation(function() {
-    // Simula validação de sessão ativa no banco
-    return { data: { active: true }, error: null };
-  })
-}));
+const supabase = require('../../config/supabase');
+
+supabase.eq.mockImplementation((field, value) => {
+  supabase._lastVal = value;
+  return supabase;
+});
+supabase.single.mockImplementation(() => {
+  const v = supabase._lastVal;
+  let cid = v === 'userA' ? 'clinic_A' : v === 'userB' ? 'clinic_B' : v;
+  return Promise.resolve({ data: { id: cid, clinic_id: cid, active: true }, error: null });
+});
 
 app.get('/api/clinic/data', authMiddleware, (req, res) => {
   res.json({ clinic: req.clinicId, data: 'secure data' });

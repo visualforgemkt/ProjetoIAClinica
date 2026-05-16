@@ -1,13 +1,5 @@
-// Setup file for Jest
 require('dotenv').config({ path: '.env.test' });
+process.env.JWT_SECRET = 'jest-secret';
 
-// Mock do Supabase para evitar chamadas reais durante os testes
-jest.mock('./src/config/supabase', () => ({
-  from: jest.fn().mockReturnThis(),
-  select: jest.fn().mockReturnThis(),
-  insert: jest.fn().mockReturnThis(),
-  update: jest.fn().mockReturnThis(),
-  delete: jest.fn().mockReturnThis(),
-  eq: jest.fn().mockReturnThis(),
-  single: jest.fn().mockReturnThis(),
-}));
+// O Mock do Supabase agora é feito via config/__mocks__/supabase.js
+jest.mock('../config/supabase');

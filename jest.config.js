@@ -8,7 +8,5 @@ module.exports = {
   ],
   setupFilesAfterEnv: ['./tests/setup.js'],
   testMatch: ['**/tests/**/*.test.js'],
-  clearMocks: true,
-  resetMocks: true,
-  restoreMocks: true
+  clearMocks: true
 };

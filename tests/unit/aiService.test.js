@@ -4,7 +4,7 @@ const AIOrchestrator = require('../../src/ai/orchestrator');
 
 jest.mock('../../src/repositories/usageRepository');
 jest.mock('../../src/ai/orchestrator');
-const supabase = require('../../src/config/supabase');
+const supabase = require('../../config/supabase');
 
 describe('AIService - IA Orchestrator', () => {
   beforeEach(() => {
