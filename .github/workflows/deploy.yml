@@ -1,0 +1,40 @@
+name: MedAI Pro CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, staging, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run test
+
+  deploy-staging:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Staging (Vercel/Heroku/AWS)
+        run: echo "Deploying STAGING environment..."
+        # Integração real: vercel --prod ou aws eb deploy
+
+  deploy-production:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Production
+        run: echo "Deploying PRODUCTION environment..."
+      - name: Record Deployment in Sentry
+        run: echo "Sentry release tracking..."

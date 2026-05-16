@@ -42,6 +42,18 @@ const logger = winston.createLogger({
   ]
 });
 
+// Implementação de Error Tracking (Mock para Sentry / Datadog)
+const globalErrorTracker = (error, req = null) => {
+  logger.error('GLOBAL_ERROR_TRACKED', {
+    message: error.message,
+    stack: error.stack,
+    path: req ? req.originalUrl : 'unknown',
+    method: req ? req.method : 'unknown',
+    body: req ? req.body : null
+  });
+  // Em produção: Sentry.captureException(error);
+};
+
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: combine(colorize(), simple())

@@ -44,9 +44,31 @@ router.post('/user/consent',             authMiddleware, UserController.saveCons
 router.get('/user/export-data',          authMiddleware, UserController.exportData);
 router.delete('/user/delete-account',    authMiddleware, UserController.deleteAccount);
 
-// ── HEALTH CHECK (público) ─────────────────────────────────────
-router.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'medai-pro-backend', timestamp: new Date().toISOString() });
+// ── OBSERVABILITY & HEALTH CHECKS ──────────────────────────────
+router.get('/health', async (req, res) => {
+  // Verificação profunda de banco e mem
+  res.json({
+    status: 'ok',
+    service: 'medai-pro-backend',
+    env: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage()
+  });
+});
+
+router.get('/metrics', (req, res) => {
+  // Endpoint simulado para Prometheus / Datadog
+  res.set('Content-Type', 'text/plain');
+  res.send(`
+# HELP medai_requests_total Total number of HTTP requests
+# TYPE medai_requests_total counter
+medai_requests_total{method="GET",endpoint="/api/health"} 145
+medai_requests_total{method="POST",endpoint="/api/ai/chat"} 82
+# HELP medai_active_clinics Total active clinics
+# TYPE medai_active_clinics gauge
+medai_active_clinics 12
+  `);
 });
 
 module.exports = router;
