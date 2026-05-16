@@ -4,6 +4,8 @@ const { v4: uuidv4 } = require('uuid');
 const AuthRepository = require('../repositories/authRepository');
 const supabase = require('../../config/supabase');
 const logger   = require('../utils/logger');
+const eventBus = require('../core/eventBus');
+const { EventType } = require('./trackingService');
 
 const AuthService = {
   /**
@@ -71,6 +73,15 @@ const AuthService = {
 
     await AuthRepository.updateLastLogin(user.id);
 
+    // Track login success
+    eventBus.emitEvent(EventType.LOGIN, {
+      clinicId: clinic.id,
+      userId: user.id,
+      module: 'AUTH',
+      screen: 'Login',
+      metadata: { ip, userAgent }
+    });
+
     return {
       accessToken, refreshToken,
       user: { id: user.id, email: user.email, name: user.name, initials: user.initials, role: user.role },
@@ -112,7 +123,18 @@ const AuthService = {
   },
 
   async logout(refreshToken) {
-    if (refreshToken) await AuthRepository.deleteSession(refreshToken);
+    if (refreshToken) {
+      const session = await AuthRepository.findSession(refreshToken);
+      if (session) {
+        eventBus.emitEvent(EventType.LOGOUT, {
+          clinicId: session.clinic_id,
+          userId: session.user_id,
+          module: 'AUTH',
+          screen: 'Logout'
+        });
+      }
+      await AuthRepository.deleteSession(refreshToken);
+    }
   }
 };
 

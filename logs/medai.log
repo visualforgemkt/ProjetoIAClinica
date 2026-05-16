@@ -181,3 +181,24 @@
 {"clinicId":"clinic-123","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":29,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.552Z"}
 {"clinicId":"clinic-123","intent":"image","level":"info","message":"Orchestrator processing","messageLength":33,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.610Z"}
 {"clinicId":"clinic-123","intent":"faq","level":"info","message":"Orchestrator processing","messageLength":23,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.613Z"}
+{"error":"Unexpected end of JSON input","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:48:14.491Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:48:14.577Z","type":"campaign"}
+{"clinicId":"c1","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"TEST","service":"medai-pro","timestamp":"2026-05-16T12:48:15.211Z","userId":"u1"}
+{"clinicId":"c1","durationMs":23,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-16T12:48:15.233Z"}
+{"clinicId":"c2","level":"info","message":"[EventBus] Emitting CAMPAIGN_CREATED","module":"TEST","service":"medai-pro","timestamp":"2026-05-16T12:48:15.243Z","userId":"u2"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.247Z"}
+{"level":"info","message":"[EventBus] Processing retry queue: 1 events","service":"medai-pro","timestamp":"2026-05-16T12:48:15.252Z"}
+{"eventName":"CAMPAIGN_CREATED","level":"info","message":"[EventBus] Event recovered via retry","service":"medai-pro","timestamp":"2026-05-16T12:48:15.255Z"}
+{"level":"info","message":"[EventBus] Processing retry queue: 1 events","service":"medai-pro","timestamp":"2026-05-16T12:48:15.258Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-16T12:48:15.259Z"}
+{"clinicId":"clinic-123","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":29,"service":"medai-pro","timestamp":"2026-05-16T12:48:15.921Z"}
+{"clinicId":"clinic-123","intent":"image","level":"info","message":"Orchestrator processing","messageLength":33,"service":"medai-pro","timestamp":"2026-05-16T12:48:15.952Z"}
+{"clinicId":"clinic-123","intent":"faq","level":"info","message":"Orchestrator processing","messageLength":23,"service":"medai-pro","timestamp":"2026-05-16T12:48:15.956Z"}
+{"clinicId":"clinic-123","level":"info","message":"[EventBus] Emitting CAMPAIGN_CREATED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T12:48:15.979Z","userId":null}
+{"clinicId":"clinic-123","durationMs":5,"level":"info","message":"[EventBus] Processed CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.984Z"}
+{"clinicId":"clinic-123","level":"info","message":"[EventBus] Emitting IMAGE_GENERATED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T12:48:15.986Z","userId":null}
+{"clinicId":"clinic-123","durationMs":1,"level":"info","message":"[EventBus] Processed IMAGE_GENERATED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.987Z"}
+{"clinicId":"clinic-123","level":"info","message":"[EventBus] Emitting FAQ_UTILIZED","module":"AI_ORCHESTRATOR","service":"medai-pro","timestamp":"2026-05-16T12:48:15.989Z","userId":null}
+{"clinicId":"clinic-123","durationMs":1,"level":"info","message":"[EventBus] Processed FAQ_UTILIZED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.990Z"}
+{"clinicId":"clinic-1","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-16T12:48:16.149Z","userId":"uuid-1"}
+{"clinicId":"clinic-1","durationMs":15,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-16T12:48:16.163Z"}

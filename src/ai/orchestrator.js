@@ -14,6 +14,8 @@ const AIGateway   = require('./gateway');
 const agentPrompts = require('./agentPrompts');
 const logger      = require('../utils/logger');
 const AIParser    = require('./parser');
+const eventBus    = require('../core/eventBus');
+const { EventType } = require('../services/trackingService');
 const ContextLayer = require('./prompts/context/clinicContext');
 const { buildCampaignSystem } = require('./prompts/templates/campaign');
 const { buildVIESystem } = require('./prompts/system/imagePrompt');
@@ -195,6 +197,14 @@ const AIOrchestrator = {
       result.model   = aiResult.model;
       result.provider = aiResult.provider;
 
+      eventBus.emitEvent(EventType.CAMPAIGN_CREATE, {
+        clinicId: clinic?.id,
+        userId: null, // Orchestrator não tem user nativo agora, controllers devem injetar, ou deixamos nulo
+        module: 'AI_ORCHESTRATOR',
+        screen: 'CampaignBuilder',
+        metadata: { intent: resolvedIntent, tokens: result.tokens, duration: Date.now() - t0 }
+      });
+
     } else if (resolvedIntent === 'image') {
       // VIE: primeiro interpreta, depois retorna prompt para Pollinations
       const vieResult = await AgentLayer.executeVIE(message, clinic);
@@ -216,6 +226,14 @@ const AIOrchestrator = {
         provider: vieResult.provider
       };
 
+      eventBus.emitEvent(EventType.IMAGE_CREATE, {
+        clinicId: clinic?.id,
+        userId: null,
+        module: 'AI_ORCHESTRATOR',
+        screen: 'ImageGenerator',
+        metadata: { style: result.data.style, tokens: result.tokens }
+      });
+
     } else {
       const messages = [
         ...conversationHistory,
@@ -229,6 +247,14 @@ const AIOrchestrator = {
         model:    aiResult.model,
         provider: aiResult.provider
       };
+
+      eventBus.emitEvent(resolvedIntent === 'faq' ? EventType.FAQ_USE : EventType.AI_CHAT, {
+        clinicId: clinic?.id,
+        userId: null,
+        module: 'AI_ORCHESTRATOR',
+        screen: 'ChatBot',
+        metadata: { intent: resolvedIntent, messageLength: message.length }
+      });
     }
 
     // 4. Formatting Layer

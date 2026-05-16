@@ -28,3 +28,6 @@
 {"email":"inexistente@clinica.com","error":"Not found","level":"error","message":"findUserByEmail database error","service":"medai-pro","timestamp":"2026-05-16T12:15:41.478Z"}
 {"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:01.778Z","type":"campaign"}
 {"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:27.269Z","type":"campaign"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:48:14.577Z","type":"campaign"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-16T12:48:15.247Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-16T12:48:15.259Z"}

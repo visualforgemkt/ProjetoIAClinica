@@ -4,11 +4,15 @@ const router  = express.Router();
 const { authMiddleware }  = require('../middleware/auth');
 const { aiLimiter, authLimiter, codeVerifyLimiter } = require('../middleware/rateLimiter');
 const { validate, schemas } = require('../middleware/validator');
+const trackingMiddleware = require('../middleware/trackingMiddleware');
 
 const AuthController   = require('../controllers/authController');
 const AIController     = require('../controllers/aiController');
 const ClinicController = require('../controllers/clinicController');
 const UserController   = require('../controllers/userController');
+
+// Tracking global (Middlewares que monitoram requisições)
+router.use(trackingMiddleware);
 
 // ── AUTH (público) ─────────────────────────────────────────────
 // authLimiter: 10 tentativas / 15min por IP (anti-brute-force)
