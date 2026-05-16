@@ -8,6 +8,7 @@ const { validate, schemas } = require('../middleware/validator');
 const AuthController   = require('../controllers/authController');
 const AIController     = require('../controllers/aiController');
 const ClinicController = require('../controllers/clinicController');
+const UserController   = require('../controllers/userController');
 
 // ── AUTH (público) ─────────────────────────────────────────────
 // authLimiter: 10 tentativas / 15min por IP (anti-brute-force)
@@ -37,6 +38,11 @@ router.get('/clinic/context',            authMiddleware, ClinicController.getCon
 router.put('/clinic/context',            authMiddleware, validate(schemas.clinicUpdate), ClinicController.updateContext);
 router.get('/clinic/campaigns',          authMiddleware, ClinicController.getCampaigns);
 router.get('/clinic/campaigns/:id',      authMiddleware, ClinicController.getCampaign);
+
+// ── USER / LGPD COMPLIANCE ─────────────────────────────────────
+router.post('/user/consent',             authMiddleware, UserController.saveConsent);
+router.get('/user/export-data',          authMiddleware, UserController.exportData);
+router.delete('/user/delete-account',    authMiddleware, UserController.deleteAccount);
 
 // ── HEALTH CHECK (público) ─────────────────────────────────────
 router.get('/health', (req, res) => {

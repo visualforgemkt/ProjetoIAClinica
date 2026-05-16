@@ -13,6 +13,8 @@ const AIController = {
         user:           req.user,
         clinic:         req.clinic
       });
+      // DISCLAIMER DE IA (CRÍTICO) - Compliance MedAI Pro
+      result.disclaimer = "A MedAI Pro utiliza inteligência artificial para geração de conteúdo e apoio operacional. Os conteúdos gerados devem ser revisados pelo usuário antes de publicação ou utilização. A plataforma não fornece diagnóstico, prescrição ou orientação clínica individual.";
       return success(res, result);
     } catch (e) {
       if (e.code === 'LIMIT_EXCEEDED') {
