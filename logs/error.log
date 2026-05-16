@@ -26,3 +26,5 @@
 {"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.844Z"}
 {"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.886Z"}
 {"email":"inexistente@clinica.com","error":"Not found","level":"error","message":"findUserByEmail database error","service":"medai-pro","timestamp":"2026-05-16T12:15:41.478Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:01.778Z","type":"campaign"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:27.269Z","type":"campaign"}

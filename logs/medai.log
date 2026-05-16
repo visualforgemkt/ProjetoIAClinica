@@ -174,3 +174,10 @@
 {"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.844Z"}
 {"error":"Cannot read properties of undefined (reading 'select')","level":"error","message":"Auth middleware error","service":"medai-pro","timestamp":"2026-05-16T12:15:07.886Z"}
 {"email":"inexistente@clinica.com","error":"Not found","level":"error","message":"findUserByEmail database error","service":"medai-pro","timestamp":"2026-05-16T12:15:41.478Z"}
+{"error":"Unexpected end of JSON input","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:27:01.760Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:01.778Z","type":"campaign"}
+{"error":"Unexpected end of JSON input","level":"warn","message":"JSON quebrado, tentando autofix...","service":"medai-pro","timestamp":"2026-05-16T12:27:27.220Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T12:27:27.269Z","type":"campaign"}
+{"clinicId":"clinic-123","intent":"campaign","level":"info","message":"Orchestrator processing","messageLength":29,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.552Z"}
+{"clinicId":"clinic-123","intent":"image","level":"info","message":"Orchestrator processing","messageLength":33,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.610Z"}
+{"clinicId":"clinic-123","intent":"faq","level":"info","message":"Orchestrator processing","messageLength":23,"service":"medai-pro","timestamp":"2026-05-16T12:27:27.613Z"}
