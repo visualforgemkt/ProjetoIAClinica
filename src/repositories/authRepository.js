@@ -8,7 +8,7 @@ const AuthRepository = {
     
     const { data, error } = await supabase
       .from('users')
-      .select('id, clinic_id, email, password_hash, access_code, name, initials, role, active')
+      .select('id, clinic_id, email, password_hash, access_code, access_code_expires_at, access_code_attempts, locked_until, lockout_count, name, initials, role, active')
       .eq('email', cleanEmail)
       .single();
 
@@ -77,6 +77,68 @@ const AuthRepository = {
       .from('sessions')
       .delete()
       .lt('expires_at', new Date().toISOString());
+  },
+
+  async updateOTP(userId, code, expiresAt) {
+    const { error } = await supabase
+      .from('users')
+      .update({ 
+        access_code: code,
+        access_code_expires_at: expiresAt,
+        access_code_attempts: 0
+      })
+      .eq('id', userId);
+    
+    if (error) {
+      logger.error('updateOTP database error', { error: error.message, userId });
+      throw new Error('DB_ERROR');
+    }
+  },
+
+  async incrementAttempts(userId, attemptsCount) {
+    const { error } = await supabase
+      .from('users')
+      .update({ access_code_attempts: attemptsCount })
+      .eq('id', userId);
+    
+    if (error) {
+      logger.error('incrementAttempts database error', { error: error.message, userId });
+      throw new Error('DB_ERROR');
+    }
+  },
+
+  async lockUser(userId, lockedUntil, lockoutCount) {
+    const { error } = await supabase
+      .from('users')
+      .update({ 
+        locked_until: lockedUntil,
+        lockout_count: lockoutCount,
+        access_code_attempts: 0
+      })
+      .eq('id', userId);
+    
+    if (error) {
+      logger.error('lockUser database error', { error: error.message, userId });
+      throw new Error('DB_ERROR');
+    }
+  },
+
+  async resetSecurityState(userId) {
+    const { error } = await supabase
+      .from('users')
+      .update({ 
+        access_code: 'USED',
+        access_code_expires_at: new Date(0).toISOString(),
+        access_code_attempts: 0,
+        locked_until: null,
+        lockout_count: 0
+      })
+      .eq('id', userId);
+    
+    if (error) {
+      logger.error('resetSecurityState database error', { error: error.message, userId });
+      throw new Error('DB_ERROR');
+    }
   }
 };
 

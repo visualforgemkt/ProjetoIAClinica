@@ -12,6 +12,9 @@ const logger     = require('./utils/logger');
 const app  = express();
 const PORT = process.env.PORT || 3001;
 
+const { metricsMiddleware } = require('./utils/metrics');
+app.use(metricsMiddleware);
+
 // Validação de variáveis obrigatórias na inicialização
 const REQUIRED_ENV = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'ANTHROPIC_API_KEY', 'JWT_SECRET'];
 const missingEnv = REQUIRED_ENV.filter(k => !process.env[k]);
@@ -26,7 +29,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
-      scriptSrc:      ["'self'", "'unsafe-inline'"], // remover unsafe-inline após migração para bundle
+      scriptSrc:      ["'self'", "'unsafe-inline'"], // TODO P1: remover após migrar frontend monolítico para bundle Vite
       styleSrc:       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       fontSrc:        ["'self'", 'https://fonts.gstatic.com'],
       imgSrc:         ["'self'", 'data:', 'https://image.pollinations.ai', 'https://pollinations.ai'],
@@ -98,13 +101,15 @@ app.use((err, req, res, next) => {
 });
 
 // ── START ──────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  logger.info(`MedAI Pro Backend running on port ${PORT}`, {
-    env: process.env.NODE_ENV,
-    port: PORT,
-    supabase: !!process.env.SUPABASE_URL,
-    anthropic: !!process.env.ANTHROPIC_API_KEY
+if (require.main === module && process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`MedAI Pro Backend running on port ${PORT}`, {
+      env: process.env.NODE_ENV,
+      port: PORT,
+      supabase: !!process.env.SUPABASE_URL,
+      anthropic: !!process.env.ANTHROPIC_API_KEY
+    });
   });
-});
+}
 
 module.exports = app;

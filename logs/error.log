@@ -39,3 +39,64 @@
 {"details":"\"nome\" is required, \"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-16T13:11:15.971Z","type":"campaign"}
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:12:40.490Z"}
 {"clinicId":"test","error":"400 The model 'dall-e-3' does not exist.","level":"error","message":"AI Image Generation error","service":"medai-pro","timestamp":"2026-05-16T13:14:14.704Z"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T13:18:19.702Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T13:18:19.709Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T13:18:20.136Z","type":"campaign"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T13:23:40.901Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T13:23:40.913Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T13:23:41.910Z","type":"campaign"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T13:29:00.926Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T13:29:00.932Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T13:29:01.478Z","type":"campaign"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:31:42.625Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:32:19.580Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:32:44.976Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:33:09.614Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:34:37.837Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:35:21.345Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:35:47.871Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:36:47.800Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:36:47.929Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:37:55.249Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:37:55.408Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:38:35.938Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:39:50.824Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:39:50.963Z"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T13:40:22.421Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T13:40:22.432Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T13:40:22.547Z","type":"campaign"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:40:23.358Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T13:40:23.438Z"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T14:04:19.173Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T14:04:19.183Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:04:19.302Z","type":"campaign"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:04:19.878Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:04:19.959Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:06:21.738Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:06:21.843Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:06:22.636Z","type":"campaign"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T14:06:22.635Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T14:06:22.642Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:07:15.297Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:07:15.387Z"}
+{"clinicId":"c-999","error":"supabase.from(...).update(...).eq is not a function","level":"error","message":"Erro no processamento interno do webhook","service":"medai-pro","timestamp":"2026-05-19T14:07:15.545Z"}
+{"clinicId":"c-999","error":"supabase.from(...).update(...).eq is not a function","level":"error","message":"Erro no processamento interno do webhook","service":"medai-pro","timestamp":"2026-05-19T14:07:15.577Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:07:16.311Z","type":"campaign"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T14:07:16.408Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T14:07:16.414Z"}
+{"clinicId":"c-999","error":"supabase.from(...).update(...).eq is not a function","level":"error","message":"Erro no processamento interno do webhook","service":"medai-pro","timestamp":"2026-05-19T14:07:28.246Z"}
+{"clinicId":"c-999","error":"supabase.from(...).update(...).eq is not a function","level":"error","message":"Erro no processamento interno do webhook","service":"medai-pro","timestamp":"2026-05-19T14:07:28.264Z"}
+{"code":"USER_NOT_FOUND","error":"E-mail não encontrado.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:08:18.997Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-05-19T14:08:19.145Z"}
+{"error":"Network error","level":"error","message":"[EventBus] Processing failed for CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T14:08:20.556Z"}
+{"eventName":"TEST","level":"error","message":"[EventBus] Event dropped after 3 retries","service":"medai-pro","timestamp":"2026-05-19T14:08:20.564Z"}
+{"details":"\"estrategia\" is required, \"copyPrincipal\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:08:20.653Z","type":"campaign"}
+{"error":"null value in column \"access_code\" of relation \"users\" violates not-null constraint","level":"error","message":"resetSecurityState database error","service":"medai-pro","timestamp":"2026-05-19T14:11:41.125Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"email":"doutorgregory@clinica.com.br","error":"DB_ERROR","level":"error","message":"VerifyCode error","service":"medai-pro","timestamp":"2026-05-19T14:11:41.126Z"}
+{"error":"null value in column \"access_code\" of relation \"users\" violates not-null constraint","level":"error","message":"resetSecurityState database error","service":"medai-pro","timestamp":"2026-05-19T14:12:01.666Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"email":"doutorgregory@clinica.com.br","error":"DB_ERROR","level":"error","message":"VerifyCode error","service":"medai-pro","timestamp":"2026-05-19T14:12:01.667Z"}
+{"error":"null value in column \"access_code\" of relation \"users\" violates not-null constraint","level":"error","message":"resetSecurityState database error","service":"medai-pro","timestamp":"2026-05-19T14:12:35.482Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"details":"\"briefingVisual.composicao\" is required, \"briefingVisual.estilo\" is required, \"briefingVisual.emocao\" is required, \"briefingVisual.cores\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:14:32.002Z","type":"campaign"}
+{"details":"\"briefingVisual.composicao\" is required, \"briefingVisual.estilo\" is required, \"briefingVisual.emocao\" is required, \"briefingVisual.cores\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:15:31.309Z","type":"campaign"}
+{"details":"\"briefingVisual.composicao\" is required, \"briefingVisual.estilo\" is required, \"briefingVisual.emocao\" is required, \"briefingVisual.cores\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:16:49.013Z","type":"campaign"}
+{"details":"\"briefingVisual.composicao\" is required, \"briefingVisual.estilo\" is required, \"briefingVisual.emocao\" is required, \"briefingVisual.cores\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-19T14:17:31.943Z","type":"campaign"}

@@ -34,10 +34,14 @@ const authLimiter = rateLimit({
   max: parseInt(process.env.AUTH_RATE_LIMIT_MAX) || 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip,
+  keyGenerator: (req) => {
+    const email = (req.body?.email || '').toLowerCase().trim();
+    return `${req.ip}_${email}`;
+  },
   skipSuccessfulRequests: false,
   handler: (req, res) => {
-    logger.warn('Auth rate limit hit — possible brute force', { ip: req.ip, path: req.path });
+    const email = (req.body?.email || '').toLowerCase().trim();
+    logger.warn('Auth rate limit hit — possible brute force', { ip: req.ip, email, path: req.path });
     res.status(429).json({
       success: false,
       error: 'Muitas tentativas de login. Aguarde 15 minutos.',

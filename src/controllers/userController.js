@@ -72,6 +72,32 @@ const UserController = {
       logger.error('Erro ao excluir conta', { error: e.message });
       return error(res, 'Erro ao excluir conta.', 500);
     }
+  },
+  /**
+   * Coleta de feedback do Piloto Controlado (P1)
+   */
+  async saveFeedback(req, res) {
+    try {
+      const { rating, comment } = req.body;
+      if (rating === undefined) {
+        return error(res, 'A avaliação é obrigatória.', 400);
+      }
+
+      const { data, error: dbError } = await supabase.from('feedbacks').insert({
+        clinic_id: req.clinic?.id || req.user?.clinic_id,
+        user_id: req.user?.id,
+        rating,
+        comment
+      });
+
+      if (dbError) throw dbError;
+
+      logger.info('Feedback de piloto salvo com sucesso', { userId: req.user?.id, rating });
+      return success(res, { message: 'Feedback registrado com sucesso.' });
+    } catch (e) {
+      logger.error('Erro ao salvar feedback do piloto', { error: e.message });
+      return error(res, 'Erro ao processar seu feedback.', 500);
+    }
   }
 };
 

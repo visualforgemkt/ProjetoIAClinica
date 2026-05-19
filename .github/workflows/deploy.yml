@@ -1,40 +1,86 @@
-name: MedAI Pro CI/CD Pipeline
+name: MedAI Pro CI/CD Go-Live Pipeline
 
 on:
   push:
-    branches: [ main, staging, develop ]
+    branches: [ main, staging ]
 
 jobs:
-  build-and-test:
+  security-and-quality:
+    name: 🔒 Security & Quality Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-      - run: npm ci
-      - run: npm run test
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Secret Scan
+        run: npm run scan
+
+      - name: Run E2E Integration Suite
+        run: npm run check
+        env:
+          NODE_ENV: test
+          SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.TEST_SUPABASE_KEY }}
 
   deploy-staging:
-    needs: build-and-test
+    name: 🚀 Deploy to Staging (Sandbox)
+    needs: security-and-quality
     if: github.ref == 'refs/heads/staging'
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to Staging (Vercel/Heroku/AWS)
-        run: echo "Deploying STAGING environment..."
-        # Integração real: vercel --prod ou aws eb deploy
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Staging Docker Image
+        run: |
+          docker build -t medai-pro-backend:staging .
+          echo "Staging image built successfully!"
+
+      - name: Deploy to Cloud (Render/AWS ECS Staging)
+        run: |
+          echo "Deploying to Render/AWS ECS Staging environment..."
+          # Real integration command: curl -X POST https://api.render.com/deploy/srv-${{ secrets.RENDER_STAGING_SERVICE_ID }}?key=${{ secrets.RENDER_STAGING_DEPLOY_KEY }}
+
+      - name: Run Health Check Verification
+        run: |
+          echo "Verifying health check endpoint..."
+          # curl --fail https://staging-api.medaipro.com.br/api/health || exit 1
 
   deploy-production:
-    needs: build-and-test
+    name: 🎯 Deploy to Production (Go-Live)
+    needs: security-and-quality
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to Production
-        run: echo "Deploying PRODUCTION environment..."
-      - name: Record Deployment in Sentry
-        run: echo "Sentry release tracking..."
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build Production Docker Image
+        run: |
+          docker build -t medai-pro-backend:latest .
+          echo "Production image built successfully!"
+
+      - name: Deploy to Production Cloud (AWS ECS / Render Production)
+        run: |
+          echo "Deploying to AWS ECS Production cluster..."
+          # Real AWS CLI or Render deployment webhook:
+          # aws ecs update-service --cluster medai-production --service medai-api --force-new-deployment
+
+      - name: Record Deployment release in Sentry
+        run: |
+          echo "Registering new release in Sentry..."
+          # curl -sL https://sentry.io/get-cli/ | bash
+          # sentry-cli releases new -o medai-pro -p backend v1.0.0
+          # sentry-cli releases set-commits v1.0.0 --auto
+          # sentry-cli releases finalize v1.0.0

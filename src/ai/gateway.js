@@ -163,9 +163,9 @@ const AIGateway = {
     } catch (err) {
       const duration = Date.now() - t0;
 
-      // Fallback para OpenAI se Anthropic falhar (e OpenAI estiver configurado)
-      if (provider === 'anthropic' && process.env.OPENAI_API_KEY && err.message !== 'AI_TIMEOUT') {
-        logger.warn('Anthropic failed, trying OpenAI fallback', { error: err.message, clinicId });
+      // Fallback para OpenAI se Anthropic falhar ou der Timeout (e OpenAI estiver configurado)
+      if (provider === 'anthropic' && process.env.OPENAI_API_KEY) {
+        logger.warn('Anthropic failed or timed out, trying OpenAI fallback', { error: err.message, clinicId });
         try {
           const fallback = getProvider('openai');
           const result = await fallback.complete({ messages, systemPrompt, maxTokens });

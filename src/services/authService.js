@@ -1,6 +1,7 @@
 const bcrypt   = require('bcrypt');
 const jwt      = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const crypto   = require('crypto');
 const AuthRepository = require('../repositories/authRepository');
 const supabase = require('../../config/supabase');
 const logger   = require('../utils/logger');
@@ -19,8 +20,30 @@ const AuthService = {
     if (!user) throw { code: 'USER_NOT_FOUND', message: 'E-mail não encontrado.' };
     if (!user.active) throw { code: 'USER_INACTIVE', message: 'Conta desativada. Contate o suporte.' };
 
+    // Validar bloqueio temporário ativo por tentativas incorretas
+    if (user.locked_until && new Date() < new Date(user.locked_until)) {
+      const minutesLeft = Math.ceil((new Date(user.locked_until) - new Date()) / 1000 / 60);
+      throw { 
+        code: 'ACCOUNT_LOCKED', 
+        message: `Esta conta está temporariamente bloqueada devido a sucessivas tentativas incorretas. Tente novamente em ${minutesLeft} minuto(s).` 
+      };
+    }
+
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) throw { code: 'WRONG_PASSWORD', message: 'Senha incorreta. Tente novamente.' };
+
+    // Gerar OTP dinâmico numérico de 6 dígitos
+    const otpCode = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 10); // Expiração em 10 minutos
+
+    // Salvar estado de segurança do OTP
+    await AuthRepository.updateOTP(user.id, otpCode, expiresAt.toISOString());
+
+    // Exibir OTP nos logs SOMENTE em ambiente de desenvolvimento (NODE_ENV=development)
+    if (process.env.NODE_ENV === 'development') {
+      logger.info('DEVELOPMENT ONLY: Generated dynamic OTP', { email: cleanEmail, code: otpCode });
+    }
 
     return { emailKey: cleanEmail, userId: user.id };
   },
@@ -32,10 +55,56 @@ const AuthService = {
     const user = await AuthRepository.findUserByEmail(emailKey);
     if (!user || !user.active) throw { code: 'SESSION_EXPIRED', message: 'Sessão expirada. Faça login novamente.' };
 
-    const input  = (accessCode || '').trim().toUpperCase();
-    const stored = (user.access_code || '').trim().toUpperCase();
-    if (!input)         throw { code: 'CODE_EMPTY',  message: 'Digite o código de acesso.' };
-    if (input !== stored) throw { code: 'WRONG_CODE', message: 'Código de acesso inválido.' };
+    // Validar bloqueio temporário ativo por tentativas incorretas
+    if (user.locked_until && new Date() < new Date(user.locked_until)) {
+      const minutesLeft = Math.ceil((new Date(user.locked_until) - new Date()) / 1000 / 60);
+      throw { 
+        code: 'ACCOUNT_LOCKED', 
+        message: `Esta conta está bloqueada. Tente novamente em ${minutesLeft} minuto(s).` 
+      };
+    }
+
+    const input = (accessCode || '').trim();
+    if (!input) throw { code: 'CODE_EMPTY', message: 'Digite o código de acesso.' };
+
+    // Validar expiração do código OTP (10 minutos)
+    if (user.access_code_expires_at && new Date() > new Date(user.access_code_expires_at)) {
+      throw { code: 'CODE_EXPIRED', message: 'Código de acesso expirou. Faça login novamente.' };
+    }
+
+    const stored = (user.access_code || '').trim();
+    
+    // Comparação do código
+    if (input !== stored) {
+      const currentAttempts = (user.access_code_attempts || 0) + 1;
+      
+      if (currentAttempts >= 3) {
+        // Bloqueio progressivo: 15 minutos multiplicados pela contagem acumulada de bloqueios
+        const nextLockoutCount = (user.lockout_count || 0) + 1;
+        const lockoutDurationMinutes = 15 * nextLockoutCount;
+        const lockedUntil = new Date();
+        lockedUntil.setMinutes(lockedUntil.getMinutes() + lockoutDurationMinutes);
+
+        await AuthRepository.lockUser(user.id, lockedUntil.toISOString(), nextLockoutCount);
+
+        logger.warn('User lockout activated', { email: emailKey, lockoutCount: nextLockoutCount, duration: lockoutDurationMinutes });
+
+        throw {
+          code: 'ACCOUNT_LOCKED',
+          message: `Número máximo de tentativas incorretas atingido. Conta bloqueada por ${lockoutDurationMinutes} minutos.`
+        };
+      } else {
+        await AuthRepository.incrementAttempts(user.id, currentAttempts);
+        const remaining = 3 - currentAttempts;
+        throw {
+          code: 'WRONG_CODE',
+          message: `Código inválido. Você tem mais ${remaining} tentativa(s) antes do bloqueio.`
+        };
+      }
+    }
+
+    // Invalidação imediata de OTP e liberação de bloqueios após autenticação bem-sucedida
+    await AuthRepository.resetSecurityState(user.id);
 
     // Carregar dados da clínica
     const { data: clinic, error: clinicErr } = await supabase

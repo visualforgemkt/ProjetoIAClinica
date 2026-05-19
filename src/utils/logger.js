@@ -42,7 +42,21 @@ const logger = winston.createLogger({
   ]
 });
 
-// Implementação de Error Tracking (Mock para Sentry / Datadog)
+// Implementação de Error Tracking (Integração Real com Sentry)
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = require('@sentry/node');
+    Sentry.init({
+      dsn: process.env.SENTRY_DSN,
+      environment: process.env.APP_ENV || 'production',
+      tracesSampleRate: 1.0
+    });
+    logger.info('Sentry inicializado com sucesso em ambiente de produção');
+  } catch (err) {
+    logger.warn('Falha ao inicializar SDK do Sentry. Certifique-se de que @sentry/node está instalado.');
+  }
+}
+
 const globalErrorTracker = (error, req = null) => {
   logger.error('GLOBAL_ERROR_TRACKED', {
     message: error.message,
@@ -51,7 +65,21 @@ const globalErrorTracker = (error, req = null) => {
     method: req ? req.method : 'unknown',
     body: req ? req.body : null
   });
-  // Em produção: Sentry.captureException(error);
+
+  if (process.env.SENTRY_DSN) {
+    try {
+      const Sentry = require('@sentry/node');
+      Sentry.captureException(error, {
+        extra: {
+          path: req ? req.originalUrl : 'unknown',
+          method: req ? req.method : 'unknown',
+          requestId: req ? req.requestId : 'unknown'
+        }
+      });
+    } catch (_) {
+      // Falha silenciosa do tracker
+    }
+  }
 };
 
 if (process.env.NODE_ENV !== 'production') {

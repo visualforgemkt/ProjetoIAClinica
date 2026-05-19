@@ -1,32 +1,44 @@
-/* Design System Tokens */
+/* MedAI Pro — Premium Design System Tokens (HSL & Dark Mode) */
 :root {
-  /* Colors */
-  --color-primary: #171717;
-  --color-primary-hover: #262626;
-  --color-accent: #0070F3;
-  --color-accent-hover: #0051B3;
-  
-  --color-surface: #FFFFFF;
-  --color-surface-hover: #F9FAFB;
-  --color-surface-muted: #F3F4F6;
-  
-  --color-border: #E5E7EB;
-  --color-border-strong: #D1D5DB;
-  
-  --color-text: #111827;
-  --color-text-muted: #6B7280;
-  --color-text-on-primary: #FFFFFF;
-  
-  --color-error: #EF4444;
-  --color-error-bg: #FEF2F2;
-  --color-success: #10B981;
-  --color-success-bg: #ECFDF5;
-  --color-warning: #F59E0B;
-  --color-warning-bg: #FFFBEB;
+  /* Layout Colors - Dark Palette */
+  --bg:     #07090F;
+  --sf:     #0C1018;
+  --sf2:    #111827;
+  --sf3:    #192032;
+  --sf4:    #1E2840;
+
+  /* Accent Colors - MedAI Blue */
+  --blu:    #3B7FFF;
+  --blu-h:  #2D70EF;
+  --blu-l:  #6FA3FF;
+  --blu-d:  rgba(59,127,255,0.08);
+  --blu-b:  rgba(59,127,255,0.18);
+
+  /* Gold Theme - Enterprise/Premium Features */
+  --gld:    #C9A84C;
+  --gld-d:  rgba(201,168,76,0.10);
+  --gld-b:  rgba(201,168,76,0.20);
+
+  /* Text Colors - High contrast and readability */
+  --t1: #F0F4FF;
+  --t2: #8A9BBE;
+  --t3: #4A5A7A;
+  --t4: #242F45;
+
+  /* Borders & Dividers */
+  --bd:  rgba(255,255,255,0.055);
+  --bd2: rgba(255,255,255,0.095);
+  --bda: rgba(59,127,255,0.22);
+
+  /* Semantic Feedback */
+  --ok:   #22C55E;
+  --err:  #EF4444;
+  --wrn:  #F59E0B;
+  --ok-d: rgba(34,197,94,0.09);
 
   /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
   /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -35,18 +47,18 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-12: 3rem;
-  
+
   /* Radii */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-full: 9999px;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  
+
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -2,6 +2,13 @@ const AIOrchestrator   = require('../ai/orchestrator');
 const UsageRepository  = require('../repositories/usageRepository');
 const supabase         = require('../../config/supabase');
 const logger           = require('../utils/logger');
+const { 
+  aiRequestsTotal, 
+  aiRequestDurationSeconds, 
+  aiTokensInputTotal, 
+  aiTokensOutputTotal, 
+  aiCostUsdTotal 
+} = require('../utils/metrics');
 
 const AIService = {
   /**
@@ -54,6 +61,8 @@ const AIService = {
       });
     } catch (e) {
       status = 'error';
+      // Registra a métrica de erro do Prometheus
+      aiRequestsTotal.inc({ intent, provider: 'unknown', model: 'unknown', status: 'error' });
       await UsageRepository.log({
         clinicId: clinic.id, userId: user.id, intent,
         agentId: intent, status: 'error',
@@ -61,6 +70,15 @@ const AIService = {
       });
       throw e;
     }
+
+    // Registra métricas de sucesso, duração e custos financeiros no Prometheus (prom-client)
+    const durationSec = (Date.now() - t0) / 1000;
+    aiRequestsTotal.inc({ intent: aiResult.intent, provider: aiResult.provider, model: aiResult.model, status: 'success' });
+    aiRequestDurationSeconds.observe({ intent: aiResult.intent, provider: aiResult.provider, model: aiResult.model, status: 'success' }, durationSec);
+    
+    aiTokensInputTotal.inc({ intent: aiResult.intent, provider: aiResult.provider, model: aiResult.model }, aiResult.tokens?.input || 0);
+    aiTokensOutputTotal.inc({ intent: aiResult.intent, provider: aiResult.provider, model: aiResult.model }, aiResult.tokens?.output || 0);
+    aiCostUsdTotal.inc({ intent: aiResult.intent, provider: aiResult.provider, model: aiResult.model }, aiResult.cost || 0);
 
     // 4. Persistir mensagens
     const userMsg = message;
@@ -86,13 +104,8 @@ const AIService = {
       }
     ]);
 
-    // Atualizar contagem da conversa (incremento seguro)
-    const { data: convData } = await supabase.from('conversations').select('message_count').eq('id', convId).single();
-    const newCount = (convData?.message_count || 0) + 1;
-
-    await supabase.from('conversations')
-      .update({ message_count: newCount, updated_at: new Date().toISOString() })
-      .eq('id', convId);
+    // Atualizar contagem da conversa de forma atômica no banco de dados (previne race conditions)
+    await supabase.rpc('increment_message_count', { conversation_uuid: convId });
 
     // 5. Persistir campanha se for campaign
     let campaignId = null;

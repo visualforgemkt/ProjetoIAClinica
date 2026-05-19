@@ -10,6 +10,9 @@ const AuthController   = require('../controllers/authController');
 const AIController     = require('../controllers/aiController');
 const ClinicController = require('../controllers/clinicController');
 const UserController   = require('../controllers/userController');
+const BillingController = require('../controllers/billingController');
+
+const billingMiddleware = require('../middleware/billingMiddleware');
 
 // Tracking global (Middlewares que monitoram requisições)
 router.use(trackingMiddleware);
@@ -22,12 +25,22 @@ router.post('/auth/verify',      codeVerifyLimiter, validate(schemas.verifyCode)
 router.post('/auth/refresh',     authLimiter,       validate(schemas.refreshToken), AuthController.refresh);
 router.post('/auth/logout',      AuthController.logout);
 
+// ── BILLING WEBHOOK (público) ──────────────────────────────────
+router.post('/billing/webhook', BillingController.webhook);
+
 // ── AUTH (protegido) ───────────────────────────────────────────
 router.get('/auth/me', authMiddleware, AuthController.me);
+
+// ── BILLING (protegido) ─────────────────────────────────────────
+router.get('/billing/subscription',  authMiddleware, BillingController.getSubscription);
+router.post('/billing/checkout',     authMiddleware, BillingController.createCheckout);
+router.post('/billing/cancel',       authMiddleware, BillingController.cancelSubscription);
+router.post('/billing/reactivate',   authMiddleware, BillingController.reactivateSubscription);
 
 // ── AI ─────────────────────────────────────────────────────────
 router.post('/ai/chat',
   authMiddleware,
+  billingMiddleware,
   aiLimiter,
   validate(schemas.chat),
   AIController.chat
@@ -45,6 +58,7 @@ router.get('/clinic/campaigns/:id',      authMiddleware, ClinicController.getCam
 
 // ── USER / LGPD COMPLIANCE ─────────────────────────────────────
 router.post('/user/consent',             authMiddleware, UserController.saveConsent);
+router.post('/user/feedback',            authMiddleware, UserController.saveFeedback);
 router.get('/user/export-data',          authMiddleware, UserController.exportData);
 router.delete('/user/delete-account',    authMiddleware, UserController.deleteAccount);
 
@@ -61,18 +75,19 @@ router.get('/health', async (req, res) => {
   });
 });
 
-router.get('/metrics', (req, res) => {
-  // Endpoint simulado para Prometheus / Datadog
-  res.set('Content-Type', 'text/plain');
-  res.send(`
-# HELP medai_requests_total Total number of HTTP requests
-# TYPE medai_requests_total counter
-medai_requests_total{method="GET",endpoint="/api/health"} 145
-medai_requests_total{method="POST",endpoint="/api/ai/chat"} 82
-# HELP medai_active_clinics Total active clinics
-# TYPE medai_active_clinics gauge
-medai_active_clinics 12
-  `);
+const { client: promClient, getActiveClinicsCount, activeClinicsGauge } = require('../utils/metrics');
+
+router.get('/metrics', async (req, res) => {
+  try {
+    // Carrega clínicas ativas (com cache de 5 minutos interno)
+    const activeCount = await getActiveClinicsCount();
+    activeClinicsGauge.set(activeCount);
+
+    res.set('Content-Type', promClient.register.contentType);
+    res.end(await promClient.register.metrics());
+  } catch (err) {
+    res.status(500).end(err);
+  }
 });
 
 module.exports = router;

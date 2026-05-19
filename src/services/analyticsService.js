@@ -33,28 +33,15 @@ class AnalyticsService {
    * Atualiza as métricas agregadas da clínica
    */
   static async updateClinicMetrics(clinicId, eventType) {
-    // 1. Garante que a linha existe
-    const { data: metrics } = await supabase
-      .from('clinic_metrics')
-      .select('*')
-      .eq('clinic_id', clinicId)
-      .single();
+    // Atualiza as métricas da clínica de forma 100% atômica no banco de dados (previne race conditions)
+    const { error } = await supabase.rpc('increment_clinic_metrics', { 
+      p_clinic_id: clinicId, 
+      p_event_type: eventType 
+    });
 
-    let updates = { last_active_date: new Date().toISOString() };
-    
-    if (eventType === 'CAMPAIGN_GENERATED') updates.total_campaigns = (metrics?.total_campaigns || 0) + 1;
-    if (eventType === 'IMAGE_GENERATED') updates.total_images = (metrics?.total_images || 0) + 1;
-    if (eventType === 'AI_CHAT_INTERACTION') updates.total_ai_interactions = (metrics?.total_ai_interactions || 0) + 1;
-
-    // Recalcular Health Score simples (exemplo: atividade aumenta score)
-    let healthScore = metrics?.health_score || 80;
-    if (updates.total_campaigns) healthScore = Math.min(100, healthScore + 2);
-    updates.health_score = healthScore;
-
-    if (!metrics) {
-      await supabase.from('clinic_metrics').insert({ clinic_id: clinicId, ...updates });
-    } else {
-      await supabase.from('clinic_metrics').update(updates).eq('clinic_id', clinicId);
+    if (error) {
+      logger.error('Failed to atomically update clinic metrics via RPC', { error: error.message, clinicId, eventType });
+      throw error;
     }
   }
 
