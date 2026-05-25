@@ -88,4 +88,7 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
+// Expõe o rastreador global para uso em pontos não tratados da aplicação
+logger.globalErrorTracker = globalErrorTracker;
+
 module.exports = logger;

@@ -9,7 +9,8 @@ const AuthController = {
       return success(res, result);
     } catch (e) {
       logger.error('Login error', { error: e.message, code: e.code });
-      const status = e.code === 'USER_NOT_FOUND' || e.code === 'WRONG_PASSWORD' ? 401 : 400;
+      const status = e.code === 'ACCOUNT_LOCKED' ? 429
+        : (e.code === 'USER_NOT_FOUND' || e.code === 'WRONG_PASSWORD' ? 401 : 400);
       return error(res, e.message || 'Erro ao fazer login.', status, e.code);
     }
   },
@@ -26,7 +27,8 @@ const AuthController = {
       return success(res, result);
     } catch (e) {
       logger.error('VerifyCode error', { error: e.message, code: e.code, email: req.body.emailKey });
-      const status = ['SESSION_EXPIRED','CLINIC_INACTIVE'].includes(e.code) ? 401 : 400;
+      const status = ['SESSION_EXPIRED', 'CLINIC_INACTIVE'].includes(e.code) ? 401
+        : ['ACCOUNT_LOCKED', 'CODE_EXPIRED'].includes(e.code) ? 429 : 400;
       return error(res, e.message || 'Código inválido.', status, e.code);
     }
   },

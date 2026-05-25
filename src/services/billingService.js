@@ -257,7 +257,7 @@ const BillingService = {
           .eq('id', clinicId);
 
         logger.info('Assinatura ativada via webhook com sucesso', { clinicId });
-        eventBus.emit('BILLING_SUBSCRIPTION_ACTIVE', { clinicId, planName });
+        eventBus.emitEvent('BILLING_SUBSCRIPTION_ACTIVE', { clinicId, userId: null, module: 'BILLING', screen: 'Webhook', metadata: { planName } });
       } else if (actionType === 'payment_failed') {
         await supabase
           .from('subscriptions')
@@ -265,7 +265,7 @@ const BillingService = {
           .eq('clinic_id', clinicId);
 
         logger.warn('Pagamento falhou. Assinatura colocada em atraso (past_due)', { clinicId });
-        eventBus.emit('BILLING_PAYMENT_FAILED', { clinicId });
+        eventBus.emitEvent('BILLING_PAYMENT_FAILED', { clinicId, userId: null, module: 'BILLING', screen: 'Webhook', metadata: {} });
       } else if (actionType === 'subscription_cancelled') {
         await supabase
           .from('subscriptions')
@@ -273,7 +273,7 @@ const BillingService = {
           .eq('clinic_id', clinicId);
 
         logger.info('Auto-renovação cancelada pelo usuário via webhook', { clinicId });
-        eventBus.emit('BILLING_SUBSCRIPTION_CANCELLED', { clinicId });
+        eventBus.emitEvent('BILLING_SUBSCRIPTION_CANCELLED', { clinicId, userId: null, module: 'BILLING', screen: 'Webhook', metadata: {} });
       } else if (actionType === 'subscription_expired') {
         await supabase
           .from('subscriptions')
@@ -296,7 +296,7 @@ const BillingService = {
           .eq('id', clinicId);
 
         logger.warn('Assinatura expirou/cancelada definitivamente via webhook', { clinicId });
-        eventBus.emit('BILLING_SUBSCRIPTION_EXPIRED', { clinicId });
+        eventBus.emitEvent('BILLING_SUBSCRIPTION_EXPIRED', { clinicId, userId: null, module: 'BILLING', screen: 'Webhook', metadata: {} });
       }
 
       return { success: true };

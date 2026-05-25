@@ -70,8 +70,8 @@ export default function Chat() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const dataUsage = await resUsage.json();
-      if (dataUsage.success) {
-        setUsageStats({ count: dataUsage.count, limit: dataUsage.limit });
+      if (dataUsage.success && dataUsage.data) {
+        setUsageStats({ count: dataUsage.data.count ?? 0, limit: dataUsage.data.limit ?? 500 });
       }
     } catch (err) {
       console.error('Erro ao carregar dados iniciais do chat', err);
@@ -123,11 +123,28 @@ export default function Chat() {
       }
 
       const reply = data.data;
-      const parsedCampaign = reply.campaign || null;
+      // reply = { type, data, intent, conversationId, campaignId, usage, disclaimer }
+      const isCampaign = reply.type === 'campaign';
+      const isImage    = reply.type === 'image';
+      const parsedCampaign = isCampaign ? reply.data : null;
+
+      // Monta o conteúdo de exibição conforme o tipo de resposta
+      let displayContent;
+      if (isCampaign) {
+        displayContent = reply.data?.copyPrincipal
+          ? `**${reply.data.nome || 'Campanha'}**\n\n${reply.data.copyPrincipal}`
+          : (reply.data?.nome || 'Campanha gerada com sucesso.');
+      } else if (isImage) {
+        displayContent = reply.data?.imageUrl
+          ? `![Imagem Gerada](${reply.data.imageUrl})`
+          : 'Imagem gerada com sucesso.';
+      } else {
+        displayContent = typeof reply.data === 'string' ? reply.data : JSON.stringify(reply.data);
+      }
 
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: reply.response, campaign: parsedCampaign }
+        { role: 'assistant', content: displayContent, campaign: parsedCampaign, type: reply.type }
       ]);
 
       if (parsedCampaign) {

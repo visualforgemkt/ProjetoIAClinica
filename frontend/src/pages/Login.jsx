@@ -73,7 +73,8 @@ export default function Login() {
       setAuth({
         user: d.user,
         clinic: d.clinic,
-        token: d.accessToken
+        token: d.accessToken,
+        refreshToken: d.refreshToken
       });
     } catch (err) {
       setErrorMsg(err.message);

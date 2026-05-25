@@ -4,7 +4,7 @@
  * Evitando fetch() espalhados nos componentes React
  */
 
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = 'http://localhost:3001/api';
 
 export const api = {
   async get(endpoint) {
