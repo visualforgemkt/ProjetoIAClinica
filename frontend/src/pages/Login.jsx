@@ -31,6 +31,19 @@ export default function Login() {
       });
       const d = await r.json();
       if (!r.ok || !d.success) throw new Error(d.error || 'Credenciais inválidas. Verifique seus dados.');
+
+      // Login já completo (usuário recorrente) — emite tokens direto
+      if (d.data?.authenticated && d.data?.accessToken) {
+        setAuth({
+          user: d.data.user,
+          clinic: d.data.clinic,
+          token: d.data.accessToken,
+          refreshToken: d.data.refreshToken
+        });
+        return;
+      }
+
+      // Primeiro login — precisa do código de acesso
       setMaskedEmail(maskEmail(email.trim().toLowerCase()));
       setStage(2);
     } catch (err) { setErrorMsg(err.message); }
@@ -124,11 +137,14 @@ export default function Login() {
               border: '1px solid var(--border-brand)',
               borderRadius: 'var(--r-md)'
             }}>
-              <div style={{ fontSize: 12, color: 'var(--text-soft)', marginBottom: 4 }}>Código enviado para</div>
+              <div style={{ fontSize: 12, color: 'var(--text-soft)', marginBottom: 4 }}>Primeiro acesso de</div>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--brand-h)' }}>{maskedEmail}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+                Use o código de ativação que você recebeu. Ele só é solicitado uma vez.
+              </div>
             </div>
 
-            <Field label="Código de 6 dígitos" icon={KeyRound}>
+            <Field label="Código de ativação" icon={KeyRound}>
               <input
                 type="text" inputMode="numeric" maxLength={6}
                 value={otpCode}

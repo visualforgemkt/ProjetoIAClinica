@@ -10,9 +10,11 @@ const { EventType } = require('./trackingService');
 
 const AuthService = {
   /**
-   * Etapa 1: valida e-mail + senha
+   * Etapa 1: valida e-mail + senha.
+   * - Se o código de primeiro acesso já foi usado → emite tokens direto (login normal).
+   * - Caso contrário → pede o código de primeiro acesso na etapa 2.
    */
-  async login(email, password) {
+  async login(email, password, ip, userAgent) {
     const cleanEmail = (email || '').toLowerCase().trim();
     if (!cleanEmail) throw { code: 'INVALID_INPUT', message: 'E-mail obrigatório.' };
 
@@ -23,29 +25,71 @@ const AuthService = {
     // Validar bloqueio temporário ativo por tentativas incorretas
     if (user.locked_until && new Date() < new Date(user.locked_until)) {
       const minutesLeft = Math.ceil((new Date(user.locked_until) - new Date()) / 1000 / 60);
-      throw { 
-        code: 'ACCOUNT_LOCKED', 
-        message: `Esta conta está temporariamente bloqueada devido a sucessivas tentativas incorretas. Tente novamente em ${minutesLeft} minuto(s).` 
+      throw {
+        code: 'ACCOUNT_LOCKED',
+        message: `Esta conta está temporariamente bloqueada devido a sucessivas tentativas incorretas. Tente novamente em ${minutesLeft} minuto(s).`
       };
     }
 
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) throw { code: 'WRONG_PASSWORD', message: 'Senha incorreta. Tente novamente.' };
 
-    // Gerar OTP dinâmico numérico de 6 dígitos
-    const otpCode = crypto.randomInt(100000, 999999).toString();
-    const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 10); // Expiração em 10 minutos
-
-    // Salvar estado de segurança do OTP
-    await AuthRepository.updateOTP(user.id, otpCode, expiresAt.toISOString());
-
-    // Exibir OTP nos logs SOMENTE em ambiente de desenvolvimento (NODE_ENV=development)
-    if (process.env.NODE_ENV === 'development') {
-      logger.info('DEVELOPMENT ONLY: Generated dynamic OTP', { email: cleanEmail, code: otpCode });
+    // Se o código de primeiro acesso já foi usado, emite tokens diretamente
+    const stored = (user.access_code || '').trim();
+    if (!stored || stored === 'USED') {
+      return await AuthService._issueSession(user, ip, userAgent);
     }
 
-    return { emailKey: cleanEmail, userId: user.id };
+    // Senão, ainda precisa validar o código de primeiro acesso na etapa 2
+    return { requiresAccessCode: true, emailKey: cleanEmail };
+  },
+
+  /**
+   * Cria sessão e tokens (uso interno).
+   */
+  async _issueSession(user, ip, userAgent) {
+    const { data: clinic, error: clinicErr } = await supabase
+      .from('clinics').select('*').eq('id', user.clinic_id).single();
+    if (clinicErr) {
+      logger.error('Error loading clinic during auth', { error: clinicErr.message, userId: user.id });
+      throw { code: 'AUTH_ERROR', message: 'Erro ao carregar dados da clínica.' };
+    }
+    if (!clinic || !clinic.active) throw { code: 'CLINIC_INACTIVE', message: 'Sua clínica está desativada. Contate o suporte.' };
+
+    const accessToken = jwt.sign(
+      { userId: user.id, clinicId: clinic.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
+    );
+    const refreshToken = uuidv4();
+    const expiresAt = new Date(); expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await AuthRepository.createSession({
+      user_id: user.id, clinic_id: clinic.id,
+      refresh_token: refreshToken,
+      expires_at: expiresAt.toISOString(),
+      ip_address: ip, user_agent: userAgent
+    });
+    await AuthRepository.updateLastLogin(user.id);
+
+    eventBus.emitEvent(EventType.LOGIN, {
+      clinicId: clinic.id, userId: user.id,
+      module: 'AUTH', screen: 'Login',
+      metadata: { ip, userAgent }
+    });
+
+    return {
+      authenticated: true,
+      accessToken, refreshToken,
+      user: { id: user.id, email: user.email, name: user.name, initials: user.initials, role: user.role },
+      clinic: {
+        id: clinic.id, name: clinic.name, slug: clinic.slug,
+        specialty: clinic.specialty, city: clinic.city,
+        tone: clinic.tone, visual_style: clinic.visual_style,
+        brand_color1: clinic.brand_color1, brand_color2: clinic.brand_color2,
+        monthly_limit: clinic.monthly_limit, plan_id: clinic.plan_id
+      }
+    };
   },
 
   /**
@@ -67,12 +111,11 @@ const AuthService = {
     const input = (accessCode || '').trim();
     if (!input) throw { code: 'CODE_EMPTY', message: 'Digite o código de acesso.' };
 
-    // Validar expiração do código OTP (10 minutos)
-    if (user.access_code_expires_at && new Date() > new Date(user.access_code_expires_at)) {
-      throw { code: 'CODE_EXPIRED', message: 'Código de acesso expirou. Faça login novamente.' };
-    }
-
     const stored = (user.access_code || '').trim();
+    if (!stored || stored === 'USED') {
+      // Código já foi usado — não deve cair aqui, mas tratamos defensivamente
+      throw { code: 'CODE_ALREADY_USED', message: 'Este código já foi utilizado. Faça login normalmente com e-mail e senha.' };
+    }
     
     // Comparação do código
     if (input !== stored) {
@@ -103,65 +146,10 @@ const AuthService = {
       }
     }
 
-    // Invalidação imediata de OTP e liberação de bloqueios após autenticação bem-sucedida
+    // Marca código como usado e libera bloqueios
     await AuthRepository.resetSecurityState(user.id);
 
-    // Carregar dados da clínica
-    const { data: clinic, error: clinicErr } = await supabase
-      .from('clinics')
-      .select('*')
-      .eq('id', user.clinic_id)
-      .single();
-
-    if (clinicErr) {
-      logger.error('Error loading clinic during auth', { error: clinicErr.message, userId: user.id });
-      throw { code: 'AUTH_ERROR', message: 'Erro ao carregar dados da clínica.' };
-    }
-
-    if (!clinic || !clinic.active) {
-      throw { code: 'CLINIC_INACTIVE', message: 'Sua clínica está desativada. Contate o suporte.' };
-    }
-
-    // Gerar tokens
-    const accessToken = jwt.sign(
-      { userId: user.id, clinicId: clinic.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '15m' }
-    );
-
-    const refreshToken = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await AuthRepository.createSession({
-      user_id: user.id, clinic_id: clinic.id,
-      refresh_token: refreshToken,
-      expires_at: expiresAt.toISOString(),
-      ip_address: ip, user_agent: userAgent
-    });
-
-    await AuthRepository.updateLastLogin(user.id);
-
-    // Track login success
-    eventBus.emitEvent(EventType.LOGIN, {
-      clinicId: clinic.id,
-      userId: user.id,
-      module: 'AUTH',
-      screen: 'Login',
-      metadata: { ip, userAgent }
-    });
-
-    return {
-      accessToken, refreshToken,
-      user: { id: user.id, email: user.email, name: user.name, initials: user.initials, role: user.role },
-      clinic: {
-        id: clinic.id, name: clinic.name, slug: clinic.slug,
-        specialty: clinic.specialty, city: clinic.city,
-        tone: clinic.tone, visual_style: clinic.visual_style,
-        brand_color1: clinic.brand_color1, brand_color2: clinic.brand_color2,
-        monthly_limit: clinic.monthly_limit, plan_id: clinic.plan_id
-      }
-    };
+    return await AuthService._issueSession(user, ip, userAgent);
   },
 
   /**

@@ -5,7 +5,7 @@ const logger = require('../utils/logger');
 const AuthController = {
   async login(req, res) {
     try {
-      const result = await AuthService.login(req.body.email, req.body.password);
+      const result = await AuthService.login(req.body.email, req.body.password, req.ip, req.headers['user-agent']);
       return success(res, result);
     } catch (e) {
       logger.error('Login error', { error: e.message, code: e.code });
