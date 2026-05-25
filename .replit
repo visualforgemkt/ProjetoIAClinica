@@ -74,6 +74,6 @@ localPort = 5000
 externalPort = 80
 
 [deployment]
-deploymentTarget = "autoscale"
-run = ["bash", "-c", "cd frontend && npm run preview -- --port 5000 --host 0.0.0.0"]
-build = ["bash", "-c", "cd frontend && npm install && npm run build"]
+deploymentTarget = "vm"
+run = ["bash", "-c", "node src/server.js & cd frontend && npx vite preview --port 5000 --host 0.0.0.0 --strictPort"]
+build = ["bash", "-c", "npm install && cd frontend && npm install && npm run build"]
