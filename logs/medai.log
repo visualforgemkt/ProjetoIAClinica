@@ -1149,3 +1149,24 @@
 {"level":"info","message":"POST /api/auth/verify 400 203.229 ms - 1d9518dd-05cb-42db-93dd-59ecb4c886d3","service":"medai-pro","timestamp":"2026-05-25T23:32:30.015Z"}
 {"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:32:30.016Z","userId":null}
 {"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-25T23:34:46.536Z"}
+{"email":"doutorgregory@clinica.com.br","level":"info","message":"User logged in","service":"medai-pro","timestamp":"2026-05-25T23:35:04.956Z"}
+{"level":"info","message":"POST /api/auth/verify 200 554.286 ms - 9c5bcb07-c958-45b6-89a1-b16b4616a6b8","service":"medai-pro","timestamp":"2026-05-25T23:35:04.959Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-25T23:35:04.961Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:35:04.962Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":66,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-25T23:35:05.027Z"}
+{"code":"CODE_ALREADY_USED","email":"doutorgregory@clinica.com.br","error":"Este código já foi utilizado. Faça login normalmente com e-mail e senha.","level":"error","message":"VerifyCode error","service":"medai-pro","timestamp":"2026-05-25T23:35:10.044Z"}
+{"level":"info","message":"POST /api/auth/verify 400 101.047 ms - e23be1cb-5cd2-437b-9ddb-f4ebffe41b69","service":"medai-pro","timestamp":"2026-05-25T23:35:10.045Z"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:35:10.046Z","userId":null}
+{"level":"info","message":"POST /api/auth/login 200 407.466 ms - 02a166e2-f575-4610-9b2d-ba9193c9c7e9","service":"medai-pro","timestamp":"2026-05-25T23:35:14.111Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-25T23:35:14.112Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:35:14.114Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":51,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-25T23:35:14.163Z"}
+{"level":"info","message":"POST /api/auth/login 200 408.517 ms - 9cb97c7d-b3be-4bfa-aa86-1411e413ac3d","service":"medai-pro","timestamp":"2026-05-25T23:35:18.088Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-25T23:35:18.088Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:35:18.090Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":49,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-25T23:35:18.137Z"}
+{"level":"info","message":"POST /api/auth/login 200 406.358 ms - 7e02e3b4-9007-41c3-959b-c1aa61896db4","service":"medai-pro","timestamp":"2026-05-25T23:35:20.598Z"}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting USER_LOGIN","module":"AUTH","service":"medai-pro","timestamp":"2026-05-25T23:35:20.598Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-25T23:35:20.599Z","userId":null}
+{"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":50,"level":"info","message":"[EventBus] Processed USER_LOGIN","service":"medai-pro","timestamp":"2026-05-25T23:35:20.648Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-25T23:37:10.149Z"}

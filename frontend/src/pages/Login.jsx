@@ -1,8 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/useAuthStore';
 import { ArrowRight, KeyRound, Loader2, ShieldCheck, Mail, Lock } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  useEffect(() => {
+    if (isAuthenticated) navigate('/assistente', { replace: true });
+  }, [isAuthenticated, navigate]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');

@@ -34,13 +34,18 @@ const AuthService = {
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) throw { code: 'WRONG_PASSWORD', message: 'Senha incorreta. Tente novamente.' };
 
-    // Se o código de primeiro acesso já foi usado, emite tokens diretamente
+    // Só pula a etapa 2 se o código já foi explicitamente marcado como usado
     const stored = (user.access_code || '').trim();
-    if (!stored || stored === 'USED') {
+    if (stored === 'USED') {
       return await AuthService._issueSession(user, ip, userAgent);
     }
 
-    // Senão, ainda precisa validar o código de primeiro acesso na etapa 2
+    // Conta sem código configurado — não permitir login direto (bypass)
+    if (!stored) {
+      throw { code: 'NO_ACCESS_CODE', message: 'Conta sem código de ativação. Contate o suporte.' };
+    }
+
+    // Caso contrário, exigir validação do código de primeiro acesso na etapa 2
     return { requiresAccessCode: true, emailKey: cleanEmail };
   },
 
