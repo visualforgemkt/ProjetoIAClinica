@@ -1134,3 +1134,4 @@
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","durationMs":419,"level":"info","message":"[EventBus] Processed CAMPAIGN_CREATED","service":"medai-pro","timestamp":"2026-05-19T14:17:32.364Z"}
 {"level":"info","message":"POST /api/ai/chat 200 27354.119 ms - 65c7028d-5468-4cbd-a938-faad24cbb911","service":"medai-pro","timestamp":"2026-05-19T14:17:32.890Z"}
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-05-19T14:17:32.892Z","userId":"a2d1365b-bdc6-4587-83ef-ed5ddae18956"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-25T23:16:48.687Z"}
