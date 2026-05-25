@@ -13,8 +13,10 @@ class ClinicMemoryService {
         .eq('clinic_id', clinicId)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is not found
-        logger.error('Failed to get clinic memory', { error: error.message, clinicId });
+      if (error && error.code !== 'PGRST116') {
+        // Tabela ainda não existe no banco — usar memória padrão sem poluir os logs de erro
+        if (error.message?.includes('clinic_memory')) return this.getDefaultMemory();
+        logger.warn('Failed to get clinic memory', { error: error.message, clinicId });
       }
       return data || this.getDefaultMemory();
     } catch (err) {
