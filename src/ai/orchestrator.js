@@ -1,13 +1,13 @@
 /**
  * MedAI Pro — AI Orchestrator
  *
- * Arquitetura em camadas:
+ * Arquitetura em camadas atualizada (Assistente Inteligente de Crescimento):
  *
- *   IntentLayer   → classifica intenção do usuário
- *   ContextLayer  → monta contexto da clínica do banco
- *   PromptLayer   → enriquece prompts com contexto
- *   AgentLayer    → seleciona e executa o agente correto
- *   OutputLayer   → estrutura e valida a resposta
+ *   buildContext()      → Carrega dados estáticos da clínica
+ *   enrichContext()     → Adiciona regras de negócio e informações de serviços
+ *   behavioralContext() → Adiciona o tom da clínica e preferências de formato
+ *   memoryContext()     → Injeta o aprendizado persistente (o que aprova/rejeita)
+ *   executeAgent()      → Seleciona e executa o agente correto com o super-contexto
  */
 
 const AIGateway   = require('./gateway');
@@ -16,7 +16,9 @@ const logger      = require('../utils/logger');
 const AIParser    = require('./parser');
 const eventBus    = require('../core/eventBus');
 const { EventType } = require('../services/trackingService');
-const ContextLayer = require('./prompts/context/clinicContext');
+const ClinicMemoryService = require('../services/clinicMemoryService');
+const VisualIdentityService = require('../services/visualIdentityService');
+const ContextBuilder = require('./prompts/context/clinicContext');
 const { buildCampaignSystem } = require('./prompts/templates/campaign');
 const { buildVIESystem } = require('./prompts/system/imagePrompt');
 
@@ -30,20 +32,41 @@ class IntentLayer {
     if (/dúvida|agendamento|convênio|horário|funciona|atende|contato/.test(t))  return 'faq';
     if (/paciente|crescimento|mais.*cliente|atrair|conseguir/.test(t))          return 'campaign';
     if (/saúde|pediatria|criança|bebê|vacina|febre|sintoma/.test(t))            return 'health';
-    return 'campaign'; // default mais completo
+    return 'campaign'; // default
   }
 }
 
-// ── Prompt Layer ───────────────────────────────────────────────
-class PromptLayer {
-  static enrich(baseSystem, clinic) {
-    return baseSystem + ContextLayer.build(clinic);
+// ── Contextualization Pipeline ─────────────────────────────────
+class PipelineLayer {
+  static async buildFullContext(clinic) {
+    if (!clinic) return '';
+
+    // 1. buildContext() -> Dados Básicos (Identity)
+    const baseContext = ContextBuilder.build(clinic);
+
+    // 2. enrichContext() + memoryContext() + behavioralContext() 
+    // Extraídos pelo ClinicMemoryService
+    const memory = await ClinicMemoryService.getMemory(clinic?.id);
+    
+    let enrich = '\n\n[MEMÓRIA E COMPORTAMENTO APRENDIDO]';
+    
+    if (memory.preferences) {
+      enrich += `\n- Plataformas preferidas: ${memory.preferences.plataformas?.join(', ') || 'N/A'}`;
+      enrich += `\n- Temas de sucesso: ${memory.preferences.temas?.join(', ') || 'N/A'}`;
+      enrich += `\n- Tamanho de conteúdo preferido: ${memory.preferences.tamanho || 'médio'}`;
+    }
+    
+    if (memory.behavior) {
+      enrich += `\n- O usuário já rejeitou campanhas focadas em formatos longos se a preferência for curta.`;
+    }
+
+    return baseContext + enrich;
   }
 }
 
 // ── Agent Layer ────────────────────────────────────────────────
 class AgentLayer {
-  static async executeChat(intent, messages, clinic) {
+  static async executeChat(intent, messages, clinic, superContext) {
     const agentMap = {
       campaign: 'orchestrator',
       social:   'instagram',
@@ -52,12 +75,15 @@ class AgentLayer {
     };
     const agentId  = agentMap[intent] || 'orchestrator';
     const baseSystem = agentPrompts[agentId] || agentPrompts.orientacao;
-    const systemPrompt = PromptLayer.enrich(baseSystem, clinic);
+    
+    const systemPrompt = baseSystem + '\n' + superContext;
     return await AIGateway.complete({ messages, systemPrompt, clinicId: clinic?.id });
   }
 
-  static async executeCampaign(topic, clinic) {
-    const systemPrompt = buildCampaignSystem(clinic, topic);
+  static async executeCampaign(topic, clinic, superContext) {
+    const baseSystem = buildCampaignSystem(clinic, topic);
+    const systemPrompt = baseSystem + '\n' + superContext;
+    
     return await AIGateway.complete({
       messages: [{ role: 'user', content: `Criar campanha: ${topic}` }],
       systemPrompt,
@@ -77,17 +103,18 @@ class AgentLayer {
   }
 }
 
-
 // ── Image URL Generator ────────────────────────────────────────
 class ImageUrlGenerator {
-  static async generate(prompt, style = 'neutral', clinicId = null) {
+  static async generate(prompt, style = 'neutral', clinicId = null, clinicSpecialty = '') {
     if (!prompt) return null;
 
-    // Se tivermos OpenAI API Key, usamos DALL-E 3 (Profissional)
+    // Enriquecer o prompt visual usando o Visual Identity Engine (P1)
+    const enrichedPrompt = await VisualIdentityService.enrichImagePrompt(prompt, clinicId, clinicSpecialty);
+
     if (process.env.OPENAI_API_KEY) {
       try {
         const url = await AIGateway.generateImage({ 
-          prompt: `${prompt}, high quality medical style, ${style}`, 
+          prompt: enrichedPrompt, 
           clinicId 
         });
         if (url) return url;
@@ -96,10 +123,8 @@ class ImageUrlGenerator {
       }
     }
 
-    // Fallback: Pollinations (Gratuito/Aberto)
     const seed = Math.floor(Math.random() * 1000000);
-    // Encurtar prompt para evitar URLs gigantes que quebram em alguns browsers
-    const shortPrompt = prompt.split('.').slice(0, 2).join('.') || prompt;
+    const shortPrompt = enrichedPrompt.split('.').slice(0, 2).join('.') || enrichedPrompt;
     const fullPrompt = style !== 'neutral' ? `${shortPrompt}, style: ${style}` : shortPrompt;
     const encoded = encodeURIComponent(fullPrompt);
     return `https://pollinations.ai/p/${encoded}?width=1024&height=1024&seed=${seed}&nologo=true`;
@@ -113,19 +138,8 @@ class ResponseFormatter {
 
     if (type === 'image') {
       const subject = data.subject || 'Imagem';
-      const stylePt = {
-        cartoon: 'Desenho Animado', anime: 'Anime', '3d': '3D', pixel_art: 'Pixel Art',
-        watercolor: 'Aquarela', digital_painting: 'Pintura Digital', cyberpunk: 'Cyberpunk',
-        minimalist: 'Minimalista', futurist: 'Futurista', vintage: 'Vintage',
-        realistic_photo: 'Foto Realista', documentary_photo: 'Foto Documental',
-        product_photo: 'Foto de Produto', poster: 'Pôster', infographic: 'Infográfico',
-        neutral: 'Padrão'
-      }[data.style] || data.style || 'Padrão';
-
       return [
         `### 🎨 Imagem Gerada: ${subject}`,
-        `**Estilo:** ${stylePt}`,
-        '',
         `![${subject}](${data.imageUrl})`,
         ''
       ].join('\n');
@@ -148,14 +162,13 @@ class ResponseFormatter {
 
       if (data.briefingVisual?.imageUrl) {
         parts.push(
-          '### 🎨 Sugestão Visual',
+          '### 🎨 Sugestão Visual Baseada na Identidade',
           `![Visual](${data.briefingVisual.imageUrl})`,
           `*Conceito: ${data.briefingVisual.conceito || ''}*`,
           ''
         );
       }
-
-      parts.push('---', '*Os detalhes completos e o calendário de postagens foram salvos na sua área de campanhas.*');
+      parts.push('---', '*Criado usando aprendizado contínuo sobre sua clínica.*');
       return parts.join('\n');
     }
 
@@ -183,123 +196,83 @@ const AIOrchestrator = {
     const t0 = Date.now();
 
     // 1. Intent Layer
-    const resolvedIntent = intent === 'auto'
-      ? IntentLayer.classify(message)
-      : intent;
+    const resolvedIntent = intent === 'auto' ? IntentLayer.classify(message) : intent;
 
-    logger.info('Orchestrator processing', {
-      intent: resolvedIntent,
-      clinicId: clinic?.id,
-      messageLength: message.length
-    });
+    // 2. Novo Contextualization Pipeline (Memory & Behavior)
+    const superContext = await PipelineLayer.buildFullContext(clinic);
 
-    // 2. Context Layer — clínica já vem do req.clinic (carregada pelo middleware)
-
-    // 3. Agent Layer + Output Layer
     let result;
 
     if (resolvedIntent === 'campaign') {
-      const aiResult = await AgentLayer.executeCampaign(message, clinic);
+      const aiResult = await AgentLayer.executeCampaign(message, clinic, superContext);
       try {
         result = OutputLayer.parseCampaign(aiResult.text);
       } catch (err) {
-        logger.error('Orchestrator Campaign Parsing Failed', { error: err.message, text: aiResult.text });
-        result = { 
-          type: 'campaign', 
-          data: { 
-            nome: 'Erro na geração da campanha', 
-            copyPrincipal: 'A IA teve um problema ao formatar a resposta. Por favor, tente novamente com um tema mais específico.',
-            _error: true 
-          } 
-        };
+        logger.error('Orchestrator Parsing Failed', { error: err.message, text: aiResult.text });
+        result = { type: 'campaign', data: { nome: 'Erro', copyPrincipal: 'Erro na formatação.', _error: true } };
       }
       
-      // Gerar imagem para o briefing visual se houver prompt
+      // Gera imagem respeitando o Visual Identity Engine
       if (result.type === 'campaign' && result.data?.briefingVisual?.promptImagem) {
         result.data.briefingVisual.imageUrl = await ImageUrlGenerator.generate(
           result.data.briefingVisual.promptImagem,
           result.data.briefingVisual.estilo || 'poster',
-          clinic?.id
+          clinic?.id,
+          clinic?.specialty
         );
       }
 
-      result.tokens  = aiResult.tokens;
-      result.model   = aiResult.model;
+      result.tokens = aiResult.tokens;
+      result.model = aiResult.model;
       result.provider = aiResult.provider;
 
       eventBus.emitEvent(EventType.CAMPAIGN_CREATE, {
-        clinicId: clinic?.id,
-        userId: null, // Orchestrator não tem user nativo agora, controllers devem injetar, ou deixamos nulo
-        module: 'AI_ORCHESTRATOR',
-        screen: 'CampaignBuilder',
+        clinicId: clinic?.id, userId: null, module: 'AI_ORCHESTRATOR', screen: 'CampaignBuilder',
         metadata: { intent: resolvedIntent, tokens: result.tokens, duration: Date.now() - t0 }
       });
 
     } else if (resolvedIntent === 'image') {
-      // VIE: primeiro interpreta, depois retorna prompt para Pollinations
       const vieResult = await AgentLayer.executeVIE(message, clinic);
-      const parsed    = OutputLayer.parseVIE(vieResult.text);
+      const parsed = OutputLayer.parseVIE(vieResult.text);
       
       const imageUrl = await ImageUrlGenerator.generate(
         parsed?.contentPrompt || message,
         parsed?.style || 'neutral',
-        clinic?.id
+        clinic?.id,
+        clinic?.specialty
       );
 
       result = {
         type: 'image',
-        data: {
-          ...(parsed || { subject: message, contentPrompt: message, style: 'neutral', userSpecifiedStyle: false, extraNegatives: '' }),
-          imageUrl
-        },
-        tokens:   vieResult.tokens,
-        model:    vieResult.model,
-        provider: vieResult.provider
+        data: { ...(parsed || { subject: message, style: 'neutral' }), imageUrl },
+        tokens: vieResult.tokens, model: vieResult.model, provider: vieResult.provider
       };
 
       eventBus.emitEvent(EventType.IMAGE_CREATE, {
-        clinicId: clinic?.id,
-        userId: null,
-        module: 'AI_ORCHESTRATOR',
-        screen: 'ImageGenerator',
+        clinicId: clinic?.id, userId: null, module: 'AI_ORCHESTRATOR', screen: 'ImageGenerator',
         metadata: { style: result.data.style, tokens: result.tokens }
       });
 
     } else {
-      const messages = [
-        ...conversationHistory,
-        { role: 'user', content: message }
-      ];
-      const aiResult = await AgentLayer.executeChat(resolvedIntent, messages, clinic);
-      result = {
-        type:     'text',
-        data:     aiResult.text,
-        tokens:   aiResult.tokens,
-        model:    aiResult.model,
-        provider: aiResult.provider
-      };
+      const messages = [ ...conversationHistory, { role: 'user', content: message } ];
+      const aiResult = await AgentLayer.executeChat(resolvedIntent, messages, clinic, superContext);
+      
+      result = { type: 'text', data: aiResult.text, tokens: aiResult.tokens, model: aiResult.model, provider: aiResult.provider };
 
       eventBus.emitEvent(resolvedIntent === 'faq' ? EventType.FAQ_USE : EventType.AI_CHAT, {
-        clinicId: clinic?.id,
-        userId: null,
-        module: 'AI_ORCHESTRATOR',
-        screen: 'ChatBot',
-        metadata: { intent: resolvedIntent, messageLength: message.length }
+        clinicId: clinic?.id, userId: null, module: 'AI_ORCHESTRATOR', screen: 'ChatBot',
+        metadata: { intent: resolvedIntent }
       });
     }
 
-    // 4. Formatting Layer
     result.formattedText = ResponseFormatter.toMarkdown(result.type, result.data);
-
-    result.intent   = resolvedIntent;
+    result.intent = resolvedIntent;
     result.duration = Date.now() - t0;
     return result;
   },
 
-  // Exportar camadas para uso direto se necessário
   IntentLayer,
-  ContextLayer,
-  PromptLayer
+  PipelineLayer
 };
 
 module.exports = AIOrchestrator;

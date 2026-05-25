@@ -41,7 +41,7 @@ class TrackingService {
    * P1 — FEEDBACK LOOP IA
    * Registra aceites/rejeições de sugestões da IA para treinar o modelo
    */
-  static async logAIFeedback(clinicId, userId, interactionType, referenceId, action, notes = '') {
+  static async logAIFeedback(clinicId, userId, interactionType, referenceId, action, notes = '', metadata = {}) {
     try {
       await supabase.from('ai_feedback').insert({
         clinic_id: clinicId,
@@ -50,6 +50,15 @@ class TrackingService {
         reference_id: referenceId,
         action,
         feedback_notes: notes
+      });
+
+      // P0 - O motor de aprendizado usa o feedback para personalizar a IA
+      const ClinicMemoryService = require('./clinicMemoryService');
+      await ClinicMemoryService.learnFromInteraction(clinicId, {
+        action,
+        reason: notes, // Exemplo: 'too_long'
+        topic: metadata?.topic, // metadata pode precisar ser passada
+        platform: metadata?.platform
       });
 
       // Rastreia como evento genérico também
