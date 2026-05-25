@@ -51,12 +51,17 @@ const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
   .map(o => o.trim())
   .filter(Boolean);
 
+const isReplitDevOrigin = (origin) =>
+  /^https?:\/\/[^/]+\.(replit\.dev|repl\.co|riker\.replit\.dev|kirk\.replit\.dev|janeway\.replit\.dev|picard\.replit\.dev|sisko\.replit\.dev)$/i.test(origin || '');
+
 app.use(cors({
   origin: (origin, callback) => {
     // Permitir requests sem origin (curl, mobile apps, Postman em dev) ou origem 'null' (arquivos locais)
     if (process.env.NODE_ENV !== 'production' && (!origin || origin === 'null')) return callback(null, true);
     if (!origin) return callback(new Error('Origem não permitida'), false);
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Permitir domínios do Replit (preview/dev) automaticamente
+    if (isReplitDevOrigin(origin)) return callback(null, true);
     logger.warn('CORS blocked origin', { origin });
     return callback(new Error('Origem não autorizada'), false);
   },
