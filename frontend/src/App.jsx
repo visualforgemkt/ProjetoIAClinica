@@ -2,11 +2,13 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './layouts/AuthLayout';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Chat from './pages/Chat';
+import Assistant from './pages/Assistant';
+import Insights from './pages/Insights';
+import Campaigns from './pages/Campaigns';
+import Creatives from './pages/Creatives';
+import Settings from './pages/Settings';
 import useAuthStore from './store/useAuthStore';
 
-// Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
@@ -17,16 +19,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Auth Routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<Login />} />
         </Route>
 
-        {/* Protected Routes */}
         <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-          <Route path="/" element={<Navigate to="/chat" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chat" element={<Chat />} />
+          <Route path="/" element={<Navigate to="/assistente" replace />} />
+          <Route path="/assistente" element={<Assistant />} />
+          <Route path="/chat" element={<Navigate to="/assistente" replace />} />
+          <Route path="/campanhas" element={<Campaigns />} />
+          <Route path="/criativos" element={<Creatives />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/dashboard" element={<Navigate to="/insights" replace />} />
+          <Route path="/configuracoes" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

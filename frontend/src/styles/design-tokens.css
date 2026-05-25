@@ -1,64 +1,102 @@
-/* MedAI Pro — Premium Design System Tokens (HSL & Dark Mode) */
+/* ============================================================================
+   MedAI Pro — Design System v2
+   Premium · Moderno · Acolhedor
+   ============================================================================ */
+
 :root {
-  /* Layout Colors - Dark Palette */
-  --bg:     #07090F;
-  --sf:     #0C1018;
-  --sf2:    #111827;
-  --sf3:    #192032;
-  --sf4:    #1E2840;
+  /* ---- Surfaces ---- */
+  --bg:        #0B0D12;
+  --bg-soft:   #0F1218;
+  --sf-1:      #141821;
+  --sf-2:      #1A1F2B;
+  --sf-3:      #232938;
+  --sf-hover:  #1E2532;
 
-  /* Accent Colors - MedAI Blue */
-  --blu:    #3B7FFF;
-  --blu-h:  #2D70EF;
-  --blu-l:  #6FA3FF;
-  --blu-d:  rgba(59,127,255,0.08);
-  --blu-b:  rgba(59,127,255,0.18);
+  /* ---- Brand ---- */
+  --brand:        #4F8BFF;
+  --brand-h:      #6FA0FF;
+  --brand-soft:   rgba(79, 139, 255, 0.10);
+  --brand-soft-2: rgba(79, 139, 255, 0.18);
+  --brand-ring:   rgba(79, 139, 255, 0.30);
+  --brand-grad:   linear-gradient(135deg, #4F8BFF 0%, #6FA0FF 50%, #A78BFA 100%);
+  --brand-grad-soft: linear-gradient(135deg, rgba(79,139,255,0.12) 0%, rgba(167,139,250,0.10) 100%);
 
-  /* Gold Theme - Enterprise/Premium Features */
-  --gld:    #C9A84C;
-  --gld-d:  rgba(201,168,76,0.10);
-  --gld-b:  rgba(201,168,76,0.20);
+  /* ---- Accents ---- */
+  --gold:      #E5B968;
+  --gold-soft: rgba(229, 185, 104, 0.12);
+  --violet:    #A78BFA;
+  --teal:      #34D6BE;
+  --pink:      #F472B6;
 
-  /* Text Colors - High contrast and readability */
-  --t1: #F0F4FF;
-  --t2: #8A9BBE;
-  --t3: #4A5A7A;
-  --t4: #242F45;
+  /* ---- Text (contraste alto, WCAG AA) ---- */
+  --text:        #F2F5FB;
+  --text-soft:   #B4BFD3;
+  --text-muted:  #7C89A3;
+  --text-dim:    #4D5871;
 
-  /* Borders & Dividers */
-  --bd:  rgba(255,255,255,0.055);
-  --bd2: rgba(255,255,255,0.095);
-  --bda: rgba(59,127,255,0.22);
+  /* ---- Semantic ---- */
+  --ok:        #34D399;
+  --ok-soft:   rgba(52, 211, 153, 0.12);
+  --warn:      #FBBF24;
+  --warn-soft: rgba(251, 191, 36, 0.12);
+  --err:       #F87171;
+  --err-soft:  rgba(248, 113, 113, 0.12);
 
-  /* Semantic Feedback */
-  --ok:   #22C55E;
-  --err:  #EF4444;
-  --wrn:  #F59E0B;
-  --ok-d: rgba(34,197,94,0.09);
+  /* ---- Borders ---- */
+  --border:        rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --border-brand:  rgba(79, 139, 255, 0.28);
 
-  /* Typography */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* ---- Typography ---- */
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Inter', sans-serif;
 
-  /* Spacing */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
+  --fs-xs:   12px;
+  --fs-sm:   13px;
+  --fs-base: 15px;
+  --fs-md:   16px;
+  --fs-lg:   18px;
+  --fs-xl:   22px;
+  --fs-2xl:  28px;
+  --fs-3xl:  36px;
+  --fs-4xl:  48px;
 
-  /* Radii */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-full: 9999px;
+  /* ---- Spacing (4pt grid) ---- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  /* ---- Radii (mais arredondado, premium) ---- */
+  --r-sm:   6px;
+  --r-md:   10px;
+  --r-lg:   16px;
+  --r-xl:   20px;
+  --r-2xl:  24px;
+  --r-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* ---- Shadows (suaves com tinta azul) ---- */
+  --shadow-sm:    0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.25);
+  --shadow-lg:    0 12px 40px rgba(0,0,0,0.35);
+  --shadow-brand: 0 8px 32px rgba(79, 139, 255, 0.18);
+  --shadow-glow:  0 0 0 1px var(--brand-ring), 0 8px 24px rgba(79, 139, 255, 0.25);
+
+  /* ---- Transitions ---- */
+  --t-fast:   120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-base:   200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-slow:   320ms cubic-bezier(0.4, 0, 0.2, 1);
+  --t-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Layout ---- */
+  --sidebar-w: 240px;
+  --maxw-prose: 760px;
+  --maxw-chat: 820px;
 }

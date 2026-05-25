@@ -1,397 +1,327 @@
-import React, { useState } from 'react';
-import { Clipboard, Check, Calendar, MessageSquare, Award, RefreshCw, Palette, Users, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Clipboard, Check, X, FileText, Layers, Palette, Calendar, BarChart3, RefreshCw, Sparkles, Hash } from 'lucide-react';
 
-export default function CampaignRenderer({ campaign, topic, onRefine, onGenerateImage }) {
-  const [activeTab, setActiveTab] = useState('estrategia');
-  const [copiedStates, setCopiedStates] = useState({});
+const SECTIONS = [
+  { id: 'resumo',       label: 'Resumo',       icon: FileText },
+  { id: 'conteudo',     label: 'Conteúdo',     icon: Layers },
+  { id: 'criativos',    label: 'Criativos',    icon: Palette },
+  { id: 'planejamento', label: 'Planejamento', icon: Calendar },
+  { id: 'resultados',   label: 'Resultados',   icon: BarChart3 },
+];
 
-  if (!campaign || !campaign.nome) {
+export default function CampaignRenderer({ campaign, onClose, onRefine, onGenerateImage, closeRef }) {
+  const [active, setActive] = useState('resumo');
+  const [copied, setCopied] = useState({});
+
+  if (!campaign?.nome) {
     return (
-      <div className="cp-blk" style={{ padding: '20px', color: 'var(--t2)', textAlign: 'center' }}>
-        Carregando dados da campanha...
+      <div className="empty" style={{ padding: 40 }}>
+        <Sparkles size={20} /> Carregando campanha…
       </div>
     );
   }
 
-  const handleCopy = (key, text) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).catch(() => {});
-    }
-    setCopiedStates((prev) => ({ ...prev, [key]: true }));
-    setTimeout(() => {
-      setCopiedStates((prev) => ({ ...prev, [key]: false }));
-    }, 2000);
+  const copyTo = (key, text) => {
+    if (!text) return;
+    navigator.clipboard?.writeText(text).catch(() => {});
+    setCopied(c => ({ ...c, [key]: true }));
+    setTimeout(() => setCopied(c => ({ ...c, [key]: false })), 1800);
   };
-
-  const tabs = [
-    { id: 'estrategia', lbl: '📋 Estratégia' },
-    { id: 'copy', lbl: '✍️ Copy' },
-    { id: 'posts', lbl: '📱 Posts' },
-    { id: 'stories', lbl: '📲 Stories' },
-    { id: 'whatsapp', lbl: '💬 WhatsApp' },
-    { id: 'calendario', lbl: '📅 Calendário' },
-    { id: 'visual', lbl: '🎨 Visual' },
-    { id: 'versoes', lbl: '🔀 Versões' },
-    { id: 'metricas', lbl: '📊 Métricas' }
-  ];
 
   const strategy = campaign.estrategia || {};
-  const briefingVisual = campaign.briefingVisual || {};
+  const visual = campaign.briefingVisual || {};
+  const get = (obj, keys) => { for (const k of keys) if (obj?.[k]) return obj[k]; return null; };
 
-  const getFieldValue = (obj, keys) => {
-    for (let k of keys) {
-      if (obj[k]) return obj[k];
-    }
-    return '—';
-  };
-
-  const renderEstrategia = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Estratégia de Marketing
-      </h4>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-        {[
-          { label: '🎯 Objetivo Principal', val: getFieldValue(strategy, ['objetivo', 'goal', 'objective']) },
-          { label: '👥 Público-Alvo', val: getFieldValue(strategy, ['publicoAlvo', 'publico_alvo', 'target', 'audience']) },
-          { label: '💡 Abordagem Prática', val: getFieldValue(strategy, ['abordagem', 'approach']) },
-          { label: '📣 Chamada de Ação (CTA)', val: getFieldValue(strategy, ['ctaPrincipal', 'cta_principal', 'cta']) },
-          { label: '🏥 Posicionamento da Clínica', val: getFieldValue(strategy, ['posicionamento', 'positioning']) }
-        ].map((item, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '12px' }}>
-            <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '4px' }}>{item.label}</div>
-            <div style={{ fontSize: '13px', color: 'var(--t1)', lineHeight: '1.5' }}>{item.val}</div>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 8 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+              <span className="pill pill-brand"><Sparkles size={11} /> Campanha gerada</span>
+              <span className="pill pill-ok">Pronto para publicar</span>
+            </div>
+            <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 4 }}>
+              {campaign.nome}
+            </h2>
+            {campaign.slogan && (
+              <p style={{ color: 'var(--text-muted)', fontSize: 14, fontStyle: 'italic' }}>{campaign.slogan}</p>
+            )}
           </div>
-        ))}
-      </div>
-    </div>
-  );
+          {onClose && (
+            <button ref={closeRef} onClick={onClose} className="btn btn-ghost btn-icon" aria-label="Fechar painel da campanha">
+              <X size={18} />
+            </button>
+          )}
+        </div>
 
-  const renderCopy = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Copy Principal (Instagram/Facebook)
-      </h4>
-      <div style={{ position: 'relative', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '15px' }}>
-        <button
-          onClick={() => handleCopy('copyPrincipal', campaign.copyPrincipal || '')}
-          style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--sf3)', border: '1px solid var(--bd)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', color: copiedStates.copyPrincipal ? 'var(--ok)' : 'var(--t3)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-        >
-          {copiedStates.copyPrincipal ? <Check size={12} /> : <Clipboard size={12} />}
-          {copiedStates.copyPrincipal ? 'Copiado' : 'Copiar'}
-        </button>
-        <div style={{ whiteSpace: 'pre-wrap', color: 'var(--t1)', fontSize: '13px', lineHeight: '1.7', marginRight: '70px' }}>
-          {campaign.copyPrincipal || '—'}
+        <div className="tabs" style={{ marginTop: 12 }}>
+          {SECTIONS.map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setActive(id)} className={`tab${active === id ? ' is-active' : ''}`}>
+              <Icon size={13} /> {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', marginTop: '10px' }}>Hashtags Sugeridas</h4>
-      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-        {(campaign.hashtags || []).map((h, i) => (
-          <span
-            key={i}
-            onClick={() => handleCopy(`ht_${i}`, `#${h}`)}
-            style={{ padding: '4px 10px', background: 'var(--blu-d)', border: '1px solid var(--bda)', color: 'var(--blu-l)', borderRadius: '20px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-          >
-            #{h} {copiedStates[`ht_${i}`] && '✓'}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
+      {/* Body */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        {active === 'resumo' && (
+          <Section title="Visão geral da estratégia">
+            <Grid>
+              <InfoCard label="🎯 Objetivo"        value={get(strategy, ['objetivo', 'goal', 'objective'])} />
+              <InfoCard label="👥 Público-alvo"    value={get(strategy, ['publicoAlvo', 'publico_alvo', 'target', 'audience'])} />
+              <InfoCard label="💡 Abordagem"        value={get(strategy, ['abordagem', 'approach'])} />
+              <InfoCard label="📣 CTA principal"    value={get(strategy, ['ctaPrincipal', 'cta_principal', 'cta'])} />
+              <InfoCard label="🏥 Posicionamento"  value={get(strategy, ['posicionamento', 'positioning'])} span={2} />
+            </Grid>
+          </Section>
+        )}
 
-  const renderPosts = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Planejamento de Feed / Carrossel
-      </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {(campaign.posts || []).map((post, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--blu-l)' }}>Post {post.num || idx + 1}</span>
-              <span style={{ fontSize: '10px', padding: '2px 8px', background: 'var(--blu-d)', border: '1px solid var(--bda)', borderRadius: '20px', color: 'var(--blu-l)', fontWeight: 600 }}>
-                {post.tipo || 'Feed'}
-              </span>
-            </div>
-            <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--t1)', marginBottom: '6px' }}>{post.titulo}</div>
-            <div style={{ fontSize: '13px', color: 'var(--t2)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{post.legenda}</div>
+        {active === 'conteudo' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            {campaign.copyPrincipal && (
+              <Section title="Copy principal (Instagram/Facebook)">
+                <CopyBlock text={campaign.copyPrincipal} onCopy={() => copyTo('copyPrincipal', campaign.copyPrincipal)} copied={copied.copyPrincipal} />
+              </Section>
+            )}
+            {campaign.hashtags?.length > 0 && (
+              <Section title="Hashtags sugeridas">
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {campaign.hashtags.map((h, i) => (
+                    <button key={i} className="pill pill-brand" onClick={() => copyTo(`ht_${i}`, `#${h}`)} style={{ cursor: 'pointer' }}>
+                      <Hash size={10} /> {h} {copied[`ht_${i}`] && '✓'}
+                    </button>
+                  ))}
+                </div>
+              </Section>
+            )}
+            {campaign.posts?.length > 0 && (
+              <Section title="Posts do feed">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {campaign.posts.map((post, i) => (
+                    <div key={i} className="card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span className="pill pill-brand">Post {post.num || i + 1}</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{post.tipo || 'Feed'}</span>
+                      </div>
+                      <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>{post.titulo}</div>
+                      <div style={{ color: 'var(--text-soft)', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{post.legenda}</div>
+                      {post.slides?.length > 0 && (
+                        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Roteiro do carrossel</div>
+                          {post.slides.map((s, sIdx) => (
+                            <div key={sIdx} style={{ display: 'flex', gap: 10, padding: '6px 0', fontSize: 13 }}>
+                              <strong style={{ color: 'var(--brand-h)', minWidth: 22 }}>S{sIdx + 1}</strong>
+                              <span style={{ color: 'var(--text-soft)' }}>{s}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+            {campaign.stories?.length > 0 && (
+              <Section title="Stories">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
+                  {campaign.stories.map((story, i) => (
+                    <div key={i} className="card" style={{ padding: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 8 }}>
+                        <span style={{ color: 'var(--brand-h)', fontWeight: 700 }}>Story {story.num || i + 1}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>{story.tipo || 'Imagem'}</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: 'var(--text-soft)', lineHeight: 1.55, whiteSpace: 'pre-wrap' }}>{story.conteudo}</div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+            {campaign.whatsapp && (
+              <Section title="WhatsApp / Lista de transmissão">
+                <CopyBlock text={campaign.whatsapp} onCopy={() => copyTo('wpp', campaign.whatsapp)} copied={copied.wpp} />
+              </Section>
+            )}
+            {campaign.versoes?.length > 0 && (
+              <Section title="Variações de tom">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {campaign.versoes.map((v, i) => (
+                    <div key={i} className="card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <span className="pill pill-brand">{v.tag || v.tipo || `Alternativa ${i + 1}`}</span>
+                        <button className="btn btn-ghost btn-sm" onClick={() => copyTo(`v_${i}`, v.copy)}>
+                          {copied[`v_${i}`] ? <Check size={12} /> : <Clipboard size={12} />} {copied[`v_${i}`] ? 'Copiado' : 'Copiar'}
+                        </button>
+                      </div>
+                      <div style={{ color: 'var(--text-soft)', fontSize: 14, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{v.copy}</div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            )}
+          </div>
+        )}
 
-            {post.slides && post.slides.length > 0 && (
-              <div style={{ marginTop: '12px', borderTop: '1px solid var(--bd)', paddingTop: '10px' }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '6px' }}>Roteiro do Carrossel</div>
-                {post.slides.map((slide, sIdx) => (
-                  <div key={sIdx} style={{ fontSize: '12px', padding: '6px 10px', background: 'var(--sf3)', borderRadius: 'var(--radius-sm)', marginBottom: '4px', display: 'flex', alignItems: 'flex-start' }}>
-                    <strong style={{ color: 'var(--blu-l)', marginRight: '8px', minWidth: '22px' }}>S{sIdx + 1}</strong>
-                    <span style={{ color: 'var(--t1)' }}>{slide}</span>
+        {active === 'criativos' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            <Section title="Direção de arte">
+              <Grid cols={3}>
+                <InfoCard label="💡 Conceito" value={visual.conceito} />
+                <InfoCard label="📐 Composição" value={visual.composicao} />
+                <InfoCard label="🎨 Estilo" value={visual.estilo} />
+                <InfoCard label="🧠 Emoção" value={visual.emocao} />
+                <InfoCard label="🌈 Cores" value={visual.cores} />
+              </Grid>
+            </Section>
+
+            <Section title="Prompts para geração de imagem">
+              {buildPrompts(campaign, visual).map((p, i) => (
+                <div key={i} className="card" style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-h)' }}>{p.label}</span>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => copyTo(`p_${i}`, p.prompt)}>
+                        {copied[`p_${i}`] ? <Check size={12} /> : <Clipboard size={12} />} {copied[`p_${i}`] ? 'Copiado' : 'Copiar'}
+                      </button>
+                      {onGenerateImage && (
+                        <button className="btn btn-primary btn-sm" onClick={() => onGenerateImage(p.prompt)}>
+                          <Sparkles size={12} /> Gerar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: 'var(--text-soft)',
+                    background: 'var(--sf-2)', padding: '12px 14px',
+                    borderRadius: 'var(--r-md)', borderLeft: '3px solid var(--brand)',
+                    fontStyle: 'italic', lineHeight: 1.55
+                  }}>{p.prompt}</div>
+                </div>
+              ))}
+            </Section>
+          </div>
+        )}
+
+        {active === 'planejamento' && (
+          <Section title="Cronograma de publicação">
+            {campaign.calendario?.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {campaign.calendario.map((cal, i) => (
+                  <div key={i} className="card" style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 14 }}>
+                    <div style={{
+                      width: 52, height: 52, borderRadius: 'var(--r-md)',
+                      background: 'var(--brand-soft)', border: '1px solid var(--border-brand)',
+                      display: 'grid', placeItems: 'center', flexShrink: 0
+                    }}>
+                      <Calendar size={16} style={{ color: 'var(--brand-h)' }} />
+                      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--brand-h)', marginTop: 2 }}>{cal.dia || `D${i + 1}`}</span>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{cal.acao}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        ⏰ {cal.horario || '—'}{cal.obs ? ` · 💡 ${cal.obs}` : ''}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
+            ) : (
+              <div className="empty">Nenhum cronograma definido para esta campanha.</div>
             )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+          </Section>
+        )}
 
-  const renderStories = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Roteiro e Conteúdo para Stories
-      </h4>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-        {(campaign.stories || []).map((story, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', marginBottom: '8px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--blu-l)' }}>Story {story.num || idx + 1}</span>
-                <span style={{ color: 'var(--t3)', textTransform: 'uppercase', fontWeight: 600 }}>{story.tipo || 'Imagem'}</span>
-              </div>
-              <div style={{ fontSize: '12.5px', color: 'var(--t1)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
-                {story.conteudo}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderWhatsapp = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Mensagem de WhatsApp / Lista de Transmissão
-      </h4>
-      <div style={{ position: 'relative', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '15px' }}>
-        <button
-          onClick={() => handleCopy('whatsapp', campaign.whatsapp || '')}
-          style={{ position: 'absolute', top: '10px', right: '10px', background: 'var(--sf3)', border: '1px solid var(--bd)', padding: '4px 10px', borderRadius: 'var(--radius-sm)', color: copiedStates.whatsapp ? 'var(--ok)' : 'var(--t3)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px' }}
-        >
-          {copiedStates.whatsapp ? <Check size={12} /> : <Clipboard size={12} />}
-          {copiedStates.whatsapp ? 'Copiado' : 'Copiar'}
-        </button>
-        <div style={{ whiteSpace: 'pre-wrap', color: 'var(--t1)', fontSize: '13px', lineHeight: '1.7', marginRight: '70px' }}>
-          {campaign.whatsapp || '—'}
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderCalendario = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Cronograma e Frequência de Postagens
-      </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {(campaign.calendario || []).map((cal, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '10px 15px', display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '50px', height: '50px', background: 'var(--sf3)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', flexShrink: 0 }}>
-              <Calendar size={18} style={{ color: 'var(--blu-l)', marginBottom: '2px' }} />
-              <span style={{ fontSize: '10px', fontWeight: 700, color: 'var(--t1)' }}>{cal.dia || `Dia ${idx + 1}`}</span>
-            </div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--t1)' }}>{cal.acao}</div>
-              <div style={{ fontSize: '11px', color: 'var(--t3)' }}>
-                ⏰ {cal.horario || '—'} {cal.obs ? `· 💡 ${cal.obs}` : ''}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderVisual = () => {
-    const imgPrompts = [];
-    if (briefingVisual.promptImagem) {
-      imgPrompts.push({ lbl: 'Imagem Principal (Feed)', prompt: briefingVisual.promptImagem });
-    }
-    if (campaign.posts && campaign.posts[0]) {
-      imgPrompts.push({ lbl: 'Imagem do Post 1', prompt: `${campaign.posts[0].tipo || 'photo'} about: ${campaign.posts[0].titulo || topic}. ${briefingVisual.estilo || 'clean professional medical photography'}.` });
-    }
-    if (campaign.stories && campaign.stories[0]) {
-      imgPrompts.push({ lbl: 'Imagem Story Abertura', prompt: `Vertical composition, ${topic}. ${briefingVisual.conceito || ''}. Minimal style.` });
-    }
-
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-          Identidade Visual & Direcionamento de Arte
-        </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
-          {[
-            { label: '💡 Conceito', val: briefingVisual.conceito || '—' },
-            { label: '📐 Composição', val: briefingVisual.composicao || '—' },
-            { label: '🎨 Estilo Gráfico', val: briefingVisual.estilo || '—' },
-            { label: '🧠 Emoção Transmitida', val: briefingVisual.emocao || '—' },
-            { label: '🌈 Cores Sugeridas', val: briefingVisual.cores || '—' }
-          ].map((item, idx) => (
-            <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '10px', textAlign: 'center' }}>
-              <div style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '4px' }}>{item.label}</div>
-              <div style={{ fontSize: '12px', color: 'var(--t1)', fontWeight: 500 }}>{item.val}</div>
-            </div>
-          ))}
-        </div>
-
-        <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', marginTop: '10px' }}>
-          Gerador Dinâmico de Prompts de Imagem
-        </h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {imgPrompts.map((ip, idx) => (
-            <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--blu-l)' }}>{ip.lbl}</span>
-                <div style={{ display: 'flex', gap: '6px' }}>
-                  <button
-                    onClick={() => handleCopy(`prompt_${idx}`, ip.prompt)}
-                    style={{ background: 'var(--sf3)', border: '1px solid var(--bd)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', color: copiedStates[`prompt_${idx}`] ? 'var(--ok)' : 'var(--t2)', fontSize: '10.5px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    {copiedStates[`prompt_${idx}`] ? <Check size={11} /> : <Clipboard size={11} />}
-                    {copiedStates[`prompt_${idx}`] ? 'Copiado' : 'Copiar Prompt'}
-                  </button>
-                  <button
-                    onClick={() => onGenerateImage && onGenerateImage(ip.prompt)}
-                    style={{ background: 'var(--blu)', border: 'none', padding: '3px 10px', borderRadius: 'var(--radius-sm)', color: '#fff', fontSize: '10.5px', fontWeight: 600, cursor: 'pointer' }}
-                  >
-                    🎨 Gerar com IA
-                  </button>
-                </div>
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--t2)', background: 'var(--sf3)', padding: '8px 12px', borderRadius: 'var(--radius-sm)', borderLeft: '2px solid var(--blu)', fontStyle: 'italic' }}>
-                {ip.prompt}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderVersoes = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Variações do Tom de Voz
-      </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {(campaign.versoes || []).map((version, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', padding: '2px 8px', background: 'var(--blu-d)', border: '1px solid var(--bda)', borderRadius: '20px', color: 'var(--blu-l)', fontWeight: 600, textTransform: 'uppercase' }}>
-                {version.tag || version.tipo || 'Alternativa'}
-              </span>
-              <button
-                onClick={() => handleCopy(`version_${idx}`, version.copy || '')}
-                style={{ background: 'var(--sf3)', border: '1px solid var(--bd)', padding: '3px 8px', borderRadius: 'var(--radius-sm)', color: copiedStates[`version_${idx}`] ? 'var(--ok)' : 'var(--t3)', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-              >
-                {copiedStates[`version_${idx}`] ? <Check size={11} /> : <Clipboard size={11} />}
-                {copiedStates[`version_${idx}`] ? 'Copiado' : 'Copiar'}
-              </button>
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--t1)', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{version.copy}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderMetricas = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <h4 style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)', borderBottom: '1px solid var(--bd)', paddingBottom: '6px' }}>
-        Métricas e KPIs de Sucesso
-      </h4>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-        {(campaign.metricas || []).map((m, idx) => (
-          <div key={idx} style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', padding: '15px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <div style={{ fontSize: '20px', background: 'var(--sf3)', border: '1px solid var(--bd)', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              {m.icone || '📈'}
-            </div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--t1)', marginBottom: '2px' }}>{m.titulo}</div>
-              <div style={{ fontSize: '11.5px', color: 'var(--t2)', lineHeight: '1.5' }}>{m.desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'estrategia': return renderEstrategia();
-      case 'copy': return renderCopy();
-      case 'posts': return renderPosts();
-      case 'stories': return renderStories();
-      case 'whatsapp': return renderWhatsapp();
-      case 'calendario': return renderCalendario();
-      case 'visual': return renderVisual();
-      case 'versoes': return renderVersoes();
-      case 'metricas': return renderMetricas();
-      default: return renderEstrategia();
-    }
-  };
-
-  return (
-    <div className="camp-doc" style={{ background: 'var(--sf)', border: '1px solid var(--bd2)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', boxShadow: 'var(--shadow-lg)', width: '100%' }}>
-      {/* Header */}
-      <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--bd)', background: 'linear-gradient(135deg, var(--sf2) 0%, var(--sf3) 100%)' }}>
-        <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.09em', color: 'var(--blu-l)', marginBottom: '5px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--blu)', display: 'inline-block' }}></span>
-          Campanha Gerada para sua Clínica
-        </div>
-        <div style={{ fontSize: '18px', fontWeight: 800, letterSpacing: '-.03em', color: 'var(--t1)', marginBottom: '4px' }}>
-          {campaign.nome || topic}
-        </div>
-        <div style={{ fontSize: '13px', color: 'var(--t2)', fontStyle: 'italic' }}>
-          {campaign.slogan || 'Foco em marketing ético médico.'}
-        </div>
-        <div style={{ display: 'flex', gap: '7px', marginTop: '10px' }}>
-          <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 9px', borderRadius: '20px', background: 'var(--blu-d)', color: 'var(--blu-l)', border: '1px solid var(--bda)' }}>9 seções</span>
-          <span style={{ fontSize: '10px', fontWeight: 600, padding: '2px 9px', borderRadius: '20px', background: 'var(--gld-d)', color: 'var(--gld)', border: '1px solid var(--gld-b)' }}>Pronto para publicar</span>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '1px solid var(--bd)', background: 'var(--sf)' }}>
-        {tabs.map((tab) => (
-          <div
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '11px 15px',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: activeTab === tab.id ? 'var(--blu-l)' : 'var(--t3)',
-              cursor: 'pointer',
-              borderBottom: activeTab === tab.id ? '2px solid var(--blu)' : '2px solid transparent',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s ease',
-              userSelect: 'none'
-            }}
-          >
-            {tab.lbl}
-          </div>
-        ))}
-      </div>
-
-      {/* Panels */}
-      <div style={{ padding: '18px 22px', minHeight: '180px' }}>
-        {renderContent()}
+        {active === 'resultados' && (
+          <Section title="Métricas e resultados esperados">
+            {campaign.metricas?.length > 0 ? (
+              <Grid cols={3}>
+                {campaign.metricas.map((m, i) => (
+                  <div key={i} className="card" style={{ display: 'flex', gap: 12 }}>
+                    <div style={{
+                      fontSize: 20, width: 40, height: 40, borderRadius: '50%',
+                      background: 'var(--brand-soft)', display: 'grid', placeItems: 'center', flexShrink: 0
+                    }}>{m.icone || '📈'}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>{m.titulo}</div>
+                      <div style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.5 }}>{m.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </Grid>
+            ) : (
+              <div className="empty">Métricas serão definidas após publicação inicial.</div>
+            )}
+          </Section>
+        )}
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '12px 22px', borderTop: '1px solid var(--bd)', background: 'var(--sf2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '11px', color: 'var(--t3)' }}>
-          Campanha baseada em inteligência contextual e diretrizes LGPD.
+      <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          Conformidade CFM · LGPD
         </span>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => onRefine && onRefine('Refine esta campanha')}
-            style={{ background: 'transparent', border: '1px solid var(--bd)', padding: '5px 12px', borderRadius: 'var(--radius-sm)', color: 'var(--t2)', fontSize: '12px', fontWeight: 500, cursor: 'pointer' }}
-          >
-            Refinar Campanha
-          </button>
-        </div>
+        <button onClick={() => onRefine && onRefine('Refine esta campanha mantendo o tom, ajustando...')} className="btn btn-outline btn-sm">
+          <RefreshCw size={13} /> Refinar com IA
+        </button>
       </div>
     </div>
   );
+}
+
+function Section({ title, children }) {
+  return (
+    <section>
+      <h3 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 14 }}>{title}</h3>
+      {children}
+    </section>
+  );
+}
+
+function Grid({ children, cols = 2 }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 12 }}>
+      {children}
+    </div>
+  );
+}
+
+function InfoCard({ label, value, span }) {
+  if (!value) return null;
+  return (
+    <div className="card" style={{ padding: 16, gridColumn: span ? `span ${span}` : undefined }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+      <div style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.55 }}>{value}</div>
+    </div>
+  );
+}
+
+function CopyBlock({ text, onCopy, copied }) {
+  return (
+    <div className="card" style={{ position: 'relative' }}>
+      <button onClick={onCopy} className="btn btn-ghost btn-sm" style={{ position: 'absolute', top: 10, right: 10 }}>
+        {copied ? <Check size={13} style={{ color: 'var(--ok)' }} /> : <Clipboard size={13} />} {copied ? 'Copiado' : 'Copiar'}
+      </button>
+      <div style={{ color: 'var(--text)', fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap', paddingRight: 90 }}>{text}</div>
+    </div>
+  );
+}
+
+function buildPrompts(campaign, visual) {
+  const out = [];
+  if (visual.promptImagem) out.push({ label: 'Imagem principal (feed)', prompt: visual.promptImagem });
+  if (campaign.posts?.[0]) {
+    out.push({
+      label: 'Imagem do Post 1',
+      prompt: `${campaign.posts[0].tipo || 'photo'} about: ${campaign.posts[0].titulo || campaign.nome}. ${visual.estilo || 'clean professional medical photography'}.`
+    });
+  }
+  if (campaign.stories?.[0]) {
+    out.push({
+      label: 'Story de abertura',
+      prompt: `Vertical composition, ${campaign.nome}. ${visual.conceito || ''}. Minimal style.`
+    });
+  }
+  return out;
 }

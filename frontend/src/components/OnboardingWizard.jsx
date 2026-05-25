@@ -1,327 +1,240 @@
-import React, { useState } from 'react';
-import { ArrowRight, ArrowLeft, Loader2, Sparkles, Instagram, Home, Award, HeartHandshake, Eye } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, ArrowLeft, Loader2, Sparkles, Instagram, Building2, Stethoscope, Target, Heart } from 'lucide-react';
+
+const SPECIALTIES = ['Dermatologia', 'Cardiologia', 'Pediatria', 'Ginecologia', 'Ortopedia', 'Psiquiatria', 'Medicina Geral', 'Outro'];
+const OBJECTIVES = ['Atrair novos pacientes', 'Fidelizar pacientes atuais', 'Educar em saúde e prevenção', 'Fortalecer minha marca'];
+const TONES = ['Empático e acolhedor', 'Científico e técnico', 'Prático e direto', 'Inspirador e motivacional'];
 
 export default function OnboardingWizard({ onComplete }) {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    clinicName: '',
-    city: '',
-    specialty: 'Dermatologia',
-    customSpecialty: '',
+  const [error, setError] = useState('');
+  const [loadingMsg, setLoadingMsg] = useState('');
+  const [data, setData] = useState({
+    clinicName: '', city: '',
+    specialty: 'Dermatologia', customSpecialty: '',
     objective: 'Atrair novos pacientes',
-    instagram: '',
-    tone: 'Empático e acolhedor'
+    instagram: '', tone: 'Empático e acolhedor'
   });
-  const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState('');
 
-  const specialties = ['Dermatologia', 'Cardiologia', 'Pediatria', 'Ginecologia', 'Ortopedia', 'Psiquiatria', 'Medicina Geral', 'Outro'];
-  const objectives = ['Atrair novos pacientes', 'Fidelizar clientes atuais', 'Educação em saúde e prevenção', 'Fortalecer marca pessoal/clínica'];
-  const tones = ['Empático e acolhedor', 'Científico e técnico', 'Prático e direto', 'Inspirador e motivacional'];
-
-  const handleNext = () => {
-    if (step === 1 && (!formData.clinicName || !formData.city)) return;
-    if (step === 4 && !formData.instagram) return;
-    
-    if (step < 5) {
-      setStep(step + 1);
-    } else {
-      triggerWowMoment();
-    }
+  const canAdvance = () => {
+    if (step === 1) return data.clinicName.trim() && data.city.trim();
+    if (step === 2 && data.specialty === 'Outro') return data.customSpecialty.trim();
+    if (step === 4) return data.instagram.trim();
+    return true;
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
+  const next = () => {
+    setError('');
+    if (!canAdvance()) return;
+    if (step < 5) setStep(step + 1); else finish();
   };
 
-  const triggerWowMoment = async () => {
+  const finish = async () => {
     setStep(6);
-    setLoading(true);
-    setLoadingMessage('Analisando especialidade médica...');
-    
-    setTimeout(() => {
-      setLoadingMessage('Formatando tom de voz da clínica...');
-    }, 2000);
-
-    setTimeout(() => {
-      setLoadingMessage('Criando primeira campanha promocional ética...');
-    }, 4000);
-
+    setLoadingMsg('Analisando sua especialidade…');
+    setTimeout(() => setLoadingMsg('Ajustando o tom da sua clínica…'), 1500);
+    setTimeout(() => setLoadingMsg('Preparando sua primeira campanha…'), 3000);
     try {
-      const selectedSpecialty = formData.specialty === 'Outro' ? formData.customSpecialty : formData.specialty;
-      
-      // Envia os dados de onboarding de forma integrada para o backend
-      // PUT /api/clinic/context
-      const contextPayload = {
-        name: formData.clinicName,
-        specialty: selectedSpecialty,
-        city: formData.city,
+      const specialty = data.specialty === 'Outro' ? data.customSpecialty : data.specialty;
+      const payload = {
+        name: data.clinicName.trim(),
+        specialty,
+        city: data.city.trim(),
         target_public: 'Pacientes particulares ou planos premium',
-        services: `Consultas e tratamentos em ${selectedSpecialty}`,
+        services: `Consultas e tratamentos em ${specialty}`,
         differentials: 'Atendimento humanizado e infraestrutura moderna',
-        instagram: formData.instagram.startsWith('@') ? formData.instagram : `@${formData.instagram}`,
-        tone: formData.tone,
+        instagram: data.instagram.startsWith('@') ? data.instagram : `@${data.instagram.trim()}`,
+        tone: data.tone,
         onboarding_complete: true
       };
-
-      // Chama o callback de conclusão enviando os dados
-      if (onComplete) {
-        await onComplete(contextPayload);
-      }
+      await onComplete?.(payload);
     } catch (err) {
-      setLoading(false);
+      setError(err?.message || 'Não conseguimos finalizar. Tente novamente.');
       setStep(5);
-      alert('Erro ao concluir onboarding. Tente novamente.');
-    }
-  };
-
-  const renderStepContent = () => {
-    switch (step) {
-      case 1:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Home size={18} style={{ color: 'var(--blu-l)' }} /> Passo 1: Informações Gerais
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--t2)' }}>Conte-nos os dados básicos de identificação da sua clínica.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '5px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)' }}>Nome da Clínica ou Consultório</label>
-              <input
-                type="text"
-                value={formData.clinicName}
-                onChange={(e) => setFormData({ ...formData, clinicName: e.target.value })}
-                placeholder="Ex: Clínica MedVida"
-                style={{ padding: '9px 12px', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', color: 'var(--t1)', outline: 'none', fontSize: '13px' }}
-              />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)' }}>Cidade de Atendimento</label>
-              <input
-                type="text"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                placeholder="Ex: São Paulo - SP"
-                style={{ padding: '9px 12px', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', color: 'var(--t1)', outline: 'none', fontSize: '13px' }}
-              />
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Award size={18} style={{ color: 'var(--blu-l)' }} /> Passo 2: Sua Especialidade
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--t2)' }}>Qual é a principal especialidade ou área médica de atuação?</p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px', marginTop: '5px' }}>
-              {specialties.map((spec) => (
-                <button
-                  key={spec}
-                  onClick={() => setFormData({ ...formData, specialty: spec })}
-                  style={{
-                    padding: '10px 8px',
-                    background: formData.specialty === spec ? 'var(--blu-d)' : 'var(--sf2)',
-                    border: formData.specialty === spec ? '1px solid var(--blu)' : '1px solid var(--bd)',
-                    borderRadius: 'var(--radius-md)',
-                    color: formData.specialty === spec ? 'var(--blu-l)' : 'var(--t2)',
-                    fontSize: '12px',
-                    fontWeight: formData.specialty === spec ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {spec}
-                </button>
-              ))}
-            </div>
-            {formData.specialty === 'Outro' && (
-              <input
-                type="text"
-                value={formData.customSpecialty}
-                onChange={(e) => setFormData({ ...formData, customSpecialty: e.target.value })}
-                placeholder="Digite sua especialidade..."
-                style={{ padding: '9px 12px', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', color: 'var(--t1)', outline: 'none', fontSize: '13px', marginTop: '5px' }}
-              />
-            )}
-          </div>
-        );
-      case 3:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Eye size={18} style={{ color: 'var(--blu-l)' }} /> Passo 3: Objetivo do Marketing
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--t2)' }}>O que você busca conquistar prioritariamente utilizando o MedAI Pro?</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '5px' }}>
-              {objectives.map((obj) => (
-                <button
-                  key={obj}
-                  onClick={() => setFormData({ ...formData, objective: obj })}
-                  style={{
-                    padding: '12px 15px',
-                    textAlign: 'left',
-                    background: formData.objective === obj ? 'var(--blu-d)' : 'var(--sf2)',
-                    border: formData.objective === obj ? '1px solid var(--blu)' : '1px solid var(--bd)',
-                    borderRadius: 'var(--radius-md)',
-                    color: formData.objective === obj ? 'var(--blu-l)' : 'var(--t2)',
-                    fontSize: '12.5px',
-                    fontWeight: formData.objective === obj ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {obj}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      case 4:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Instagram size={18} style={{ color: 'var(--blu-l)' }} /> Passo 4: Redes Sociais
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--t2)' }}>Informe seu perfil profissional do Instagram para refinamento de tom.</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)' }}>Usuário do Instagram</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '12px', top: '9px', color: 'var(--t3)', fontSize: '13px', fontWeight: 700 }}>@</span>
-                <input
-                  type="text"
-                  value={formData.instagram}
-                  onChange={(e) => setFormData({ ...formData, instagram: e.target.value.replace('@', '') })}
-                  placeholder="clinicamedica"
-                  style={{ padding: '9px 12px 9px 28px', width: '100%', background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-md)', color: 'var(--t1)', outline: 'none', fontSize: '13px' }}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 5:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <HeartHandshake size={18} style={{ color: 'var(--blu-l)' }} /> Passo 5: Tom de Comunicação
-            </h3>
-            <p style={{ fontSize: '12.5px', color: 'var(--t2)' }}>Qual tom melhor descreve a relação da sua clínica com os pacientes?</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '5px' }}>
-              {tones.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setFormData({ ...formData, tone: t })}
-                  style={{
-                    padding: '14px 10px',
-                    background: formData.tone === t ? 'var(--blu-d)' : 'var(--sf2)',
-                    border: formData.tone === t ? '1px solid var(--blu)' : '1px solid var(--bd)',
-                    borderRadius: 'var(--radius-md)',
-                    color: formData.tone === t ? 'var(--blu-l)' : 'var(--t2)',
-                    fontSize: '12.5px',
-                    fontWeight: formData.tone === t ? 700 : 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      case 6:
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '180px', gap: '15px', textAlign: 'center' }}>
-            <Loader2 size={36} className="animate-spin" style={{ color: 'var(--blu)', animation: 'spin 1.5s linear infinite' }} />
-            <div>
-              <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--t1)', marginBottom: '5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                <Sparkles size={18} style={{ color: 'var(--gld)' }} /> Momento WOW Ativado!
-              </h3>
-              <p style={{ fontSize: '12.5px', color: 'var(--t2)', maxWidth: '280px' }}>{loadingMessage}</p>
-            </div>
-          </div>
-        );
-      default:
-        return null;
     }
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(7,9,15,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
-      <div style={{ width: '450px', background: 'var(--sf)', border: '1px solid var(--bd2)', borderRadius: 'var(--radius-lg)', padding: '24px', boxShadow: 'var(--shadow-lg)', position: 'relative' }}>
-        {/* Step Indicator */}
+    <div role="dialog" aria-modal="true" aria-labelledby="onb-title" style={{
+      position: 'fixed', inset: 0, zIndex: 999,
+      background: 'rgba(8,10,14,0.78)', backdropFilter: 'blur(10px)',
+      display: 'grid', placeItems: 'center', padding: 20
+    }}>
+      <div className="animate-fadeUp" style={{
+        width: '100%', maxWidth: 500,
+        background: 'var(--sf-1)',
+        border: '1px solid var(--border-strong)',
+        borderRadius: 'var(--r-xl)',
+        boxShadow: 'var(--shadow-lg)',
+        padding: 32
+      }}>
         {step < 6 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <span style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--blu-l)' }}>Onboarding Clínico</span>
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {[1, 2, 3, 4, 5].map((s) => (
-                <div
-                  key={s}
-                  style={{
-                    width: '24px',
-                    height: '4px',
-                    borderRadius: '2px',
-                    background: s <= step ? 'var(--blu)' : 'var(--sf3)',
-                    transition: 'background 0.2s ease'
-                  }}
-                ></div>
-              ))}
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <span className="pill pill-brand"><Sparkles size={11} /> Bem-vindo</span>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[1, 2, 3, 4, 5].map(s => (
+                  <div key={s} style={{
+                    width: 22, height: 4, borderRadius: 2,
+                    background: s <= step ? 'var(--brand)' : 'var(--sf-3)',
+                    transition: 'background 200ms'
+                  }} />
+                ))}
+              </div>
+            </div>
+
+            <Step n={step} data={data} setData={setData} />
+
+            {error && <div style={{ marginTop: 14, padding: '10px 12px', background: 'var(--err-soft)', border: '1px solid var(--err)', color: 'var(--err)', fontSize: 12, borderRadius: 'var(--r-md)' }}>{error}</div>}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+              <button onClick={() => step > 1 && setStep(step - 1)} disabled={step === 1} className="btn btn-ghost btn-sm">
+                <ArrowLeft size={14} /> Voltar
+              </button>
+              <button onClick={next} disabled={!canAdvance()} className="btn btn-primary">
+                {step === 5 ? 'Começar' : 'Continuar'} <ArrowRight size={14} />
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 6 && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 220, textAlign: 'center', gap: 18 }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%',
+              background: 'var(--brand-grad-soft)',
+              border: '1px solid var(--border-brand)',
+              display: 'grid', placeItems: 'center'
+            }}>
+              <Loader2 size={28} className="animate-spin" style={{ color: 'var(--brand-h)' }} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <Sparkles size={16} style={{ color: 'var(--gold)' }} /> Preparando tudo para você
+              </h3>
+              <p style={{ fontSize: 13.5, color: 'var(--text-muted)', maxWidth: 320 }}>{loadingMsg}</p>
             </div>
           </div>
         )}
-
-        {/* Content */}
-        {renderStepContent()}
-
-        {/* Controls */}
-        {step < 6 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '22px', borderTop: '1px solid var(--bd)', paddingTop: '15px' }}>
-            <button
-              onClick={handleBack}
-              disabled={step === 1}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'transparent',
-                border: 'none',
-                color: step === 1 ? 'var(--t4)' : 'var(--t2)',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                cursor: step === 1 ? 'default' : 'pointer'
-              }}
-            >
-              <ArrowLeft size={16} /> Voltar
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={(step === 1 && (!formData.clinicName || !formData.city)) || (step === 4 && !formData.instagram)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'var(--blu)',
-                border: 'none',
-                padding: '7px 18px',
-                borderRadius: 'var(--radius-md)',
-                color: '#fff',
-                fontSize: '12.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                opacity: ((step === 1 && (!formData.clinicName || !formData.city)) || (step === 4 && !formData.instagram)) ? 0.5 : 1
-              }}
-            >
-              {step === 5 ? 'Iniciar MedAI Pro' : 'Avançar'} <ArrowRight size={16} />
-            </button>
-          </div>
-        )}
       </div>
-
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}} />
     </div>
+  );
+}
+
+function Step({ n, data, setData }) {
+  if (n === 1) return (
+    <StepContent icon={Building2} title="Vamos começar com sua clínica" desc="Só precisamos do nome e da cidade para personalizar tudo para você.">
+      <FieldText label="Nome da clínica" value={data.clinicName} onChange={(v) => setData({ ...data, clinicName: v })} placeholder="Ex: Clínica MedVida" />
+      <FieldText label="Cidade" value={data.city} onChange={(v) => setData({ ...data, city: v })} placeholder="Ex: São Paulo - SP" />
+    </StepContent>
+  );
+
+  if (n === 2) return (
+    <StepContent icon={Stethoscope} title="Qual é a sua especialidade?" desc="Isso ajuda o assistente a falar a linguagem certa para seus pacientes.">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        {SPECIALTIES.map(s => (
+          <ChipButton key={s} active={data.specialty === s} onClick={() => setData({ ...data, specialty: s })}>{s}</ChipButton>
+        ))}
+      </div>
+      {data.specialty === 'Outro' && (
+        <input className="input" value={data.customSpecialty} onChange={(e) => setData({ ...data, customSpecialty: e.target.value })} placeholder="Digite sua especialidade" style={{ marginTop: 10 }} />
+      )}
+    </StepContent>
+  );
+
+  if (n === 3) return (
+    <StepContent icon={Target} title="O que você quer alcançar?" desc="O foco principal do seu marketing com a gente.">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {OBJECTIVES.map(o => (
+          <BigChipButton key={o} active={data.objective === o} onClick={() => setData({ ...data, objective: o })}>{o}</BigChipButton>
+        ))}
+      </div>
+    </StepContent>
+  );
+
+  if (n === 4) return (
+    <StepContent icon={Instagram} title="Qual é o seu Instagram?" desc="Vamos refinar o tom de voz a partir do seu perfil.">
+      <FieldText label="Usuário" prefix="@" value={data.instagram.replace(/^@/, '')} onChange={(v) => setData({ ...data, instagram: v.replace('@', '') })} placeholder="clinicamedvida" />
+    </StepContent>
+  );
+
+  if (n === 5) return (
+    <StepContent icon={Heart} title="Como você fala com seus pacientes?" desc="Escolha o tom que mais combina com você.">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        {TONES.map(t => (
+          <ChipButton key={t} active={data.tone === t} onClick={() => setData({ ...data, tone: t })} style={{ padding: '14px 10px' }}>{t}</ChipButton>
+        ))}
+      </div>
+    </StepContent>
+  );
+
+  return null;
+}
+
+function StepContent({ icon: Icon, title, desc, children }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div>
+        <div style={{
+          width: 40, height: 40, borderRadius: 'var(--r-md)',
+          background: 'var(--brand-soft)', display: 'grid', placeItems: 'center',
+          color: 'var(--brand-h)', marginBottom: 12
+        }}>
+          <Icon size={20} />
+        </div>
+        <h3 id="onb-title" style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.01em', marginBottom: 4 }}>{title}</h3>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{desc}</p>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FieldText({ label, value, onChange, placeholder, prefix }) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-soft)', marginBottom: 6 }}>{label}</label>
+      <div style={{ position: 'relative' }}>
+        {prefix && <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontWeight: 600 }}>{prefix}</span>}
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="input"
+          style={prefix ? { paddingLeft: 30 } : undefined}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ChipButton({ active, onClick, children, style }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '10px 8px',
+      background: active ? 'var(--brand-soft)' : 'var(--sf-2)',
+      border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
+      borderRadius: 'var(--r-md)',
+      color: active ? 'var(--brand-h)' : 'var(--text-soft)',
+      fontSize: 13, fontWeight: active ? 600 : 500, cursor: 'pointer',
+      transition: 'all 150ms', ...style
+    }}>{children}</button>
+  );
+}
+
+function BigChipButton({ active, onClick, children }) {
+  return (
+    <button onClick={onClick} style={{
+      padding: '14px 16px', textAlign: 'left',
+      background: active ? 'var(--brand-soft)' : 'var(--sf-2)',
+      border: `1px solid ${active ? 'var(--brand)' : 'var(--border)'}`,
+      borderRadius: 'var(--r-md)',
+      color: active ? 'var(--brand-h)' : 'var(--text-soft)',
+      fontSize: 14, fontWeight: active ? 600 : 500, cursor: 'pointer',
+      transition: 'all 150ms'
+    }}>{children}</button>
   );
 }

@@ -1,134 +1,95 @@
-import React, { useState } from 'react';
-import { ThumbsUp, ThumbsDown, Send, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { ThumbsUp, ThumbsDown, Send, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function SatisfactionFeedback({ campaignId, onSendFeedback }) {
-  const [rating, setRating] = useState(null); // true = 👍, false = 👎
+  const [rating, setRating] = useState(null);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (rating === null) return;
-
-    setLoading(true);
+    setLoading(true); setError('');
     try {
-      if (onSendFeedback) {
-        await onSendFeedback({ rating, comment, campaignId });
-      }
+      await onSendFeedback?.({ rating, comment, campaignId });
       setSubmitted(true);
     } catch (err) {
-      alert('Erro ao enviar feedback. Tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+      setError(err?.message || 'Não conseguimos enviar seu feedback agora.');
+    } finally { setLoading(false); }
   };
 
   if (submitted) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--ok-d)', border: '1px solid var(--ok)', padding: '10px 15px', borderRadius: 'var(--radius-md)', color: 'var(--ok)', fontSize: '12px', fontWeight: 600 }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        background: 'var(--ok-soft)', border: '1px solid var(--ok)',
+        padding: '12px 16px', borderRadius: 'var(--r-md)',
+        color: 'var(--ok)', fontSize: 13, fontWeight: 500
+      }}>
         <CheckCircle2 size={16} />
-        Obrigado por nos ajudar a melhorar o MedAI Pro! Seu feedback foi registrado.
+        Obrigado pelo feedback — ele nos ajuda a melhorar o MedAI Pro.
       </div>
     );
   }
 
   return (
-    <div style={{ background: 'var(--sf2)', border: '1px solid var(--bd)', borderRadius: 'var(--radius-lg)', padding: '15px 18px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ fontSize: '12.5px', fontWeight: 600, color: 'var(--t1)' }}>
-          Esta campanha gerou valor para sua clínica hoje?
+    <div className="card" style={{ padding: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text)' }}>
+          Esta campanha foi útil?
         </div>
-        <div style={{ display: 'flex', gap: '6px' }}>
-          <button
-            type="button"
-            onClick={() => setRating(true)}
-            style={{
-              padding: '6px 12px',
-              background: rating === true ? 'var(--ok-d)' : 'var(--sf3)',
-              border: rating === true ? '1px solid var(--ok)' : '1px solid var(--bd)',
-              borderRadius: 'var(--radius-md)',
-              color: rating === true ? 'var(--ok)' : 'var(--t2)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '11px',
-              fontWeight: 600,
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ThumbsUp size={13} /> Sim, útil
-          </button>
-          <button
-            type="button"
-            onClick={() => setRating(false)}
-            style={{
-              padding: '6px 12px',
-              background: rating === false ? 'rgba(239,68,68,0.1)' : 'var(--sf3)',
-              border: rating === false ? '1px solid var(--err)' : '1px solid var(--bd)',
-              borderRadius: 'var(--radius-md)',
-              color: rating === false ? 'var(--err)' : 'var(--t2)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '11px',
-              fontWeight: 600,
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <ThumbsDown size={13} /> Não gostei
-          </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <RatingButton active={rating === true}  onClick={() => setRating(true)}  type="ok">
+            <ThumbsUp size={13} /> Sim
+          </RatingButton>
+          <RatingButton active={rating === false} onClick={() => setRating(false)} type="err">
+            <ThumbsDown size={13} /> Não
+          </RatingButton>
         </div>
       </div>
 
       {rating !== null && (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '5px', borderTop: '1px solid var(--bd)', paddingTop: '10px' }}>
-          <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: 'var(--t3)' }}>
-            {rating ? 'Excelente! Deseja acrescentar algum comentário?' : 'O que faltou para ficar excelente?'}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+          <label style={{ fontSize: 12, color: 'var(--text-soft)' }}>
+            {rating ? 'Quer comentar o que mais gostou? (opcional)' : 'O que faltou para essa campanha ser excelente?'}
           </label>
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: 6 }}>
             <input
-              type="text"
-              value={comment}
+              type="text" value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder={rating ? "Ex: Adorei o tom de voz..." : "O que deveríamos mudar ou adicionar na campanha?"}
+              placeholder={rating ? 'Ex: adorei o tom de voz' : 'Conte para a gente'}
               required={rating === false}
-              style={{
-                flex: 1,
-                padding: '7px 12px',
-                background: 'var(--sf3)',
-                border: '1px solid var(--bd)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--t1)',
-                fontSize: '12px',
-                outline: 'none'
-              }}
+              className="input"
+              style={{ flex: 1 }}
             />
-            <button
-              type="submit"
-              disabled={loading || (rating === false && !comment.trim())}
-              style={{
-                background: 'var(--blu)',
-                border: 'none',
-                padding: '7px 14px',
-                borderRadius: 'var(--radius-md)',
-                color: '#fff',
-                fontWeight: 600,
-                fontSize: '12px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                opacity: (loading || (rating === false && !comment.trim())) ? 0.5 : 1
-              }}
-            >
-              <Send size={12} /> {loading ? 'Enviando...' : 'Enviar'}
+            <button type="submit" disabled={loading || (rating === false && !comment.trim())} className="btn btn-primary">
+              {loading ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+              {loading ? 'Enviando' : 'Enviar'}
             </button>
           </div>
+          {error && <div style={{ fontSize: 12, color: 'var(--err)' }}>{error}</div>}
         </form>
       )}
     </div>
+  );
+}
+
+function RatingButton({ active, onClick, type, children }) {
+  const colors = type === 'ok'
+    ? { bg: 'var(--ok-soft)', border: 'var(--ok)', text: 'var(--ok)' }
+    : { bg: 'var(--err-soft)', border: 'var(--err)', text: 'var(--err)' };
+  return (
+    <button type="button" onClick={onClick} style={{
+      padding: '7px 14px',
+      background: active ? colors.bg : 'var(--sf-2)',
+      border: `1px solid ${active ? colors.border : 'var(--border)'}`,
+      borderRadius: 'var(--r-md)',
+      color: active ? colors.text : 'var(--text-soft)',
+      fontSize: 12, fontWeight: 600, cursor: 'pointer',
+      display: 'flex', alignItems: 'center', gap: 5,
+      transition: 'all 150ms'
+    }}>{children}</button>
   );
 }

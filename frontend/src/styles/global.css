@@ -1,42 +1,104 @@
-* {
+/* ============================================================================
+   Reset + base + utilities
+   ============================================================================ */
+
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-html, body {
+html, body, #root {
   height: 100%;
-  background-color: var(--bg);
-  color: var(--t1);
-  font-family: var(--font-family);
-  font-size: 14px;
-  line-height: 1.5;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars */
-::-webkit-scrollbar {
-  width: 3px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--sf4);
-  border-radius: 3px;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 button, input, textarea, select {
   font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
 }
 
 a {
-  color: var(--blu-l);
+  color: var(--brand-h);
   text-decoration: none;
+  transition: color var(--t-fast);
+}
+a:hover { color: var(--brand); }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--sf-3);
+  border-radius: var(--r-full);
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+::selection {
+  background: var(--brand-soft-2);
+  color: var(--text);
 }
 
-a:hover {
-  text-decoration: underline;
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
 }
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+@keyframes dotPulse {
+  0%, 60%, 100% { transform: scale(0.85); opacity: 0.5; }
+  30%           { transform: scale(1); opacity: 1; }
+}
+
+.animate-spin   { animation: spin 1s linear infinite; }
+.animate-pulse  { animation: pulse 2s ease-in-out infinite; }
+.animate-fadeIn { animation: fadeIn var(--t-base) both; }
+.animate-fadeUp { animation: fadeUp var(--t-slow) both; }
