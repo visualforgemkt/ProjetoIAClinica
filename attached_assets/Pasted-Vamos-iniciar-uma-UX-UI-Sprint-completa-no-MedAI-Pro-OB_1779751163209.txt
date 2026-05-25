@@ -1,0 +1,392 @@
+Vamos iniciar uma UX/UI Sprint completa no MedAI Pro.
+
+OBJETIVO:
+
+O layout atual transmite sensação de dashboard administrativo/ERP antigo.
+
+A MedAI Pro precisa parecer:
+
+* inteligente
+* moderna
+* premium
+* simples
+* intuitiva
+* acolhedora
+* extremamente fácil para usuários leigos
+
+O objetivo NÃO é fazer mudanças cosméticas.
+
+O objetivo é reconstruir a experiência do produto.
+
+Precisamos fazer o usuário sentir:
+
+"essa plataforma entende minha clínica"
+
+e não:
+
+"estou usando um painel técnico cheio de botões".
+
+==================================================
+P0 — AUDITORIA COMPLETA DE UX/UI
+================================
+
+Antes de modificar qualquer código:
+
+Analise completamente:
+
+* layout atual
+* componentes
+* navegação
+* fluxo de uso
+* hierarquia visual
+* estados
+* responsividade
+* acessibilidade
+* microinterações
+* onboarding
+* experiência mobile
+* experiência desktop
+* experiência do chat
+* experiência de campanhas
+
+Identifique:
+
+1. pontos de fricção
+2. excesso de informação
+3. telas confusas
+4. componentes redundantes
+5. elementos que parecem ERP/admin
+6. pontos que aumentam carga cognitiva
+
+Gerar relatório antes de iniciar.
+
+==================================================
+P0 — MUDAR O PARADIGMA DA INTERFACE
+===================================
+
+Modelo atual:
+
+Sidebar
++
+Chat
++
+Resultado gigante
++
+Muitas abas
+
+Modelo novo:
+
+Assistente inteligente no centro da experiência.
+
+Fluxo desejado:
+
+---
+
+Olá, [Nome da Clínica] 👋
+
+O que deseja fazer hoje?
+
+[ Criar campanha ]
+[ Gerar imagem ]
+[ Conseguir pacientes ]
+[ Tirar dúvidas ]
+[ Criar anúncio ]
+[ Planejar mês ]
+
+---
+
+Campo principal:
+
+"Descreva o que deseja para sua clínica..."
+
+---
+
+Sugestões inteligentes:
+
+🔥 Campanha sazonal
+
+📈 Seu Instagram performa melhor com carrosséis
+
+💡 Recomendação baseada em uso
+
+---
+
+==================================================
+P0 — O CHAT DEVE VIRAR O CENTRO DA EXPERIÊNCIA
+==============================================
+
+A MedAI Pro não deve parecer:
+
+"preencher formulário"
+
+Ela deve parecer:
+
+"conversar com um especialista"
+
+Modificar:
+
+* tamanho do chat
+* posição
+* experiência visual
+* mensagens
+* estados
+* animações
+
+Inspirar em:
+
+* ChatGPT
+* Claude
+* Perplexity
+* Linear
+* Arc
+* Notion
+
+Características:
+
+* muito espaço em branco
+* menos bordas
+* menos separadores
+* hierarquia clara
+* foco na conversa
+
+==================================================
+P0 — REESTRUTURAR A VISUALIZAÇÃO DE CAMPANHAS
+=============================================
+
+Hoje:
+
+Estratégia | Copy | Posts | Stories | WhatsApp | Calendário | Visual | Versões | Métricas
+
+Isso gera excesso de informação.
+
+Substituir por:
+
+📌 Resumo
+📲 Conteúdo
+🎨 Criativos
+📅 Planejamento
+📊 Resultados
+
+==================================================
+
+Resumo:
+
+* objetivo
+* público
+* CTA
+* estratégia
+
+==================================================
+
+Conteúdo:
+
+Cards visuais:
+
+Instagram
+Stories
+WhatsApp
+Anúncios
+
+==================================================
+
+Criativos:
+
+Galeria visual grande
+
+==================================================
+
+Planejamento:
+
+Calendário visual moderno
+
+==================================================
+
+Resultados:
+
+Métricas previstas
+ROI estimado
+alcance esperado
+
+==================================================
+P1 — NOVA SIDEBAR
+=================
+
+Substituir:
+
+MedAI
+Histórico
+Configurações
+Uso e Licença
+
+Por:
+
+✨ Assistente
+
+📁 Campanhas
+
+🎨 Criativos
+
+📊 Insights
+
+⚙️ Configurações
+
+==================================================
+P1 — NOVO DESIGN SYSTEM
+=======================
+
+Criar um design system unificado.
+
+Direção:
+
+Fundo:
+
+#0F1115
+
+Cards:
+
+#171A21
+
+Destaques:
+
+gradientes suaves
+
+Bordas:
+
+mínimas
+
+Cantos:
+
+mais arredondados
+
+Sombras:
+
+sutis
+
+Espaçamentos:
+
+mais amplos
+
+Tipografia:
+
+moderna
+
+Hierarquia:
+
+forte
+
+Reduzir drasticamente:
+
+* linhas divisórias
+* bordas
+* caixas excessivas
+
+==================================================
+P1 — TORNAR O PRODUTO "VIVO"
+============================
+
+Adicionar:
+
+Cards inteligentes:
+
+Exemplo:
+
+🔥 Novembro Azul próximo
+
+📈 Seus conteúdos tiveram +32% de engajamento
+
+💡 Detectamos oportunidade de campanha
+
+Adicionar:
+
+* estados vazios inteligentes
+* loaders modernos
+* skeletons
+* pequenas animações
+* transições suaves
+
+==================================================
+P1 — REVISAR TODAS AS FUNCIONALIDADES
+=====================================
+
+Durante a refatoração:
+
+Revisar:
+
+* login
+* logout
+* onboarding
+* chat
+* geração de campanhas
+* histórico
+* imagens
+* métricas
+* tracking
+* insights
+* billing
+* IA
+* responsividade
+* mobile
+
+Identificar e corrigir bugs encontrados.
+
+==================================================
+P2 — RESPONSIVIDADE TOTAL
+=========================
+
+Garantir:
+
+Desktop
+Tablet
+Mobile
+
+A experiência mobile NÃO pode ser uma versão quebrada do desktop.
+
+==================================================
+P2 — PERFORMANCE
+================
+
+Evitar:
+
+* renders desnecessários
+* componentes gigantes
+* estados duplicados
+* chamadas excessivas
+
+Aplicar:
+
+* lazy loading
+* memoização
+* otimização de componentes
+
+==================================================
+ENTREGA
+
+Quero:
+
+1. relatório UX completo
+
+2. problemas encontrados
+
+3. proposta visual
+
+4. componentes alterados
+
+5. bugs corrigidos
+
+6. fluxo novo
+
+7. prints/mockups conceituais
+
+8. arquitetura dos componentes
+
+9. melhorias futuras
+
+RESULTADO ESPERADO:
+
+Quando o usuário entrar no MedAI Pro, a sensação deve ser:
+
+"Isso parece um assistente premium que entende minha clínica"
+
+e não:
+
+"Estou usando um painel administrativo."
