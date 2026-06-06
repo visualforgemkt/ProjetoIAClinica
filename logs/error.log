@@ -115,3 +115,5 @@
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"Could not find the table 'public.visual_identities' in the schema cache","level":"error","message":"Failed to get visual identity","service":"medai-pro","timestamp":"2026-05-25T23:46:32.497Z"}
 {"details":"\"briefingVisual.composicao\" is required, \"briefingVisual.estilo\" is required, \"briefingVisual.emocao\" is required, \"briefingVisual.cores\" is required","level":"error","message":"AI Output Validation Failed","service":"medai-pro","timestamp":"2026-05-25T23:49:43.374Z","type":"campaign"}
 {"clinicId":"a1b2c3d4-0000-0000-0000-000000000001","error":"Could not find the table 'public.visual_identities' in the schema cache","level":"error","message":"Failed to get visual identity","service":"medai-pro","timestamp":"2026-05-25T23:49:43.475Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-06-06T20:37:32.442Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-06-06T20:37:45.010Z"}

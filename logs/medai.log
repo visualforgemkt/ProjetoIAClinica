@@ -1449,3 +1449,10 @@
 {"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-26T11:06:15.445Z"}
 {"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-05-26T22:32:12.225Z"}
 {"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-06-06T00:35:54.687Z"}
+{"anthropic":true,"env":"development","level":"info","message":"MedAI Pro Backend running on port 3001","port":"3001","service":"medai-pro","supabase":true,"timestamp":"2026-06-06T20:32:38.758Z"}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-06-06T20:37:32.442Z"}
+{"level":"info","message":"POST /api/auth/login 401 1213.539 ms - d8b93f2e-ee62-42d4-86b0-7cc13b59cf40","service":"medai-pro","timestamp":"2026-06-06T20:37:32.446Z"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-06-06T20:37:32.447Z","userId":null}
+{"code":"WRONG_PASSWORD","error":"Senha incorreta. Tente novamente.","level":"error","message":"Login error","service":"medai-pro","timestamp":"2026-06-06T20:37:45.010Z"}
+{"level":"info","message":"POST /api/auth/login 401 399.433 ms - 16bdd27c-c8d0-4bfb-9943-74b2d28a698f","service":"medai-pro","timestamp":"2026-06-06T20:37:45.011Z"}
+{"clinicId":null,"level":"info","message":"[EventBus] Emitting ROUTE_VISITED","module":"API_ROUTER","service":"medai-pro","timestamp":"2026-06-06T20:37:45.012Z","userId":null}
